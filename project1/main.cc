@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-#include "mat/Matrix.hh"
+typedef double number;
 
 int main() {
 }

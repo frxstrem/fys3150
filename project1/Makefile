@@ -19,5 +19,5 @@ pdf: project1.tex
 main: main.o
 	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS}
 
-main.o: main.cc mat/Matrix.hh
+main.o: main.cc
 	${CXX} ${CXXFLAGS} -c -o $@ $<
