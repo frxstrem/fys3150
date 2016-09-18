@@ -3,3 +3,10 @@
 *.fdb_latexmk
 *.fls
 *.log
+*-blx.bib
+*.bbl
+*.blg
+*.run.xml
+*.toc
+*.out
+*.swp

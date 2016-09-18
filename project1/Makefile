@@ -3,12 +3,12 @@ CXXFLAGS=--std=c++17
 LDFLAGS=-lm
 LIBS=
 
-.PHONY: all list clean
-
-all: main pdf
+.PHONY: list all clean
 
 list:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
+
+all: main pdf
 
 clean:
 	@git clean -fxd .

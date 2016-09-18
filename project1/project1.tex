@@ -1,21 +1,248 @@
-\documentclass[11pt,a4paper]{article}
+% standard LaTeX packages
+\documentclass[12pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
 \usepackage[margin=3cm]{geometry}
-\usepackage{mathtools,amsfonts,amssymb}
-\usepackage{esint}
-\usepackage{physics}
-\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
 
-\mathtoolsset{showonlyrefs}
+% math packages
+\usepackage{mathtools,amsfonts,amssymb,mathdots}
+
+% plotting
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{caption}
+
+% listings
+\usepackage[euler]{textgreek}
+\usepackage{xcolor}
+\usepackage{listings}
+\definecolor{background}{gray}{0.95}
+\definecolor{comment}{rgb}{0,0.5,0}
+\colorlet{keyword}{blue}
+\colorlet{string}{red}
+\lstset{numbers=left,
+  numberstyle=\tiny,
+  breaklines=true,
+  tabsize=4,
+  morekeywords={with,super,as},
+  escapeinside={[$}{$]},
+  escapebegin={\color{comment}\begin{math}},
+  escapeend={\end{math}},
+  frame=single,
+  basicstyle=\footnotesize\tt,
+  commentstyle=\color{comment},
+  keywordstyle=\color{keyword},
+  stringstyle=\color{string},
+  backgroundcolor=\color{background},
+  showstringspaces=false,
+  numbers=left,
+  numbersep=5pt,
+  literate=
+    % scandinavian vowels
+    {æ}{{\ae}}1
+    {å}{{\aa}}1
+    {ø}{{\o}}1
+    {Æ}{{\AE}}1
+    {Å}{{\AA}}1
+    {Ø}{{\O}}1
+    {é}{{\'e}}1
+    {É}{{\'E}}1
+    % greek letters
+    {α}{{\textalpha}}1
+    {β}{{\textbeta}}1
+    {γ}{{\textgamma}}1
+    {δ}{{\textdelta}}1
+    {ε}{{\textepsilon}}1
+    {ζ}{{\textzeta}}1
+    {η}{{\texteta}}1
+    {θ}{{\texttheta}}1
+    {ι}{{\textiota}}1
+    {κ}{{\textkappa}}1
+    {λ}{{\textlambda}}1
+    {μ}{{\textmu}}1
+    {ν}{{\textnu}}1
+    {ξ}{{\textxi}}1
+    {ο}{{o}}1
+    {π}{{\textpi}}1
+    {ρ}{{\textrho}}1
+    {σ}{{\textsigma}}1
+    {τ}{{\texttau}}1
+    {υ}{{\textupsilon}}1
+    {φ}{{\textphi}}1
+    {ϕ}{{\ensuremath{\phi}}}1
+    {χ}{{\textchi}}1
+    {ψ}{{\textpsi}}1
+    {ω}{{\textomega}}1
+    {Α}{{A}}1
+    {Β}{{B}}1
+    {Γ}{{\textGamma}}1
+    {Δ}{{\textDelta}}1
+    {Ε}{{E}}1
+    {Ζ}{{Z}}1
+    {Η}{{H}}1
+    {Θ}{{\textTheta}}1
+    {Ι}{{I}}1
+    {Κ}{{K}}1
+    {Λ}{{\textLambda}}1
+    {Μ}{{M}}1
+    {Ν}{{N}}1
+    {Ξ}{{\textXi}}1
+    {Ο}{{O}}1
+    {∏}{{\textPi}}1
+    {Ρ}{{P}}1
+    {Σ}{{\textSigma}}1
+    {Τ}{{T}}1
+    {Υ}{{Y}}1
+    {Φ}{{\textPhi}}1
+    {Χ}{{X}}1
+    {Ψ}{{\textPsi}}1
+    {Ω}{{\textOmega}}1
+    % miscellaneous
+    {°}{{\ensuremath{{}^\circ}}}1
+    {²}{{\ensuremath{{}^2}}}1
+  }
+
+% bibliography packages
+\usepackage[backend=bibtex8,style=authortitle,autocite=footnote,sorting=ynt,dashed=false]{biblatex}
+
+% other packages
+\usepackage{filecontents}
+
+% bibliography
+\begin{filecontents}{bibliography.bib}
+  % ...
+\end{filecontents}
+\addbibresource{bibliography.bib}
+
+% custom math commands
+\newcommand\V[1]{\mathbf{#1}}                  % vector notation
+\newcommand\M[1]{\begin{pmatrix} #1 \end{pmatrix}} % matrix shorthand
 
 \begin{document}
 
-\title{Project 1 -- FYS3150 Computational Physics}
+\title{Project 1 - FYS3150 Computational Physics}
 \author{Fredrik Østrem (\texttt{fredost})}
 \date{\today}
 
 \maketitle
+
+\begin{abstract}
+  [Abstract goes here]
+\end{abstract}
+
+\tableofcontents
+
+\clearpage
+
+\section{Introduction}
+
+\section{Methods}
+
+\subsection{Approximate solution to $-u''(x) = f(x)$}
+
+We consider a differential equation on the form $-u''(x) = f(x)$ with $x \in (0,1)$ and $u(0) = u(1) = 0$, and where $f$ is a known function.
+
+We consider the functions $u$ and $f$ at a sequence of equally spaces points $x_0,x_1,\ldots,x_n$ in the interval $[0,1]$, so that $x_i = ih$ where $h = \frac{1}{n+1}$. We let $v_i = \tilde{u}(x_i) \approx u(x_i)$ be the value of our approximate solution at $x_i$, and let $b_i = h^2 f(x_i)$. Since $u(0) = u(1)$, we have the boundary condition $v_0 = v_{n+1} = 0$.
+
+We can approximate $u''(x)$ by using the Taylor's expansion of $u(x)$, which yields:
+\begin{equation}
+  u''(x_i) \approx \frac{u(x_i+h) + u(x_i-h) - 2 u(x_i)}{h^2} \approx \frac{v_{i+1} + v_{i-1} - 2 v_i}{h^2}
+\end{equation}
+which, when subsituted into our differential equation gives
+\begin{equation}
+  2v_i - v_{i+1} - v_{i-1} = b_i
+\end{equation}
+
+Since this is a linear equation with $v_{i-1},v_i,v_{i+1}$ as unknowns, we can write this as
+\begin{equation}
+  \underbrace{\M{ 0 & 0 & \cdots & -1 & 2 & -1 & \cdots & 0 & 0 }}_{\V{a}_i}
+  \M{ v_0 \\ v_1 \\ \vdots \\ v_{i-1} \\ v_i \\ v_{i+1} \\ \vdots \\ v_{n-1} \\ v_n }
+  = b_i
+\end{equation}
+We can do this for every index $i$, and $\V{a}_i$ is shifted a single step to the right compared to $\V{a}_{i-1}$. Therefore, when we
+look at all values of $i = 1, \ldots, n$, we get the tridiagonal matrix $A$:
+\begin{equation}
+  A = \M{ \V{a}_0 \\ \vdots \\ \V{a}_{i-1} \\ \V{a}_i \\ \V{a}_{i+1} \\ \vdots \\ \V{a}_n }
+    = \M{
+      2  & -1 & 0 & \cdots &         & 0 \\
+      -1 & 2  & -1 & 0 & \iddots & \\
+      0 & -1 & 2  & \ddots & 0 & \vdots \\
+      \vdots & 0 & \ddots & 2 & -1 & 0\\
+        & \iddots & 0 & -1 & 2 & -1 \\
+      0 & & \cdots & 0 & -1 & 2
+    }
+\end{equation}
+such that $A \V{v} = \V{b}$.
+
+% f(x) = 100e^{-10x}
+
+\subsection{General algorithm for solving tridiagonal matrix equations}
+\label{sec:b}
+
+In general, we can write an $n \times n$ tridiagonal matrix $A$ as
+\begin{equation}
+  A = \M{
+    b_1 & c_1 & 0 & \ldots & \ldots & \ldots \\
+    a_1 & b_2 & c_2 & \ldots & \ldots & \ldots \\
+    & a_2 & b_3 & c_3 & \ldots & \ldots \\
+    & \ldots & \ldots & \ldots & \ldots & \ldots \\
+    & & & a_{n-2} & b_{n-1} & c_{n-1} \\
+    & & & & a_{n-1} & b_n
+  }
+\end{equation}
+
+We can solve the matrix equation $A \V{v} = \V{b}$ in three steps:
+\begin{enumerate}
+  \item Eliminate the lower diagonal $a_1,a_2,\ldots,a_{n-1}$ through forward substitution.
+  \item Eliminate the upper diagonal $c_1,c_2,\ldots,c_{n-1}$ through backward substitution.
+  \item Divide each row $i$ by $b_i$ to get only $1$ elements along the main diagonal.
+\end{enumerate}
+When doing these steps, we transform $A$ into the identity matrix, and transform $\V{b}$ into $\V{v}$. (See section \ref{apx:b} in the appendix for the implementation of this algorithm in C++). We can see the results of the approximation in figure \ref{fig:b1}.
+
+\begin{figure}[!ht]
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\textwidth,
+        height=0.5\textwidth,
+        xmin=0, xmax=1,
+        xlabel=$x$,
+        ymin=0, ymax=2,
+        ylabel=$u(x)$,
+        legend cell align=length,
+      ]
+      \addplot[black,thick,domain=0:1,samples=100] {1 - (1 - exp(-10))*x - exp(-10*x)};
+      \addplot[red] table[x=x,y=v] {plots_b_10.dat};
+      \addplot[red!50!blue] table[x=x,y=v] {plots_b_100.dat};
+      \addplot[blue] table[x=x,y=v] {plots_b_1000.dat};
+
+      \legend{Closed-form solution,$N = 10$,$N = 100$,$N = 1000$}
+    \end{axis}
+  \end{tikzpicture}
+
+  \caption{Plot of approximate solutions based on the method described in section \ref{sec:b}} \label{fig:b1}
+\end{figure}
+
+As we see in the plots, the solution shape of the solution is about right for all three approximations, but for low $N$ it's a bit off from its closed-form solution. However, we see that for large $N$, the numerical approximations gets closer to the actual solution, and by $N = 1000$ it's hard to differentite between them in the plot.
+
+From the implementation, we can see that the first step uses 6 floating-point operations for every row except the first, the second step uses 5 for every row except the last, and the third step uses 2 for every row; in total, the number of floating-point operations is $6 (N - 1) + 5 (N - 1) + 2 N = 13N - 11$.
+
+\section{Results}
+
+\section{Conclusions and perspectives}
+
+\clearpage
+\appendix
+\section{Appendix}
+
+\subsection{Algorithm for solving tridiagonal matrices}
+\label{apx:b}
+
+\lstinputlisting[language=C++]{main.cc}
+
+\clearpage
+
+\printbibliography[heading=bibnumbered,title=Bibliography]
 
 \end{document}
