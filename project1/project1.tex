@@ -8,10 +8,12 @@
 
 % math packages
 \usepackage{mathtools,amsfonts,amssymb,mathdots}
+\usepackage{siunitx}
 
-% plotting
+% plotting and tables
 \usepackage{tikz}
 \usepackage{pgfplots}
+\usepackage{pgfplotstable}
 \usepackage{caption}
 
 % listings
@@ -128,15 +130,21 @@
 
 \maketitle
 
-\begin{abstract}
-  [Abstract goes here]
-\end{abstract}
-
 \tableofcontents
 
 \clearpage
 
 \section{Introduction}
+
+In this project, we solve the one-dimensional Possion equation
+\begin{equation}
+  - u''(x) = f(x)
+\end{equation}
+in the case where $u(0) = u(1) = 0$ and $f(x) = 100e^{-10x}$. We shall set up a matrix equation
+\begin{equation}
+  A \V{v} = \V{b}
+\end{equation}
+and generate efficient algorithms for solving this equation to get a numerical solution to the differential equaion. We shall also compare these algorithms to LU decomposition, and see how much more efficient the specialized algorithms are.
 
 \section{Methods}
 
@@ -176,8 +184,6 @@ look at all values of $i = 1, \ldots, n$, we get the tridiagonal matrix $A$:
 \end{equation}
 such that $A \V{v} = \V{b}$.
 
-% f(x) = 100e^{-10x}
-
 \subsection{General algorithm for solving tridiagonal matrix equations}
 \label{sec:b}
 
@@ -196,50 +202,118 @@ In general, we can write an $n \times n$ tridiagonal matrix $A$ as
 We can solve the matrix equation $A \V{v} = \V{b}$ in three steps:
 \begin{enumerate}
   \item Eliminate the lower diagonal $a_1,a_2,\ldots,a_{n-1}$ through forward substitution.
+    \begin{itemize}
+      \item $a'_{i-1} = 0$; $b'_i = b_i - \dfrac{a_{i-1}}{b'_{i-1}} \cdot c_{i-1}$; $ f'_i = f_i - \dfrac{a_{i-1}}{b'_{i-1}} \cdot f'_{i-1}$
+    \end{itemize}
   \item Eliminate the upper diagonal $c_1,c_2,\ldots,c_{n-1}$ through backward substitution.
+    \begin{itemize}
+      \item $c''_{i} = 0$; $f''_{i} = f'_{i} - \dfrac{c_i}{b'_{i+1}} \cdot f''_{i+1}$
+    \end{itemize}
   \item Divide each row $i$ by $b_i$ to get only $1$ elements along the main diagonal.
+    \begin{itemize}
+      \item $v_i = \dfrac{f''_i}{b'_i}$
+    \end{itemize}
 \end{enumerate}
-When doing these steps, we transform $A$ into the identity matrix, and transform $\V{b}$ into $\V{v}$. (See section \ref{apx:b} in the appendix for the implementation of this algorithm in C++). We can see the results of the approximation in figure \ref{fig:b1}.
+When doing these steps, we transform $A$ into the identity matrix, and transform $\V{b}$ into $\V{v}$. (This algorithm has been implemented in the file \href{https://github.com/frxstrem/fys3150/tree/master/project1/oppg_b.cc}{\tt oppg\_b.cc}.) We can see the results of the approximation in figure \ref{fig:b}.
+
+From the implementation, we can see that the first step uses 5 floating-point operations for every row except the first, the second step uses 5 for every row except the last, and the third step uses 2 for every row; in total, the number of floating-point operations is $5 (N - 1) + 5 (N - 1) + 2 N = 12N - 10$.
+
+\section{Results}
+
+We run the algorithm from section \ref{sec:b} from different values of $n$. In figure \ref{fig:b} we see that for small values of $N$, the curve keeps the right shape but is quite a bit off from the analytic solution; however, for $N = 1000$ it is almost indistinguishable from the analytic solution. In table \ref{tbl:c}, where we have listed the maximum value of
+\begin{equation}
+  \varepsilon_i = \log_{10}\left| \frac{v_i - u_i}{u_i} \right|
+\end{equation}
+for each $N$, as a function of $\log_{10}(h)$ where $h$ is the step length, we see that the relative error becomes decreases exponentially as $h$ decreases.
 
 \begin{figure}[!ht]
   \begin{tikzpicture}
     \begin{axis}[
-        width=\textwidth,
-        height=0.5\textwidth,
-        xmin=0, xmax=1,
-        xlabel=$x$,
-        ymin=0, ymax=2,
-        ylabel=$u(x)$,
-        legend cell align=length,
+      width=\textwidth,
+      height=0.5\textwidth,
+      xmin=0, xmax=1,
+      xlabel=$x$,
+      ymin=0, ymax=2,
+      ylabel=$u(x)$,
+      legend cell align=left,
       ]
+      \addplot[red,mark=o,mark size=1] table[x=x,y=v] {plots_b_10.dat};
+      \addplot[red!50!blue,mark=o,mark size=1] table[x=x,y=v] {plots_b_100.dat};
+      \addplot[blue,mark=o,mark size=1,mark repeat=7] table[x=x,y=v] {plots_b_1000.dat};
       \addplot[black,thick,domain=0:1,samples=100] {1 - (1 - exp(-10))*x - exp(-10*x)};
-      \addplot[red] table[x=x,y=v] {plots_b_10.dat};
-      \addplot[red!50!blue] table[x=x,y=v] {plots_b_100.dat};
-      \addplot[blue] table[x=x,y=v] {plots_b_1000.dat};
 
-      \legend{Closed-form solution,$N = 10$,$N = 100$,$N = 1000$}
+      \legend{$N = 10$,$N = 100$,$N = 1000$,Closed-form solution}
     \end{axis}
   \end{tikzpicture}
 
-  \caption{Plot of approximate solutions based on the method described in section \ref{sec:b}} \label{fig:b1}
+  \caption{Plot of approximate solutions based on the method described in section \ref{sec:b}}
+  \label{fig:b}
 \end{figure}
 
-As we see in the plots, the solution shape of the solution is about right for all three approximations, but for low $N$ it's a bit off from its closed-form solution. However, we see that for large $N$, the numerical approximations gets closer to the actual solution, and by $N = 1000$ it's hard to differentite between them in the plot.
+\begin{table}[!h]
+  \begin{center}
+    \pgfplotstabletypeset[
+      col sep=tab,
+      every head row/.style={after row=\hline},
+      columns/log h/.style={
+        column name={$\log_{10}(h)$},
+      },
+      columns/eps/.style={
+        column name={$\varepsilon_{max}$},
+        sci, sci zerofill,
+        precision=2,
+      },
+    ]{d.dat}
+    \caption{}
+  \end{center}
 
-From the implementation, we can see that the first step uses 6 floating-point operations for every row except the first, the second step uses 5 for every row except the last, and the third step uses 2 for every row; in total, the number of floating-point operations is $6 (N - 1) + 5 (N - 1) + 2 N = 13N - 11$.
+  \caption{$\varepsilon_{\text{max}}$ as a function of $\log_{10}(h)$.}
+  \label{tbl:c}
+\end{table}
 
-\section{Results}
+If we compare the runtime of our tridiagonal algorithm to one using LU decomposition of the matrix (the implementation given in the course's code files), we see that the tridiagonal algorithm is very fast, even for large $N$, while the LU decomposition runs at about \SI{1}{s} for $N = 1000$:
 
-\section{Conclusions and perspectives}
+\begin{table}[!h]
+  \begin{center}
+    \pgfplotstabletypeset[
+    col sep=tab,
+    every head row/.style={after row=\hline},
+    columns/n/.style={
+    column name={$N$},
+    },
+    columns/ctime/.style={
+    column name={Time (tridiagonal) / \si{\milli\second}},
+    fixed, fixed zerofill,
+    precision=3, 1000 sep={\,},
+    },
+    columns/lutime/.style={
+    column name={Time (LU decomposition) / \si{\milli\second}},
+    fixed, fixed zerofill,
+    precision=3, 1000 sep={\,},
+    },
+    ]{e.dat}
+  \end{center}
+
+  \caption{Running times for our specialized algorithm, and a LU decomposition algorithm.}
+\end{table}
+
+There's a big difference here because our simple algorithm for tridiagonal matrices only needs on the order of $N$ float-point operations, so it run in less than a millisecond, even for very large matrices. However, LU decomposition is much more general, and needs on the order of $N^3$ different floating-point operations for each matrix. If $N$ is very large, the number of operations grows very fast.
+
+\section{Conclusions}
+
+From the results we got, we can conclude that numerically solving a differential equation by using a matrix equation can work well, but we a small enough step length ($N = 10$ is way off, for instance) and a sufficiently efficient algorithm for solving the matrix equation (LU decomposition is too slow for large $N$).
 
 \clearpage
 \appendix
 \section{Appendix}
 
-\subsection{Algorithm for solving tridiagonal matrices}
-\label{apx:b}
-
-\lstinputlisting[language=C++]{main.cc}
+All files used in this project can be found at \url{https://github.com/frxstrem/fys3150/tree/master/project1}.
+The following code files are used:
+\begin{itemize}
+  \item \href{https://github.com/frxstrem/fys3150/tree/master/project1/oppg_b.cc}{\tt oppg\_b.cc}
+  \item \href{https://github.com/frxstrem/fys3150/tree/master/project1/oppg_d.cc}{\tt oppg\_d.cc}
+  \item \href{https://github.com/frxstrem/fys3150/tree/master/project1/oppg_e.cc}{\tt oppg\_e.cc}
+\end{itemize}
 
 \clearpage
 
