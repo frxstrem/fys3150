@@ -5,46 +5,13 @@
 
 #include <cstdio>
 #include <cmath>
+#include <ctime>
+#include <functional>
+
+#include "tridiagonal.hh"
+#include "lib.h"
 
 typedef double number;
-
-/**
- *
- *
- */
-void solve_tridiagonal(size_t N, number *a, number *b, number *c, number *f) {
-  // eliminate lower diagonal through forward substitution
-  for(size_t i = 0; i < N - 1; i++) { // flops: 5 * (N - 1)
-    if(b[i] == 0) continue;
-    const number s = a[i] / b[i]; // 1 flop
-
-    a[i]   = 0; // = (b[i] / a[i]) * a[i] - b[i]
-    b[i+1] = b[i+1] - s * c[i];   // 2 flops
-    f[i+1] = f[i+1] - s * f[i];   // 2 flops
-  }
-  // now a[i] == 0 for all i
-
-  // eliminate upper diagonal through backward substitution
-  for(ssize_t i = N - 2; i >= 0; i--) { // 3 * (N - 1)
-    if(b[i+1] == 0) continue;
-    const number s = c[i] / b[i + 1]; // 1 flop
-
-    // b[i] = b[i] - (c[i] / b[i + 1]) * a[i] = b[i]
-    c[i] = 0; // = c[i] - (c[i] / b[i + 1]) * b[i + 1]
-    f[i] = f[i] - s * f[i + 1];       // 2 flops
-  }
-  // now c[i] == 0 for all i
-
-  // divide diagonal elements
-  for(size_t i = 0; i < N; i++) { // 2 * N
-    const number s = b[i];
-
-    b[i] /= s;
-    f[i] /= s;
-  }
-
-  // total flops: 10 * N - 8
-}
 
 /** Function [$f(x)$] */
 number F(number x) {
@@ -55,10 +22,6 @@ number F(number x) {
 number G(number x) {
   return 1 - (1 - exp(-10)) * x - exp(-10 * x);
 }
-
-#include <ctime>
-#include <functional>
-#include "lib.h"
 
 double timing(std::function<void()> func, int n = 1) {
   clock_t start, finish;
@@ -75,22 +38,25 @@ double timing(std::function<void()> func, int n = 1) {
 }
 
 int main() {
-  // matrix sizes
+  // list of N values to test
   const size_t Nlist[] = { 10, 100, 1000 };
+  const size_t Nlen = sizeof(Nlist) / sizeof(*Nlist);
   size_t N;
 
   // number of loops for each matrix size, for timing
   int M = 10;
 
+  // open file to write to
   FILE *fp = fopen("e.dat", "w");
   fprintf(fp, "n\tctime\tlutime\n");
 
+  // allocate A matrix dynamically
   number **A = new number*[1002];
   for(size_t i = 0; i < 1002; i++)
     A[i] = new number[1002];
 
   // generate and solve problem for 10x10, 100x100 and 1000x1000
-  for(size_t i = 0, N = Nlist[0]; i < 3; N = Nlist[++i]) {
+  for(size_t i = 0, N = Nlist[0]; i < Nlen; N = Nlist[++i]) {
     printf("N=%ld\n", N);
 
     clock_t start, finish;
@@ -100,6 +66,8 @@ int main() {
       printf("  M=%d\n", m);
       number h = 1.0 / (N + 1);
 
+      // since N <= 1000, we can keep our arrays on the stack
+      // (we can get away with this if we're compiling with g++)
       number x[N+1];
       number a[N+1];
       number b[N+1];
@@ -143,4 +111,9 @@ int main() {
     fprintf(fp, "%ld\t%.5E\t%.5E\n", N, 1e3 * ctime, 1e3 * lutime);
   }
   fclose(fp);
+
+  // deallocate A
+  for(size_t i = 0; i < 1002; i++)
+    delete[] A[i];
+  delete[] A;
 }

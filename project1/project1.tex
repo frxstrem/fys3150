@@ -214,7 +214,7 @@ We can solve the matrix equation $A \V{v} = \V{b}$ in three steps:
       \item $v_i = \dfrac{f''_i}{b'_i}$
     \end{itemize}
 \end{enumerate}
-When doing these steps, we transform $A$ into the identity matrix, and transform $\V{b}$ into $\V{v}$. (This algorithm has been implemented in the file \href{https://github.com/frxstrem/fys3150/tree/master/project1/oppg_b.cc}{\tt oppg\_b.cc}.) We can see the results of the approximation in figure \ref{fig:b}.
+When doing these steps, we transform $A$ into the identity matrix, and transform $\V{b}$ into $\V{v}$. (This algorithm has been implemented in the file \href{https://github.com/frxstrem/fys3150/tree/master/project1/tridiagonal.hh}{\tt tridiagonal.hh}.) We can see the results of the approximation in figure \ref{fig:b}.
 
 From the implementation, we can see that the first step uses 5 floating-point operations for every row except the first, the second step uses 5 for every row except the last, and the third step uses 2 for every row; in total, the number of floating-point operations is $5 (N - 1) + 5 (N - 1) + 2 N = 12N - 10$.
 
@@ -250,7 +250,7 @@ for each $N$, as a function of $\log_{10}(h)$ where $h$ is the step length, we s
   \label{fig:b}
 \end{figure}
 
-\begin{table}[!h]
+\begin{table}[!ht]
   \begin{center}
     \pgfplotstabletypeset[
       col sep=tab,
@@ -273,7 +273,7 @@ for each $N$, as a function of $\log_{10}(h)$ where $h$ is the step length, we s
 
 If we compare the runtime of our tridiagonal algorithm to one using LU decomposition of the matrix (the implementation given in the course's code files), we see that the tridiagonal algorithm is very fast, even for large $N$, while the LU decomposition runs at about \SI{1}{s} for $N = 1000$:
 
-\begin{table}[!h]
+\begin{table}[!ht]
   \begin{center}
     \pgfplotstabletypeset[
     col sep=tab,
@@ -310,6 +310,7 @@ From the results we got, we can conclude that numerically solving a differential
 All files used in this project can be found at \url{https://github.com/frxstrem/fys3150/tree/master/project1}.
 The following code files are used:
 \begin{itemize}
+  \item \href{https://github.com/frxstrem/fys3150/tree/master/project1/tridiagonal.hh}{\tt tridiagonal.hh}
   \item \href{https://github.com/frxstrem/fys3150/tree/master/project1/oppg_b.cc}{\tt oppg\_b.cc}
   \item \href{https://github.com/frxstrem/fys3150/tree/master/project1/oppg_d.cc}{\tt oppg\_d.cc}
   \item \href{https://github.com/frxstrem/fys3150/tree/master/project1/oppg_e.cc}{\tt oppg\_e.cc}
