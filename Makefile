@@ -1,8 +1,3 @@
-CXX=g++
-CXXFLAGS=--std=c++17 -g
-LDFLAGS=-lm
-LIBS=
-
 .PHONY: list all run clean
 
 list:
@@ -16,4 +11,7 @@ clean:
 pdf: project2.tex
 	latexmk -pdf -interaction=nonstopmode -pdflatex="lualatex -file-line-error --shell-escape" project2.tex
 
-run:
+run: programs
+
+programs:
+	make -C code all
