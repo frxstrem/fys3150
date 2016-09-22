@@ -1,0 +1,158 @@
+% standard LaTeX packages
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[margin=3cm]{geometry}
+\usepackage[hidelinks]{hyperref}
+
+% math packages
+\usepackage{mathtools,amsfonts,amssymb,mathdots}
+\usepackage{siunitx}
+
+% plotting and tables
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{caption}
+
+% listings
+\usepackage[euler]{textgreek}
+\usepackage{xcolor}
+\usepackage{listings}
+\definecolor{background}{gray}{0.95}
+\definecolor{comment}{rgb}{0,0.5,0}
+\colorlet{keyword}{blue}
+\colorlet{string}{red}
+\lstset{numbers=left,
+  numberstyle=\tiny,
+  breaklines=true,
+  tabsize=4,
+  morekeywords={with,super,as},
+  escapeinside={[$}{$]},
+  escapebegin={\color{comment}\begin{math}},
+  escapeend={\end{math}},
+  frame=single,
+  basicstyle=\footnotesize\tt,
+  commentstyle=\color{comment},
+  keywordstyle=\color{keyword},
+  stringstyle=\color{string},
+  backgroundcolor=\color{background},
+  showstringspaces=false,
+  numbers=left,
+  numbersep=5pt,
+  literate=
+    % scandinavian vowels
+    {æ}{{\ae}}1
+    {å}{{\aa}}1
+    {ø}{{\o}}1
+    {Æ}{{\AE}}1
+    {Å}{{\AA}}1
+    {Ø}{{\O}}1
+    {é}{{\'e}}1
+    {É}{{\'E}}1
+    % greek letters
+    {α}{{\textalpha}}1
+    {β}{{\textbeta}}1
+    {γ}{{\textgamma}}1
+    {δ}{{\textdelta}}1
+    {ε}{{\textepsilon}}1
+    {ζ}{{\textzeta}}1
+    {η}{{\texteta}}1
+    {θ}{{\texttheta}}1
+    {ι}{{\textiota}}1
+    {κ}{{\textkappa}}1
+    {λ}{{\textlambda}}1
+    {μ}{{\textmu}}1
+    {ν}{{\textnu}}1
+    {ξ}{{\textxi}}1
+    {ο}{{o}}1
+    {π}{{\textpi}}1
+    {ρ}{{\textrho}}1
+    {σ}{{\textsigma}}1
+    {τ}{{\texttau}}1
+    {υ}{{\textupsilon}}1
+    {φ}{{\textphi}}1
+    {ϕ}{{\ensuremath{\phi}}}1
+    {χ}{{\textchi}}1
+    {ψ}{{\textpsi}}1
+    {ω}{{\textomega}}1
+    {Α}{{A}}1
+    {Β}{{B}}1
+    {Γ}{{\textGamma}}1
+    {Δ}{{\textDelta}}1
+    {Ε}{{E}}1
+    {Ζ}{{Z}}1
+    {Η}{{H}}1
+    {Θ}{{\textTheta}}1
+    {Ι}{{I}}1
+    {Κ}{{K}}1
+    {Λ}{{\textLambda}}1
+    {Μ}{{M}}1
+    {Ν}{{N}}1
+    {Ξ}{{\textXi}}1
+    {Ο}{{O}}1
+    {∏}{{\textPi}}1
+    {Ρ}{{P}}1
+    {Σ}{{\textSigma}}1
+    {Τ}{{T}}1
+    {Υ}{{Y}}1
+    {Φ}{{\textPhi}}1
+    {Χ}{{X}}1
+    {Ψ}{{\textPsi}}1
+    {Ω}{{\textOmega}}1
+    % miscellaneous
+    {°}{{\ensuremath{{}^\circ}}}1
+    {²}{{\ensuremath{{}^2}}}1
+  }
+
+% bibliography packages
+\usepackage[backend=bibtex8,style=authortitle,autocite=footnote,sorting=ynt,dashed=false]{biblatex}
+
+% other packages
+\usepackage{filecontents}
+
+% bibliography
+\begin{filecontents}{bibliography.bib}
+  % ...
+\end{filecontents}
+\addbibresource{bibliography.bib}
+
+% custom math commands
+\newcommand\V[1]{\mathbf{#1}}                  % vector notation
+\newcommand\M[1]{\begin{pmatrix} #1 \end{pmatrix}} % matrix shorthand
+
+\begin{document}
+
+\title{Project 2 - FYS3150 Computational Physics}
+\author{Fredrik Østrem (\texttt{fredost}) \\ Joseph Knutson (\texttt{josephkn})}
+\date{\today}
+
+\maketitle
+
+\tableofcontents
+
+\clearpage
+
+\section{Introduction}
+
+\section{Methods}
+
+\section{Results}
+
+\section{Conclusions}
+
+\clearpage
+\appendix
+\section{Appendix}
+
+All files used in this project can be found at \url{https://github.com/frxstrem/fys3150/tree/master/project2}.
+The following code files are used:
+\begin{itemize}
+\end{itemize}
+
+\clearpage
+
+\printbibliography[heading=bibnumbered,title=Bibliography]
+
+\end{document}
