@@ -9,12 +9,14 @@
 % math packages
 \usepackage{mathtools,amsfonts,amssymb,mathdots}
 \usepackage{siunitx}
+\mathtoolsset{showonlyrefs}
 
 % plotting and tables
 \usepackage{tikz}
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
 \usepackage{caption}
+\pgfplotsset{compat=1.13}
 
 % listings
 \usepackage[euler]{textgreek}
@@ -130,6 +132,10 @@
 
 \maketitle
 
+\begin{abstract}
+  \color{red}\textit{INSERT ABSTRACT HERE}
+\end{abstract}
+
 \tableofcontents
 
 \clearpage
@@ -137,6 +143,20 @@
 \section{Introduction}
 
 \section{Methods}
+
+% (a)
+
+Assume that $\V{U}$ is an orthogonal transformation. Then by definition, $\V{U}^T \V{U} = \V{I}$,
+so for any vectors $\V{u}$ and $\V{v}$ we see that
+\begin{equation}
+  \left( \V{U} \V{u} \right) \cdot \left( \V{U} \V{v} \right)
+    = \left( \V{U} \V{u} \right)^T \left( \V{U} \V{v} \right)
+    = \V{u}^T \underbrace{\V{U}^T \V{U}}_{= \, \V{I}} \V{v}
+    = \V{u}^T \V{v} = \V{u} \cdot \V{v}
+\end{equation}
+
+Since the dot product of vectors are preserved by $\V{U}$, orthogonality (that is, the dot product
+being zero) is also preserved.
 
 \section{Results}
 
@@ -149,6 +169,7 @@
 All files used in this project can be found at \url{https://github.com/frxstrem/fys3150/tree/master/project2}.
 The following code files are used:
 \begin{itemize}
+  \item {\it \color{red} none}
 \end{itemize}
 
 \clearpage
