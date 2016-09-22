@@ -134,8 +134,160 @@
 
 \clearpage
 
-\section{Introduction}
+% Your task is to solve this
+% equation by reformulating it in a discretized form as an eigenvalue
+% equation to be solved with Jacobi's method. To achieve this you will
+% have to write your own code which implements Jacobi's method.
 
+\section{Introduction}
+Electrons confined in small places, such as in semiconductors (width of 20nm), are a hot topic in modern solid state physics.
+Their interactions are therefore a relevant field of study for today's physicists.
+In this project we are going to solve Schroedinger's equation for two
+electrons in a three-dimensional harmonic oscillator well. This will be done with and
+without a repulsive Coulomb potential while we assume spherical symmetry.
+\\
+\\
+Here we present the solution of the radial part of Schroedinger's equation for one electron
+\begin{equation}
+  -\frac{\hbar^2}{2 m} \left ( \frac{1}{r^2} \frac{d}{dr} r^2
+  \frac{d}{dr} - \frac{l (l + 1)}{r^2} \right )R(r) 
+     + V(r) R(r) = E R(r).
+\end{equation}
+In our case $V(r)$ is the harmonic oscillator potential $(1/2)kr^2$ with
+$k=m\omega^2$ and $E$ is
+the energy of the harmonic oscillator in three dimensions.
+The oscillator frequency is $\omega$ and the energies are
+
+\begin{equation}
+E_{nl}=  \hbar \omega \left(2n+l+\frac{3}{2}\right),
+\end{equation}
+with $n=0,1,2,\dots$ and $l=0,1,2,\dots$. 
+$r\in [0,\infty)$ since we're using spherical coordinates.  
+The quantum number
+$l$ is the orbital momentum of the electron.  
+\\
+\\
+We substitute $R(r) = (1/r) u(r)$, set $l = 0$ and obtain
+\begin{equation}
+  -\frac{\hbar^2}{2 m} \frac{d^2}{dr^2} u(r) 
+       +  V(r)u(r)  = E u(r) .
+\end{equation}
+The boundary conditions are $u(0)=0$ and $u(\infty)=0$.
+\\
+\\
+Now we introduce a dimensionless variable $\rho = (1/\alpha) r$
+where $\alpha$ is a constant with dimension length. We do this to remove uneccesary factors later. We also set $V(\rho)$ equal to the HO potential$(1/2) k \alpha^2\rho^2$ and rewrite our equation:
+
+\begin{equation}
+  -\frac{d^2}{d\rho^2} u(\rho) 
+       + \frac{mk}{\hbar^2} \alpha^4\rho^2u(\rho)  = \frac{2m\alpha^2}{\hbar^2}E u(\rho) .
+\end{equation}
+The constant $\alpha$ can now be fixed
+so that
+
+\begin{equation}
+\frac{mk}{\hbar^2} \alpha^4 = 1,
+\end{equation}
+or
+
+\begin{equation}
+\alpha = \left(\frac{\hbar^2}{mk}\right)^{1/4}.
+\end{equation}
+Defining
+
+\begin{equation}
+\lambda = \frac{2m\alpha^2}{\hbar^2}E,
+\end{equation}
+we can rewrite Schroedinger's equation as
+
+\begin{equation}
+  -\frac{d^2}{d\rho^2} u(\rho) + \rho^2u(\rho)  = \lambda u(\rho) .
+\end{equation}
+This is the first equation to solve numerically. In three dimensions 
+the eigenvalues for $l=0$ are 
+$\lambda_0=3,\lambda_1=7,\lambda_2=11,\dots .$
+
+We use the by now standard
+expression for the second derivative of a function $u$
+\begin{equation}
+    u''=\frac{u(\rho+h) -2u(\rho) +u(\rho-h)}{h^2} +O(h^2),
+    \label{eq:diffoperation}
+\end{equation}
+where $h$ is our step.
+Next we define minimum and maximum values for the variable $\rho$,
+$\rho_{\mathrm{min}}=0$  and $\rho_{\mathrm{max}}$, respectively.
+You need to check your results for the energies against different values
+$\rho_{\mathrm{max}}$, since we cannot set
+$\rho_{\mathrm{max}}=\infty$. 
+
+With a given number of mesh points, $N$, we 
+define the step length $h$ as, with $\rho_{\mathrm{min}}=\rho_0$  and $\rho_{\mathrm{max}}=\rho_N$,
+
+\begin{equation*}
+  h=\frac{\rho_N-\rho_0 }{N+1}.
+\end{equation*}
+The value of $\rho$ at a point $i$ is then 
+\[
+    \rho_i= \rho_0 + ih \hspace{1cm} i=0,1,2,\dots , N.
+\]
+We can rewrite the Schroedinger equation for a value $\rho_i$ as
+
+\[
+-\frac{u(\rho_i+h) -2u(\rho_i) +u(\rho_i-h)}{h^2}+\rho_i^2u(\rho_i)  = \lambda u(\rho_i),
+\]
+or in  a more compact way
+
+\[
+-\frac{u_{i+1} -2u_i +u_{i-1}}{h^2}+\rho_i^2u_i=-\frac{u_{i+1} -2u_i +u_{i-1} }{h^2}+V_iu_i  = \lambda u_i,
+\]
+where $V_i=\rho_i^2$ is the harmonic oscillator potential.
+
+We define first the diagonal matrix element
+\begin{equation*}
+   d_i=\frac{2}{h^2}+V_i,
+\end{equation*}
+and the non-diagonal matrix element
+\begin{equation*}
+   e_i=-\frac{1}{h^2}.
+\end{equation*}
+In this case the non-diagonal matrix elements are given by a mere constant.
+\emph{All non-diagonal matrix elements are equal}.
+With these definitions the Schroedinger equation takes the following form
+
+\begin{equation*}
+d_iu_i+e_{i-1}u_{i-1}+e_{i+1}u_{i+1}  = \lambda u_i,
+\end{equation*}
+where $u_i$ is unknown. We can write the 
+latter equation as a matrix eigenvalue problem
+\begin{equation}
+    \begin{bmatrix}d_0 & e_0 & 0   & 0    & \dots  &0     & 0 \\
+                                e_1 & d_1 & e_1 & 0    & \dots  &0     &0 \\
+                                0   & e_2 & d_2 & e_2  &0       &\dots & 0\\
+                                \dots  & \dots & \dots & \dots  &\dots      &\dots & \dots\\
+                                0   & \dots & \dots & \dots  &\dots  e_{N-1}     &d_{N-1} & e_{N-1}\\
+                                0   & \dots & \dots & \dots  &\dots       &e_{N} & d_{N}
+             \end{bmatrix}  \begin{bmatrix} u_{0} \\
+                                                              u_{1} \\
+                                                              \dots\\ \dots\\ \dots\\
+                                                              u_{N}
+             \end{bmatrix}=\lambda \begin{bmatrix} u_{0} \\
+                                                              u_{1} \\
+                                                              \dots\\ \dots\\ \dots\\
+                                                              u_{N}
+             \end{bmatrix}.  
+      \label{eq:sematrix}
+\end{equation}
+Since the values of $u$ at the two endpoints are known via the boundary conditions, we can skip the rows and columns that involve these values. Inserting the values for $d_i$ and $e_i$ we have the following matrix
+\begin{equation}
+    \begin{bmatrix} \frac{2}{h^2}+V_1 & -\frac{1}{h^2} & 0   & 0    & \dots  &0     & 0 \\
+                                -\frac{1}{h^2} & \frac{2}{h^2}+V_2 & -\frac{1}{h^2} & 0    & \dots  &0     &0 \\
+                                0   & -\frac{1}{h^2} & \frac{2}{h^2}+V_3 & -\frac{1}{h^2}  &0       &\dots & 0\\
+                                \dots  & \dots & \dots & \dots  &\dots      &\dots & \dots\\
+                                0   & \dots & \dots & \dots  &-\frac{1}{h^2}  &\frac{2}{h^2}+V_{N-2} & -\frac{1}{h^2}\\
+                                0   & \dots & \dots & \dots  &\dots       &-\frac{1}{h^2} & \frac{2}{h^2}+V_{N-1}
+             \end{bmatrix}
+\label{eq:matrixse} 
+\end{equation}
 \section{Methods}
 
 \section{Results}
@@ -149,6 +301,8 @@
 All files used in this project can be found at \url{https://github.com/frxstrem/fys3150/tree/master/project2}.
 The following code files are used:
 \begin{itemize}
+\item
+
 \end{itemize}
 
 \clearpage
