@@ -12,7 +12,7 @@ const double rmax = 10;
 size_t N = 41;
 const double epsilon = 1e-10;
 
-const double h = rmax / (N - 1);
+const double h = (rmax - rmin) / (N - 1);
 
 // potential function
 static constexpr double V(double r) {
