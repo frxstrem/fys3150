@@ -16,4 +16,7 @@ bibliography.bib
 *.backup
 *.bak
 
+/code/b
+/code-joseph/jacobi
+
 *.dat
