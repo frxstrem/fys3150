@@ -12,4 +12,8 @@ bibliography.bib
 *.out
 *.swp
 
+*~
+*.backup
+*.bak
+
 *.dat
