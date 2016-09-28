@@ -141,6 +141,7 @@
 % custom math commands
 \newcommand\V[1]{\mathbf{#1}}                  % vector notation
 \newcommand\M[1]{\begin{bmatrix} #1 \end{bmatrix}} % matrix shorthand
+\def\off{\operatorname{off}}
 
 % commands for derivatives/integral dx expressions
 \newcommand\D[1]{{\,\mathrm{d}{#1}}}
@@ -275,9 +276,34 @@ vectors $\V{s}_i$ of $\V{S}$ are the eigenvectors of $\V{A}$. We can see this si
 where $\V{x} = \V{S}^T \V{e}_i$ is the $i$'th column of $\V{S}^T$, and thus also the $i$'th row of $\V{S}$.
 
 We'll be using the Jacobi method, in which we in multiple steps will remove the off-diagonal elements
-of $A$ with orthonormal transformations, until we have a matrix where the off-diagonal elements are
-sufficiently small. For each step, we find the element $a_{kl}$ that is the largest off-diagonal
-element in terms of absolute value.
+of $\V{A}$ with orthonormal transformations, until we have a matrix where the off-diagonal elements are
+sufficiently small. Start with $\V{A}_0 = \V{A}$ and $\V{P}_0 = \V{I}$.
+
+For each step with matrices $\V{A}_n$ and $\V{P}_n$, we find the element $a_{kl}$ that is the largest off-diagonal element in terms of absolute value. We define
+\begin{equation}
+  \tau = \cot 2 \theta = \frac{a_{ll} - a_{kk}}{2 a_{kl}}
+\end{equation}
+and the orthonormal similarity transformation
+\begin{equation}
+  \V{S}_n = \left[ \begin{array}{*{20}c}
+    1 & 0 & \ldots & 0 & 0 & \ldots & 0 & 0 & \ldots & 0 & 0 \\
+    0 & 1 & \ldots & 0 & 0 & \ldots & 0 & 0 & \ldots & 0 & 0 \\
+    \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots \\
+    0 & 0 & \ldots & \cos \theta & 0& \ldots & 0 & \sin \theta & \ldots & 0 & 0 \\
+    0 & 0 & \ldots & 0 & 1 & \ldots & 0 & 0 & \ldots & 0 & 0 \\
+    \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots \\
+    0 & 0 & \ldots & 0 & 0 & \ldots & 1 & 0 & \ldots & 0 & 0 \\
+    0 & 0 & \ldots & -\sin\theta & 0 & \ldots & 0 & \cos \theta & \ldots & 0 & 0 \\
+    \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots \\
+    0 & 0 & \ldots & 0 & 0 & \ldots & 0 & 0 & \ldots & 1 & 0 \\
+    0 & 0 & \ldots & 0 & 0 & \ldots & 0 & 0 & \ldots & 0 & 1 \\
+  \end{array} \right]
+\end{equation}
+where $(\V{S}_n)_{kk} = (\V{S}_n)_{ll} = \cos \theta$ and $(\V{S}_n)_{kl} = - (\V{S}_n)_{lk} = \sin \theta$.
+
+We then find $\V{A}_{n+1} = \V{S}_n^T \V{A}_n \V{S}_n$ and $\V{P}_{n+1} = \V{S}_n^T \V{P}_n$, and use these for the next step.
+
+Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the diagonal elements of $\V{A}_n$ will contain the eigenvalues of $\V{A}$, and the columns vectors of $\V{P}_n$ will contain the corresponding eigenvectors.
 
 \section{Results}
 
