@@ -1,18 +1,21 @@
-.PHONY: list all run clean
+CXX=g++
+CXXFLAGS=--std=c++14 -Ofast
+LDFLAGS=
+LIBS=-lm -larmadillo
+
+.PHONY: list all
 
 list:
 	@echo "Commands:"
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
 
-all: run pdf
+all: b
 
 clean:
-	@git clean -fxd .
+	rm b *.o
 
-pdf: project2.tex
-	latexmk -pdf -interaction=nonstopmode -pdflatex="lualatex -file-line-error --shell-escape" project2.tex
+b: b.o
+	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS}
 
-run: programs
-
-programs:
-	make -C code all
+%.o: %.cc
+	${CXX} ${CXXFLAGS} -c -o $@ $<

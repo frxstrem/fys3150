@@ -11,3 +11,5 @@ bibliography.bib
 *.toc
 *.out
 *.swp
+
+*.dat

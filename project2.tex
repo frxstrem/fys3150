@@ -18,7 +18,20 @@
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
 \usepackage{caption}
-\pgfplotsset{compat=1.13}
+\pgfplotsset{
+  compat=1.13,
+  scaled x ticks = false,
+  x tick label style={
+    /pgf/number format/fixed,
+    /pgf/number format/1000 sep = \thinspace
+  },
+  scaled y ticks = false,
+  y tick label style={
+    /pgf/number format/fixed,
+    /pgf/number format/1000 sep = \thinspace
+  },
+  legend cell align=left,
+}
 
 % listings
 \usepackage[euler]{textgreek}
@@ -250,8 +263,8 @@ We can write this as a matrix eigenvector equation, $\V{A} \V{u} = \lambda \V{u}
     e_1 & d_1 & e_1 & 0    & \dots  &0     &0 \\
     0   & e_2 & d_2 & e_2  &0       &\dots & 0\\
     \dots  & \dots & \dots & \dots  &\dots      &\dots & \dots\\
-    0   & \dots & \dots & \dots  &\dots  e_{N-1}     &d_{N-1} & e_{N-1}\\
-    0   & \dots & \dots & \dots  &\dots       &e_{N} & d_{N}
+    0   & \dots & \dots & \dots  &\dots  e_{N-2}     &d_{N-2} & e_{N-2}\\
+    0   & \dots & \dots & \dots  &\dots       &e_{N-1} & d_{N-1}
   } , \quad
   d_i = \frac{2}{h^2} - V_i , \quad
   e_i = - \frac{1}{h^2}
@@ -306,6 +319,37 @@ We then find $\V{A}_{n+1} = \V{S}_n^T \V{A}_n \V{S}_n$ and $\V{P}_{n+1} = \V{S}_
 Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the diagonal elements of $\V{A}_n$ will contain the eigenvalues of $\V{A}$, and the columns vectors of $\V{P}_n$ will contain the corresponding eigenvectors.
 
 \section{Results}
+
+\begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[
+        xmin=0, xmax=100,
+        xlabel={Matrix dimensionality $N$},
+        ymin=0, ymax=20000,
+        ylabel={Number of steps $K$},
+      ]
+      \addplot[blue,dashed,domain=0:100,samples=100] {1.5479*x^2};
+      \addplot[red,mark=*,only marks] table[x=N,y=steps] {code/b_steps.dat};
+      \legend{$K = 1.5479 \; N^2$,data}
+    \end{axis}
+  \end{tikzpicture}
+\end{center}
+
+\begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[
+        xmin=0, xmax=100,
+        xlabel={Matrix dimensionality $N$},
+        ymin=0, ymax=4000,
+        ylabel={Time per step $t$},
+      ]
+      \addplot[blue,dashed,domain=0:100,samples=100] {3.02485e-3*x^3};
+      \addplot[red,mark=*,only marks] table[x=N,y expr={1e6*\thisrow{step_time}}] {code/b_steps.dat};
+
+      \legend{$t = 3.02485 \cdot 10^{-3} \; N^3$,data}
+    \end{axis}
+  \end{tikzpicture}
+\end{center}
 
 \section{Conclusions}
 
