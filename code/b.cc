@@ -161,7 +161,7 @@ int main(int argc, char **argv) {
   // calculate d_i, which depend on V(ρ_i)
   vec d(N);
   for(size_t i = 0; i < N; i++)
-    d(i) = 2 / (h * h) - V(r[i]);
+    d(i) = 2 / (h * h) + V(r[i]);
 
   // calculate matrix A
   mat A(N, N);
