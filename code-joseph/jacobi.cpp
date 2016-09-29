@@ -104,7 +104,7 @@ int main(){
 
 
 void RHO_A_FILL(vec &rho, mat &A, int N,double rhoN){
-    double h = rhoN/N;
+    double h = rhoN/(N-1);
     for(int i = 0; i < N;i++){
         rho(i) = i*h;
         A(i,i) = 2./(h*h)-(rho(i)*rho(i));
