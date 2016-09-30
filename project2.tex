@@ -18,6 +18,7 @@
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
 \usepackage{caption}
+\usepgfplotslibrary{units}
 \pgfplotsset{
   compat=1.13,
   scaled x ticks = false,
@@ -31,6 +32,19 @@
     /pgf/number format/1000 sep = \thinspace
   },
   legend cell align=left,
+  % unit
+  unit markings=slash space,
+  unit code/.code 2 args=
+    \expandafter\expandafter\expandafter\expandafter
+    \expandafter\expandafter\expandafter\si
+    \expandafter\expandafter\expandafter\expandafter
+    \expandafter\expandafter\expandafter{#2},
+  % legend style={
+  %   at={(1.02,1)},
+  %   anchor=north west,
+  % },
+  }
+
 }
 
 % listings
@@ -342,6 +356,7 @@ Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the
         xlabel={Matrix dimensionality $N$},
         ymin=0, ymax=4000,
         ylabel={Time per step $t$},
+        y unit={\milli\second},
       ]
       \addplot[blue,dashed,domain=0:100,samples=100] {3.02485e-3*x^3};
       \addplot[red,mark=*,only marks] table[x=N,y expr={1e6*\thisrow{step_time}}] {code/b_steps.dat};
