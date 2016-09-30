@@ -32,14 +32,13 @@ int main(){
 
         RHO_A_FILL(rho,A,N,rhoN);
         Maxoff(A,N,k,l,max);
+        //A.print();
+        int iterations = 0;
 
         // solve with Armadillo's eig_sym
         vec arma_eigenvalues;
         mat arma_eigenvectors;
         eig_sym(arma_eigenvalues, arma_eigenvectors, A);
-
-        //A.print();
-        int iterations = 0;
 
         double eps = 1E-10;
 
@@ -50,23 +49,25 @@ int main(){
         while(max > eps){
             tau = (A(l,l)-A(k,k))/(2.*A(k,l));
             if(tau>0){
-                 t = 1.0/(tau + sqrt(1.0 + tau*tau));
-            }else{
-              t = -1.0/( -tau + sqrt(1.0 + tau*tau));
+                t = 1.0/(tau + sqrt(1.0 + tau*tau));
+            } else{
+                t = -1.0/( -tau + sqrt(1.0 + tau*tau));
             }
-
+         
             //cosine and sine
             c = 1./sqrt(1.+t*t);
             s = t*c;
-
+         
             //Jacobi rotating A round theta in N-dim space
             for(int i = 0; i<N; i++){
                 if ((i != k) && (i !=l)){
-                    A(i,k) = A(i,k)*c - A(i,l)*s;
-                    A(i,l) = A(i,l)*c + A(i,k)*s;
-                    A(k,i) = A(i,k);
-                    // A(k,i) = ik;
-                    A(l,i) = A(i,l);
+                    
+                    ik = A(i,k)*c - A(i,l)*s;
+                    il = A(i,l)*c + A(i,k)*s;
+                    A(i,k) = ik;
+                    A(i,l) = il;
+                    A(k,i) = ik;
+                    A(l,i) = il;
                 }
                 s_ik = S(i,k);
                 s_il = S(i,l);
@@ -74,9 +75,10 @@ int main(){
                 S(i,l) = c*s_il + s*s_ik;
             }
 
-            A(k,k) = A(k,k)*c*c - 2.*A(k,l)*c*s + A(l,l)*s*s;
-            A(l,l) = A(l,l)*c*c + 2.*A(k,l)*c*s + A(k,k)*s*s;
-
+            kk = A(k,k)*c*c - 2.*A(k,l)*c*s + A(l,l)*s*s;
+            ll = A(l,l)*c*c + 2.*A(k,l)*c*s + A(k,k)*s*s;
+            A(k,k) = kk;
+            A(l,l) = ll ;          
             A(k,l) = 0;
             A(l,k) = 0;
 

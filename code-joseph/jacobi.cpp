@@ -11,12 +11,7 @@ void RHO_A_FILL(vec &rho, mat &A, int N,double rhoN); //rho, kind of like a line
 void Maxoff(mat &A, int N,int &k, int &l, double &max);        //Finds the max element of a matrix
 
 int main(){
-int values[] = {4,10,20,30,40,50,60,70,80,90,100};
-fstream Outfile;
-Outfile.open("steps.dat",ios::out);
-Outfile << "N     epsilon    steps  step_time"<<endl;
-for(int iter = 0; iter < 11; iter++){
-    int N = values[iter]; //matrix size; N x N
+    int N = 100; //matrix size; N x N
     double rhoN = 6;
     double max;
     int k,l;
@@ -87,8 +82,8 @@ for(int iter = 0; iter < 11; iter++){
     eigen = sort(eigen);
     eigen.print();
 
-    double time = (finish -start)/CLOCKS_PER_SEC/N;
-    /*
+    double time = (finish -start)/CLOCKS_PER_SEC/iterations;
+    
     fstream outfile;
     outfile.open("eigenvectors.data",ios::out);
 
@@ -99,14 +94,17 @@ for(int iter = 0; iter < 11; iter++){
             }
         }
     outfile.close();
-    */
+    
 
+    //fstream Outfile;
+    //Outfile.open("steps.dat",ios::out);
+    //Outfile << "N     epsilon    steps  step_time"<<endl;
 
-    Outfile <<N <<" "<<eps<<" "<<iterations<<" "<<time;
-    Outfile<<endl;
+    //Outfile <<N <<" "<<eps<<" "<<iterations<<" "<<time;
+    //Outfile<<endl;
         
-//    Outfile.close();
-}
+    //Outfile.close();
+
 } //end of main
 
 
