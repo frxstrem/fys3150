@@ -1,0 +1,409 @@
+% standard LaTeX packages
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[margin=3cm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{parskip}
+\usepackage{xifthen}
+
+% math packages
+\usepackage{mathtools,amsfonts,amssymb,mathdots}
+\usepackage{siunitx}
+\mathtoolsset{showonlyrefs}
+
+% plotting and tables
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{caption}
+\usepgfplotslibrary{units}
+\pgfplotsset{
+  compat=1.13,
+  scaled x ticks = false,
+  x tick label style={
+    /pgf/number format/fixed,
+    /pgf/number format/1000 sep = \thinspace
+  },
+  scaled y ticks = false,
+  y tick label style={
+    /pgf/number format/fixed,
+    /pgf/number format/1000 sep = \thinspace
+  },
+  legend cell align=left,
+  % unit
+  unit markings=slash space,
+  unit code/.code 2 args=
+    \expandafter\expandafter\expandafter\expandafter
+    \expandafter\expandafter\expandafter\si
+    \expandafter\expandafter\expandafter\expandafter
+    \expandafter\expandafter\expandafter{#2},
+  % legend style={
+  %   at={(1.02,1)},
+  %   anchor=north west,
+  % },
+}
+
+% listings
+\usepackage[euler]{textgreek}
+\usepackage{xcolor}
+\usepackage{listings}
+\definecolor{background}{gray}{0.95}
+\definecolor{comment}{rgb}{0,0.5,0}
+\colorlet{keyword}{blue}
+\colorlet{string}{red}
+\lstset{numbers=left,
+  numberstyle=\tiny,
+  breaklines=true,
+  tabsize=4,
+  morekeywords={with,super,as},
+  escapeinside={[$}{$]},
+  escapebegin={\color{comment}\begin{math}},
+  escapeend={\end{math}},
+  frame=single,
+  basicstyle=\footnotesize\tt,
+  commentstyle=\color{comment},
+  keywordstyle=\color{keyword},
+  stringstyle=\color{string},
+  backgroundcolor=\color{background},
+  showstringspaces=false,
+  numbers=left,
+  numbersep=5pt,
+  literate=
+    % scandinavian vowels
+    {æ}{{\ae}}1
+    {å}{{\aa}}1
+    {ø}{{\o}}1
+    {Æ}{{\AE}}1
+    {Å}{{\AA}}1
+    {Ø}{{\O}}1
+    {é}{{\'e}}1
+    {É}{{\'E}}1
+    % greek letters
+    {α}{{\textalpha}}1
+    {β}{{\textbeta}}1
+    {γ}{{\textgamma}}1
+    {δ}{{\textdelta}}1
+    {ε}{{\textepsilon}}1
+    {ζ}{{\textzeta}}1
+    {η}{{\texteta}}1
+    {θ}{{\texttheta}}1
+    {ι}{{\textiota}}1
+    {κ}{{\textkappa}}1
+    {λ}{{\textlambda}}1
+    {μ}{{\textmu}}1
+    {ν}{{\textnu}}1
+    {ξ}{{\textxi}}1
+    {ο}{{o}}1
+    {π}{{\textpi}}1
+    {ρ}{{\textrho}}1
+    {σ}{{\textsigma}}1
+    {τ}{{\texttau}}1
+    {υ}{{\textupsilon}}1
+    {φ}{{\textphi}}1
+    {ϕ}{{\ensuremath{\phi}}}1
+    {χ}{{\textchi}}1
+    {ψ}{{\textpsi}}1
+    {ω}{{\textomega}}1
+    {Α}{{A}}1
+    {Β}{{B}}1
+    {Γ}{{\textGamma}}1
+    {Δ}{{\textDelta}}1
+    {Ε}{{E}}1
+    {Ζ}{{Z}}1
+    {Η}{{H}}1
+    {Θ}{{\textTheta}}1
+    {Ι}{{I}}1
+    {Κ}{{K}}1
+    {Λ}{{\textLambda}}1
+    {Μ}{{M}}1
+    {Ν}{{N}}1
+    {Ξ}{{\textXi}}1
+    {Ο}{{O}}1
+    {∏}{{\textPi}}1
+    {Ρ}{{P}}1
+    {Σ}{{\textSigma}}1
+    {Τ}{{T}}1
+    {Υ}{{Y}}1
+    {Φ}{{\textPhi}}1
+    {Χ}{{X}}1
+    {Ψ}{{\textPsi}}1
+    {Ω}{{\textOmega}}1
+    % miscellaneous
+    {°}{{\ensuremath{{}^\circ}}}1
+    {²}{{\ensuremath{{}^2}}}1
+  }
+
+% bibliography packages
+\usepackage[backend=bibtex8,style=numeric,autocite=inline,sorting=ynt]{biblatex}
+
+% other packages
+\usepackage{filecontents}
+
+% bibliography
+\begin{filecontents}{bibliography.bib}
+  @online{project2,
+    author   = {Computational Physics I FYS3150},
+    title    = {Project 2},
+    year     = {2016},
+    url      = {https://github.com/CompPhysics/ComputationalPhysics/blob/master/doc/Projects/2016/Project2/project2_2016.pdf},
+  }
+
+  @article{armadillo,
+    author   = {Conrad Sanderson and Ryan Curtin.},
+    title    = {Armadillo: a template-based C++ library for linear algebra.},
+    journal  = {Journal of Open Source Software},
+    year     = 2016,
+    volume   = 1,
+    pages    = {26},
+  }
+\end{filecontents}
+\DeclareFieldFormat[article]{volume}{\bibstring{jourvol}\addnbspace #1}
+\addbibresource{bibliography.bib}
+\nocite{*}
+
+% custom math commands
+\newcommand\V[1]{\mathbf{#1}}                  % vector notation
+\newcommand\M[1]{\begin{bmatrix} #1 \end{bmatrix}} % matrix shorthand
+\def\off{\operatorname{off}}
+
+% commands for derivatives/integral dx expressions
+\newcommand\D[1]{{\,\mathrm{d}{#1}}}
+\newcommand\dd[2][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\mathrm{d}{#2}}%
+    {\mathrm{d}^{#1}{#2}}%
+}}
+\newcommand\df[3][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\frac{\mathrm{d}{#2}}{\mathrm{d}{#3}}}%
+    {\frac{\mathrm{d}^{#1}{#2}}{{\mathrm{d}{#3}^{#1}}}}%
+}}
+
+\begin{document}
+
+\title{Project 2 - FYS3150 Computational Physics}
+\author{Fredrik Østrem (\texttt{fredost}) \\ Joseph Knutson (\texttt{josephkn})}
+\date{\today}
+
+\maketitle
+
+\begin{abstract}
+  \color{red}\textit{INSERT ABSTRACT HERE}
+\end{abstract}
+
+\tableofcontents
+
+\clearpage
+\section{Introduction}
+In this project we are going to solve Schroedinger's equation for two
+electrons in a three-dimensional harmonic oscillator well. This will be done with and
+without a repulsive Coulomb potential while we assume spherical symmetry. Our method consists of the Jacobi method where we take advantage og similarity to solve our problem.
+
+Here we present the solution of the radial part of Schroedinger's equation for one electron
+\begin{equation}
+  -\frac{\hbar^2}{2 m} \left ( \frac{1}{r^2} \frac{d}{dr} r^2
+  \frac{d}{dr} - \frac{l (l + 1)}{r^2} \right )R(r)
+     + V(r) R(r) = E R(r).
+\end{equation}
+In our case $V(r)$ is the harmonic oscillator potential $(1/2)kr^2$ with
+$k=m\omega^2$.
+We substitute $R(r) = (1/r) u(r)$, set $l = 0$ and obtain
+\begin{equation}
+  -\frac{\hbar^2}{2 m} \frac{d^2}{dr^2} u(r)
+       +  V(r)u(r)  = E u(r) .
+\end{equation}
+
+Now we introduce a dimensionless variable $\rho = (1/\alpha) r$
+where $\alpha$ is a constant with dimension length. We do this to remove uneccesary factors later. We also set $V(\rho)$ equal to the HO potential$(1/2) k \alpha^2\rho^2$ and rewrite our equation:
+
+\begin{equation}
+  -\frac{d^2}{d\rho^2} u(\rho)
+       + \frac{mk}{\hbar^2} \alpha^4\rho^2u(\rho)  = \frac{2m\alpha^2}{\hbar^2}E u(\rho) .
+\end{equation}
+The constant $\alpha$ can now be fixed
+so that
+\begin{equation}
+\alpha = \left(\frac{\hbar^2}{mk}\right)^{1/4}.
+\end{equation}
+Defining
+
+\begin{equation}
+\lambda = \frac{2m\alpha^2}{\hbar^2}E,
+\end{equation}
+we can rewrite Schroedinger's equation as
+
+\begin{equation}
+  -\frac{d^2}{d\rho^2} u(\rho) + \rho^2u(\rho)  = \lambda u(\rho).
+\end{equation}
+
+\section{Methods}
+
+\subsection{}
+% (a)
+
+Assume that $\V{U}$ is an orthogonal transformation. Then by definition, $\V{U}^T \V{U} = \V{I}$,
+so for any vectors $\V{u}$ and $\V{v}$ we see that
+\begin{equation}
+  \left( \V{U} \V{u} \right) \cdot \left( \V{U} \V{v} \right)
+    = \left( \V{U} \V{u} \right)^T \left( \V{U} \V{v} \right)
+    = \V{u}^T \underbrace{\V{U}^T \V{U}}_{= \, \V{I}} \V{v}
+    = \V{u}^T \V{v} = \V{u} \cdot \V{v}
+\end{equation}
+
+Since the dot product of vectors are preserved by $\V{U}$, orthogonality (that is, the dot product
+being zero) is also preserved.
+
+\subsection{}
+% (b)
+
+We have the differential equation
+\begin{equation}
+  - \df[2]{}{\rho} u(\rho) + V(\rho) u(\rho) = \lambda u(\rho)
+\end{equation}
+where $V(\rho) = \rho^2$, that we want to solve. By using Taylor expansion of $u(\rho)$ and discretizing $u$ and $\rho$ with step length $h$, we
+get the equation
+\begin{equation}
+  - \frac{1}{h^2} u_{i-1} + \left( \frac{2}{h^2} - V_i \right) u_i - \frac{1}{h^2} u_{i+1} = \lambda u_i
+\end{equation}
+
+We can write this as a matrix eigenvector equation, $\V{A} \V{u} = \lambda \V{u}$, where
+\begin{equation}
+  \V{A} = \M{
+    d_0 & e_0 & 0   & 0    & \dots  &0     & 0 \\
+    e_1 & d_1 & e_1 & 0    & \dots  &0     &0 \\
+    0   & e_2 & d_2 & e_2  &0       &\dots & 0\\
+    \dots  & \dots & \dots & \dots  &\dots      &\dots & \dots\\
+    0   & \dots & \dots & \dots  &\dots  e_{N-2}     &d_{N-2} & e_{N-2}\\
+    0   & \dots & \dots & \dots  &\dots       &e_{N-1} & d_{N-1}
+  } , \quad
+  d_i = \frac{2}{h^2} + V_i , \quad
+  e_i = - \frac{1}{h^2}
+\end{equation}
+
+We can solve this equation by finding an orthonormal matrix $\V{S}$ and a diagonal matrix $\V{B}$
+such that
+\begin{equation}
+  \V{A} = \V{S}^T \V{B} \V{S}
+\end{equation}
+where the diagonal elements of $B$, $b_{ii}$, are the eigenvalues $\lambda_i$ of $A$, and the row
+vectors $\V{s}_i$ of $\V{S}$ are the eigenvectors of $\V{A}$. We can see this since, if $\V{y} = \V{e}_i$, then $\V{y}$ is an eigenvector of $\V{B}$ with eigenvalue $\lambda_i$; if then $\V{x} = \V{S}^T \V{y}$, then
+\begin{equation}
+  \V{A} \V{x}
+    = \V{S}^T \V{B} \V{S} \V{x}
+    = \V{S}^T \V{B} \V{S} \V{S}^T \V{y}
+    = \V{S}^T \V{B} \V{y}
+    = \V{S}^T \lambda_i \V{y}
+    = \lambda_i \, \V{S}^T \V{y}
+    = \lambda_i \V{x}
+\end{equation}
+where $\V{x} = \V{S}^T \V{e}_i$ is the $i$'th column of $\V{S}^T$, and thus also the $i$'th row of $\V{S}$.
+
+We'll be using the Jacobi method, in which we in multiple steps will remove the off-diagonal elements
+of $\V{A}$ with orthonormal transformations, until we have a matrix where the off-diagonal elements are
+sufficiently small. Start with $\V{A}_0 = \V{A}$ and $\V{P}_0 = \V{I}$.
+
+For each step with matrices $\V{A}_n$ and $\V{P}_n$, we find the element $a_{kl}$ that is the largest off-diagonal element in terms of absolute value. We define
+\begin{equation}
+  \tau = \cot 2 \theta = \frac{a_{ll} - a_{kk}}{2 a_{kl}}
+\end{equation}
+and the orthonormal similarity transformation
+\begin{equation}
+  \V{S}_n = \left[ \begin{array}{*{20}c}
+    1 & 0 & \ldots & 0 & 0 & \ldots & 0 & 0 & \ldots & 0 & 0 \\
+    0 & 1 & \ldots & 0 & 0 & \ldots & 0 & 0 & \ldots & 0 & 0 \\
+    \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots \\
+    0 & 0 & \ldots & \cos \theta & 0& \ldots & 0 & \sin \theta & \ldots & 0 & 0 \\
+    0 & 0 & \ldots & 0 & 1 & \ldots & 0 & 0 & \ldots & 0 & 0 \\
+    \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots \\
+    0 & 0 & \ldots & 0 & 0 & \ldots & 1 & 0 & \ldots & 0 & 0 \\
+    0 & 0 & \ldots & -\sin\theta & 0 & \ldots & 0 & \cos \theta & \ldots & 0 & 0 \\
+    \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots & \ldots \\
+    0 & 0 & \ldots & 0 & 0 & \ldots & 0 & 0 & \ldots & 1 & 0 \\
+    0 & 0 & \ldots & 0 & 0 & \ldots & 0 & 0 & \ldots & 0 & 1 \\
+  \end{array} \right]
+\end{equation}
+where $(\V{S}_n)_{kk} = (\V{S}_n)_{ll} = \cos \theta$ and $(\V{S}_n)_{kl} = - (\V{S}_n)_{lk} = \sin \theta$.
+
+We then find $\V{A}_{n+1} = \V{S}_n^T \V{A}_n \V{S}_n$ and $\V{P}_{n+1} = \V{S}_n^T \V{P}_n$, and use these for the next step.
+
+Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the diagonal elements of $\V{A}_n$ will contain the eigenvalues of $\V{A}$, and the columns vectors of $\V{P}_n$ will contain the corresponding eigenvectors.
+
+\section{Results}
+
+\begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[
+        xmin=0, xmax=100,
+        xlabel={Matrix dimensionality $N$},
+        ymin=0, ymax=20000,
+        ylabel={Number of steps $K$},
+      ]
+      \addplot[blue,dashed,domain=0:100,samples=100] {1.4036*x^2};
+      \addplot[red,mark=*,only marks] table[x=N,y=steps] {code-fredrik/b_steps.dat};
+    \end{axis}
+  \end{tikzpicture}
+\end{center}
+
+\begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[
+        xmin=0, xmax=100,
+        xlabel={Matrix dimensionality $N$},
+        ymin=0, ymax=4000,
+        ylabel={Time per step $t$},
+        y unit={\milli\second},
+      ]
+      \addplot[blue,dashed,domain=0:100,samples=100] {2.5743e-3*x^3};
+      \addplot[red,mark=*,only marks] table[x=N,y expr={1e6*\thisrow{step_time}}] {code-fredrik/b_steps.dat};
+    \end{axis}
+  \end{tikzpicture}
+\end{center}
+
+\begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[
+        xmin=0, xmax=100,
+        xlabel={Matrix dimensionality $N$},
+        ymin=0, ymax=20000,
+        ylabel={Number of steps $K$},
+      ]
+      \addplot[blue,dashed,domain=0:100,samples=100] {1.4036*x^2};
+      \addplot[red,mark=*,only marks] table[x=N,y=steps] {code-joseph/steps.dat};
+    \end{axis}
+  \end{tikzpicture}
+\end{center}
+
+\begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[
+        xmin=0, xmax=100,
+        xlabel={Matrix dimensionality $N$},
+        ymin=0, ymax=10,
+        ylabel={Time per step $t$},
+        y unit={\milli\second},
+      ]
+      \addplot[blue,dashed,domain=0:100,samples=100] {8.41835*(x/100)^1.5};
+      \addplot[red,mark=*,only marks] table[x=N,y expr={1e6*\thisrow{step_time}}] {code-joseph/steps.dat};
+    \end{axis}
+  \end{tikzpicture}
+\end{center}
+
+\section{Conclusions}
+
+\clearpage
+\appendix
+\section{Appendix}
+
+All files used in this project can be found at \url{https://github.com/frxstrem/fys3150/tree/master/project2}.
+The following code files are used:
+\begin{itemize}
+  \item {\it \color{red} none}
+\end{itemize}
+
+\clearpage
+
+\printbibliography[heading=bibnumbered,title=Bibliography]
+
+\end{document}
