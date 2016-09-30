@@ -18,8 +18,10 @@ bibliography.bib
 *.pdf
 
 /code-fredrik/b
+/code-fredrik/d
 /code-joseph/jacobi
 /code-joseph/jacobi_step_data
+/code-joseph/jacobi_interact
 
 *.dat
 *.data

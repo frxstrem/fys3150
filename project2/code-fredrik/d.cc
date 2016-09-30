@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <armadillo>
 #include <ctime>
+#include <limits>
 #include <unistd.h>
 
 #include "comp_eig.hh"
@@ -9,13 +10,14 @@
 using namespace std;
 using namespace arma;
 
-const double rmin = 0;
-const double rmax = 6;
+const double rmin = 1e-6;
+const double rmax = 10;
 const double epsilon = 1e-14;
 
 // potential function
-static constexpr double V(double r) {
-  return r * r;
+static constexpr double V(double r, double w) {
+  // if(abs(r) < 1e-6) r = 1e-6;
+  return w * w * r * r + 1 / r;
 }
 
 // calculate maximal off-diagonal element with respect to absolute value
@@ -107,7 +109,7 @@ static void jacobi_solve(const mat &A, mat &P, vec &L, size_t &steps, double &st
     L(i) = B(i, i);
 }
 
-int run_program(size_t N, size_t &steps, double &step_time, double &err) {
+int run_program(size_t N, double w, vec &out, size_t &steps, double &step_time, double &err) {
   const double h = (rmax - rmin) / N;
 
   // array of ρ valuses
@@ -121,7 +123,7 @@ int run_program(size_t N, size_t &steps, double &step_time, double &err) {
   // calculate d_i, which depend on V(ρ_i)
   vec d(N);
   for(size_t i = 0; i < N; i++)
-    d(i) = 2 / (h * h) + V(r[i]);
+    d(i) = 2 / (h * h) + V(r[i], w);
 
   // calculate matrix A
   mat A(N, N, arma::fill::zeros);
@@ -137,36 +139,54 @@ int run_program(size_t N, size_t &steps, double &step_time, double &err) {
   // solve with Jacobi method
   vec eigenvalues;
   mat eigenvectors;
-  jacobi_solve(A, eigenvectors, eigenvalues, steps, step_time);
+  // jacobi_solve(A, eigenvectors, eigenvalues, steps, step_time);
+  eig_sym(eigenvalues, eigenvectors, A);
 
-  // solve with Armadillo's eig_sym
-  vec arma_eigenvalues;
-  mat arma_eigenvectors;
-  eig_sym(arma_eigenvalues, arma_eigenvectors, A);
 
-  err = comp_eig(eigenvalues, eigenvectors, arma_eigenvalues, arma_eigenvectors);
+  // find lowest eigenvalue
+  size_t lowest_index = 0;
+  double lowest_eigenvalue = std::numeric_limits<double>::infinity();
+  for(size_t i = 1; i < N; i++) {
+    double l = eigenvalues(i);
+    if(l < lowest_eigenvalue) {
+      lowest_index = i; lowest_eigenvalue = l;
+    }
+  }
+
+  // save to file
+  char filename[20];
+  snprintf(filename, 20, "d-%.2lf.dat", w);
+  FILE *fp = fopen(filename, "w");
+  fprintf(fp, "r          u\n");
+  for(size_t i = 0; i < N; i++) {
+    fprintf(fp, "%-10.5g %-10.5g\n", r(i), eigenvectors(i, lowest_index));
+  }
+  fclose(fp);
 }
 
 int main(int argc, char **argv) {
-  const size_t Nvalues[] = { 4, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
-  const size_t Nlen = sizeof(Nvalues) / sizeof(*Nvalues);
+  const size_t N = 200;
+  const double Wvalues[] = { 0.01, 0.5, 1, 5 };
+  const size_t Wlen = sizeof(Wvalues) / sizeof(*Wvalues);
 
-  FILE *fp = fopen("b.dat", "w");
-  fprintf(fp, "N          epsilon    steps      step_time  error\n");
+  FILE *fp = fopen("d.dat", "w");
+  fprintf(fp, "N          W          epsilon    steps      step_time  error\n");
 
-  for(size_t i = 0; i < Nlen; i++) {
-    size_t N = i[Nvalues]; // aww yeah abusing valid C++ syntax for no reason
+  for(size_t i = 0; i < Wlen; i++) {
+    double W = Wvalues[i];
 
     size_t K; // number of steps
     double t; // time per step
     double e; // average error
 
-    std::cout << "running with N = " << N << std::endl;
+    std::cout << "running with W = " << W << std::endl;
 
-    run_program(N, K, t, e);
+    vec out;
+
+    run_program(N, W, out, K, t, e);
 
     // write result row
-    fprintf(fp, "%-10ld %-10.5g %-10ld %-10.5g %-10.5g\n", N, epsilon, K, t, e);
+    fprintf(fp, "%-10ld %-10.5g %-10.5g %-10ld %-10.5g %-10.5g\n", N, W, epsilon, K, t, e);
     fflush(fp);
   }
 
