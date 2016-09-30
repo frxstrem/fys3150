@@ -11,8 +11,8 @@ void RHO_A_FILL(vec &rho, mat &A, int N,double rhoN); //rho, kind of like a line
 void Maxoff(mat &A, int N,int &k, int &l, double &max);        //Finds the max element of a matrix
 
 int main(){
-    int N = 41; //matrix size; N x N
-    double rhoN = 10;
+    int N = 150; //matrix size; N x N
+    double rhoN = 5;
     double max;
     int k,l;
 
@@ -22,13 +22,12 @@ int main(){
     fvec eigen = fvec(N);
 
 
-
     RHO_A_FILL(rho,A,N,rhoN);
     Maxoff(A,N,k,l,max);
-    A.print();
+    //A.print();
     int iterations = 0;
 
-    double eps = 1E-10;
+    double eps = 1E-9;
 
     double tau, t, s, c, il, ik, kk, ll, s_ik, s_il;
     double start, finish;
@@ -36,11 +35,10 @@ int main(){
     start = clock();                      //clock value before eigen solve
 
     while(max > eps){
-        Maxoff(A,N,k,l,max);
         tau = (A(l,l)-A(k,k))/(2.*A(k,l));
         if(tau>0){
-             t = -tau - sqrt(1+tau*tau);}
-        else{t = -tau + sqrt(1+tau*tau);}
+             t = 1.0/(tau + sqrt(1.0 + tau*tau));}
+        else{t = -1.0/( -tau + sqrt(1.0 + tau*tau));}
      
         //cosine and sine
         c = 1./sqrt(1.+t*t);
@@ -48,7 +46,7 @@ int main(){
      
         //Jacobi rotating A round theta in N-dim space
         for(int i = 0; i<N; i++){
-            if ((i != k) and (i !=l)){
+            if ((i != k) && (i !=l)){
                 ik = A(i,k)*c - A(i,l)*s;
                 il = A(i,l)*c + A(i,k)*s;
                 A(i,k) = ik;
@@ -58,8 +56,8 @@ int main(){
                 }
             s_ik = S(i,k);
             s_il = S(i,l);
-            S[i,k] = c*s_ik - s*s_il;
-            S[i,l] = c*s_il + s*s_ik; 
+            S(i,k) = c*s_ik - s*s_il;
+            S(i,l) = c*s_il + s*s_ik; 
             }
 
         kk = A(k,k)*c*c - 2.*A(k,l)*c*s + A(l,l)*s*s;
@@ -71,7 +69,7 @@ int main(){
         A(l,k) = 0;
 
         iterations++;
-
+        Maxoff(A,N,k,l,max);
 
 
         } //end of while
@@ -79,7 +77,7 @@ int main(){
 
     finish = clock();                    //clock value after eigen solve
 
-    //Diagonal is now eigenvalues
+    //[eigen] is now eigenvalues
     for(int i = 0; i<N;i++){
         eigen(i) = A(i,i);
         }
@@ -104,10 +102,10 @@ int main(){
 
 
 void RHO_A_FILL(vec &rho, mat &A, int N,double rhoN){
-    double h = rhoN/(N-1);
+    double h = rhoN/(N);
     for(int i = 0; i < N;i++){
         rho(i) = i*h;
-        A(i,i) = 2./(h*h)-(rho(i)*rho(i));
+        A(i,i) = 2./(h*h)+(rho(i)*rho(i));
         if(i<N-1){
             A(i+1,i) = -1./(h*h);
             A(i,i+1) = -1./(h*h);
@@ -119,12 +117,13 @@ void Maxoff(mat &A, int N,int &k, int &l, double &max){
     max = 0;
     for(int i = 0; i < N ; i++){
         for(int j = i+1; j < N ; j++){
-            if (A(i,j)*A(i,j) > max){
-                max = A(i,j)*A(i,j);
+            if ( A(i,j)*A(i,j) > max){
+                max =A(i,j)*A(i,j);
                 k = i; 
                 l = j;
                 }
             }
-        }    
+        }
+    
     }
 
