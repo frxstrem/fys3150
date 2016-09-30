@@ -341,9 +341,11 @@ Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the
         ylabel={Number of steps $K$},
       ]
       \addplot[blue,dashed,domain=0:100,samples=100] {1.4036*x^2};
-      \addplot[red,mark=*,only marks] table[x=N,y=steps] {code-fredrik/b_steps.dat};
+      \addplot[red,mark=*,only marks] table[x=N,y=steps] {code-fredrik/b.dat};
     \end{axis}
   \end{tikzpicture}
+
+  {\centering b.dat}
 \end{center}
 
 \begin{center}
@@ -356,9 +358,31 @@ Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the
         y unit={\milli\second},
       ]
       \addplot[blue,dashed,domain=0:100,samples=100] {2.5743e-3*x^3};
-      \addplot[red,mark=*,only marks] table[x=N,y expr={1e6*\thisrow{step_time}}] {code-fredrik/b_steps.dat};
+      \addplot[red,mark=*,only marks] table[x=N,y expr={1e6*\thisrow{step_time}}] {code-fredrik/b.dat};
     \end{axis}
   \end{tikzpicture}
+
+  {\centering b.dat}
+\end{center}
+
+\begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\textwidth,
+        xmin=0, xmax=6,
+        xlabel={$\rho$},
+        ymin=-0.5, ymax=0.5,
+        ylabel={$u(\rho)$},
+      ]
+      \addplot[red,mark=*] table[x=r,y=u] {code-fredrik/d-0.01.dat};
+      \addplot[blue,mark=*] table[x=r,y=u] {code-fredrik/d-0.50.dat};
+      \addplot[purple,mark=*] table[x=r,y=u] {code-fredrik/d-1.00.dat};
+      \addplot[green!50!black,mark=*] table[x=r,y=u] {code-fredrik/d-5.00.dat};
+      \legend{$\omega_r = 0.01$, $\omega_r = 0.5$, $\omega_r = 1$, $\omega_r = 5$}
+    \end{axis}
+  \end{tikzpicture}
+
+  {\centering d-*.dat}
 \end{center}
 
 \begin{center}
@@ -373,6 +397,8 @@ Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the
       \addplot[red,mark=*,only marks] table[x=N,y=steps] {code-joseph/steps.dat};
     \end{axis}
   \end{tikzpicture}
+
+  {\centering steps.dat}
 \end{center}
 
 \begin{center}
@@ -388,6 +414,8 @@ Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the
       \addplot[red,mark=*,only marks] table[x=N,y expr={1e6*\thisrow{step_time}}] {code-joseph/steps.dat};
     \end{axis}
   \end{tikzpicture}
+
+  {\centering steps.dat}
 \end{center}
 
 \section{Conclusions}
@@ -398,9 +426,14 @@ Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the
 
 All files used in this project can be found at \url{https://github.com/frxstrem/fys3150/tree/master/project2}.
 The following code files are used:
-\begin{itemize}
-  \item {\it \color{red} none}
-\end{itemize}
+\begin{enumerate}
+  \item[b)]
+  \begin{itemize}
+    \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-fredrik/b.cc}{\tt code-fredrik/b.cc}
+    \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-joseph/jacobi.cpp}{\tt code-joseph/jacobi.cpp}
+    \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-joseph/jacobi_step_data.cpp}{\tt code-joseph/jacobi\_step\_data.cpp}
+  \end{itemize}
+\end{enumerate}
 
 \clearpage
 

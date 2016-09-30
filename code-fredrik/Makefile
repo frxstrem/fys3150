@@ -3,18 +3,16 @@ CXXFLAGS=--std=c++14 -Ofast
 LDFLAGS=
 LIBS=-lm -larmadillo
 
-.PHONY: list all
+.PHONY: all
 
-list:
-	@echo "Commands:"
-	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
-
-all: b
+all: b d
 
 clean:
-	rm b *.o
+	rm b d *.o *.dat
 
 b: b.o
+	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS}
+d: d.o
 	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS}
 
 %.o: %.cc
