@@ -43,8 +43,6 @@
   %   at={(1.02,1)},
   %   anchor=north west,
   % },
-  }
-
 }
 
 % listings
@@ -342,9 +340,8 @@ Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the
         ymin=0, ymax=20000,
         ylabel={Number of steps $K$},
       ]
-      \addplot[blue,dashed,domain=0:100,samples=100] {1.5479*x^2};
+      \addplot[blue,dashed,domain=0:100,samples=100] {1.4036*x^2};
       \addplot[red,mark=*,only marks] table[x=N,y=steps] {code/b_steps.dat};
-      \legend{$K = 1.5479 \; N^2$,data}
     \end{axis}
   \end{tikzpicture}
 \end{center}
@@ -358,10 +355,37 @@ Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the
         ylabel={Time per step $t$},
         y unit={\milli\second},
       ]
-      \addplot[blue,dashed,domain=0:100,samples=100] {3.02485e-3*x^3};
+      \addplot[blue,dashed,domain=0:100,samples=100] {2.5743e-3*x^3};
       \addplot[red,mark=*,only marks] table[x=N,y expr={1e6*\thisrow{step_time}}] {code/b_steps.dat};
+    \end{axis}
+  \end{tikzpicture}
+\end{center}
 
-      \legend{$t = 3.02485 \cdot 10^{-3} \; N^3$,data}
+\begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[
+        xmin=0, xmax=100,
+        xlabel={Matrix dimensionality $N$},
+        ymin=0, ymax=20000,
+        ylabel={Number of steps $K$},
+      ]
+      \addplot[blue,dashed,domain=0:100,samples=100] {1.4036*x^2};
+      \addplot[red,mark=*,only marks] table[x=N,y=steps] {code-joseph/steps.dat};
+    \end{axis}
+  \end{tikzpicture}
+\end{center}
+
+\begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[
+        xmin=0, xmax=100,
+        xlabel={Matrix dimensionality $N$},
+        ymin=0, ymax=10,
+        ylabel={Time per step $t$},
+        y unit={\milli\second},
+      ]
+      \addplot[blue,dashed,domain=0:100,samples=100] {8.41835*(x/100)^1.5};
+      \addplot[red,mark=*,only marks] table[x=N,y expr={1e6*\thisrow{step_time}}] {code-joseph/steps.dat};
     \end{axis}
   \end{tikzpicture}
 \end{center}

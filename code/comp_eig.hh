@@ -12,8 +12,10 @@ static double comp_eig(arma::vec Avalues, arma::mat Avectors, arma::vec Bvalues,
 
   size_t M = Avalues.n_elem;
 
-  // sort A eigenvalues (quick and dirty algorithm)
+  // normalize and sort A eigenvalues (quick and dirty algorithm)
   for(size_t i = 0; i < M; i++) {
+    // Avectors.col(i) = arma::normalise(Avectors.col(i));
+
     size_t k = i;
     for(size_t j = i + 1; j < M; j++) {
       if(Avalues(j) < Avalues(k))
@@ -26,6 +28,8 @@ static double comp_eig(arma::vec Avalues, arma::mat Avectors, arma::vec Bvalues,
 
   // sort B eigenvalues (quick and dirty algorithm)
   for(size_t i = 0; i < M; i++) {
+    // Bvectors.col(i) = arma::normalise(Bvectors.col(i));
+
     size_t k = i;
     for(size_t j = i + 1; j < M; j++) {
       if(Bvalues(j) < Bvalues(k))

@@ -2,7 +2,6 @@
 #include <cstdio>
 #include <armadillo>
 #include <ctime>
-#include <cassert>
 #include <unistd.h>
 
 #include "comp_eig.hh"
