@@ -11,20 +11,21 @@ void RHO_A_FILL(vec &rho, mat &A, int N,double rhoN); //rho, kind of like a line
 void Maxoff(mat &A, int N,int &k, int &l, double &max);        //Finds the max element of a matrix
 
 int main(){
+//int omega[] = 
+//for(int iter = 0; iter <
     int N = 100; //matrix size; N x N
-    double rhoN = 6;
+    double rhoN = 25;
     double max;
     int k,l;
 
     mat A = mat(N,N,fill::zeros); //indexes go from (0) to (N-1)
     mat S = mat(N,N,fill::eye);
     vec rho = vec(N,fill::zeros);
-    fvec eigen = fvec(N);
-
+    vec eigen = vec(N);
 
     RHO_A_FILL(rho,A,N,rhoN);
     Maxoff(A,N,k,l,max);
-    //A.print();
+    A.print();
     int iterations = 0;
 
     double eps = 1E-10;
@@ -34,13 +35,13 @@ int main(){
 
     start = clock();                      //clock value before eigen solve
     while(max > eps){
-        tau = (A(l,l)-A(k,k))/(2.*A(k,l));
+        tau = (A(l,l)-A(k,k))/(double(2)*A(k,l));
         if(tau>0){
-             t = 1.0/(tau + sqrt(1.0 + tau*tau));}
-        else{t = -1.0/( -tau + sqrt(1.0 + tau*tau));}
+             t = (-tau - sqrt(1.0 + tau*tau));}
+        else{t = ( -tau + sqrt(1.0 + tau*tau));}
      
         //cosine and sine
-        c = 1./sqrt(1.+t*t);
+        c = double(1)/sqrt(1.+t*t);
         s = t*c;
      
         //Jacobi rotating A round theta in N-dim space
@@ -79,7 +80,6 @@ int main(){
         eigen(i) = A(i,i);
         }
 
-    eigen = sort(eigen);
     eigen.print();
 
     double time = (finish -start)/CLOCKS_PER_SEC/iterations;
@@ -94,9 +94,16 @@ int main(){
             }
         }
     outfile.close();
+    
+    
+    fstream utfile;
+    utfile.open("eigenvalues.data",ios::out);
 
-
-
+    for (int i = 0; i<N; i++){
+        utfile << eigen(i)<<endl;
+        }
+    utfile.close();
+    
     //fstream Outfile;
     //Outfile.open("steps.dat",ios::out);
     //Outfile << "N     epsilon    steps  step_time"<<endl;
@@ -111,13 +118,14 @@ int main(){
 
 void RHO_A_FILL(vec &rho, mat &A, int N,double rhoN){
     double h = rhoN/(N);
+    rho(0) = 0.000001;
     for(int i = 0; i < N;i++){
-        rho(i) = i*h;
-        A(i,i) = 2./(h*h)+(rho(i)*rho(i));
+        if(i > 0) rho(i) = i*h;   
+        A(i,i) = 2./(h*h)+ rho(i)*rho(i)+(double(1)/rho(i));
         if(i<N-1){
             A(i+1,i) = -1./(h*h);
-            A(i,i+1) = -1./(h*h);
-            }
+            A(i,i+1) = -1./(h*h);         
+}
         }
     }
 

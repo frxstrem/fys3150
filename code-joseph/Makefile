@@ -9,7 +9,7 @@ list:
 	@echo "Commands:"
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
 
-all: jacobi jacobi_step_data
+all: jacobi jacobi_step_data jacobi_interact
 
 clean:
 	rm b *.o
@@ -18,6 +18,9 @@ jacobi: jacobi.o
 	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS}
 
 jacobi_step_data: jacobi_step_data.o
+	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS}
+
+jacobi_interact: jacobi_interact.o
 	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS}
 
 %.o: %.cc
