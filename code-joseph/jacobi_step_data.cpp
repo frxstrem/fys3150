@@ -4,7 +4,7 @@
 #include <time.h>
 #include <fstream>
 
-#include "../code/comp_eig.hh"
+#include "../code-fredrik/comp_eig.hh"
 
 using namespace std;
 using namespace arma;

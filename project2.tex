@@ -341,7 +341,7 @@ Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the
         ylabel={Number of steps $K$},
       ]
       \addplot[blue,dashed,domain=0:100,samples=100] {1.4036*x^2};
-      \addplot[red,mark=*,only marks] table[x=N,y=steps] {code/b_steps.dat};
+      \addplot[red,mark=*,only marks] table[x=N,y=steps] {code-fredrik/b_steps.dat};
     \end{axis}
   \end{tikzpicture}
 \end{center}
@@ -356,7 +356,7 @@ Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the
         y unit={\milli\second},
       ]
       \addplot[blue,dashed,domain=0:100,samples=100] {2.5743e-3*x^3};
-      \addplot[red,mark=*,only marks] table[x=N,y expr={1e6*\thisrow{step_time}}] {code/b_steps.dat};
+      \addplot[red,mark=*,only marks] table[x=N,y expr={1e6*\thisrow{step_time}}] {code-fredrik/b_steps.dat};
     \end{axis}
   \end{tikzpicture}
 \end{center}

@@ -11,7 +11,7 @@ using namespace arma;
 
 const double rmin = 0;
 const double rmax = 6;
-const double epsilon = 1e-10;
+const double epsilon = 1e-14;
 
 // potential function
 static constexpr double V(double r) {
