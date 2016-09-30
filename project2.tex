@@ -368,26 +368,6 @@ Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the
 \begin{center}
   \begin{tikzpicture}
     \begin{axis}[
-        width=\textwidth,
-        xmin=0, xmax=6,
-        xlabel={$\rho$},
-        ymin=-0.5, ymax=0.5,
-        ylabel={$u(\rho)$},
-      ]
-      \addplot[red,mark=*] table[x=r,y=u] {code-fredrik/d-0.01.dat};
-      \addplot[blue,mark=*] table[x=r,y=u] {code-fredrik/d-0.50.dat};
-      \addplot[purple,mark=*] table[x=r,y=u] {code-fredrik/d-1.00.dat};
-      \addplot[green!50!black,mark=*] table[x=r,y=u] {code-fredrik/d-5.00.dat};
-      \legend{$\omega_r = 0.01$, $\omega_r = 0.5$, $\omega_r = 1$, $\omega_r = 5$}
-    \end{axis}
-  \end{tikzpicture}
-
-  {\centering d-*.dat}
-\end{center}
-
-\begin{center}
-  \begin{tikzpicture}
-    \begin{axis}[
         xmin=0, xmax=100,
         xlabel={Matrix dimensionality $N$},
         ymin=0, ymax=20000,
@@ -418,6 +398,27 @@ Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the
   {\centering steps.dat}
 \end{center}
 
+\begin{center}
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\textwidth,
+        height=0.5\textwidth,
+        xmin=0, xmax=30,
+        xlabel={$\rho$},
+        ymin=0, ymax=2,
+        ylabel={$u(\rho)$},
+      ]
+      \addplot[red,thick,smooth] table[x=r,y expr={-\thisrow{u}}] {code-fredrik/d-0.01.dat};
+      \addplot[blue,thick,smooth] table[x=r,y expr={-\thisrow{u}}] {code-fredrik/d-0.50.dat};
+      \addplot[purple,thick,smooth] table[x=r,y expr={-\thisrow{u}}] {code-fredrik/d-1.00.dat};
+      \addplot[green!50!black,thick,smooth] table[x=r,y expr={-\thisrow{u}}] {code-fredrik/d-5.00.dat};
+      \legend{$\omega_r = 0.01$, $\omega_r = 0.5$, $\omega_r = 1$, $\omega_r = 5$}
+    \end{axis}
+  \end{tikzpicture}
+
+  {\centering d-*.dat}
+\end{center}
+
 \section{Conclusions}
 
 \clearpage
@@ -430,8 +431,29 @@ The following code files are used:
   \item[b)]
   \begin{itemize}
     \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-fredrik/b.cc}{\tt code-fredrik/b.cc}
+    \begin{itemize}
+      \item {\it description}
+    \end{itemize}
     \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-joseph/jacobi.cpp}{\tt code-joseph/jacobi.cpp}
+    \begin{itemize}
+      \item {\it description}
+    \end{itemize}
     \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-joseph/jacobi_step_data.cpp}{\tt code-joseph/jacobi\_step\_data.cpp}
+    \begin{itemize}
+      \item {\it description}
+    \end{itemize}
+  \end{itemize}
+
+  \item[d)]
+  \begin{itemize}
+    \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-fredrik/d.cc}{\tt code-fredrik/d.cc}
+    \begin{itemize}
+      \item {\it description}
+    \end{itemize}
+    \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-joseph/jacobi_interact.cpp}{\tt code-joseph/jacobi\_interact.cpp}
+    \begin{itemize}
+      \item {\it description}
+    \end{itemize}
   \end{itemize}
 \end{enumerate}
 
