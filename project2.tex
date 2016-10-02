@@ -180,6 +180,18 @@
     {\frac{\mathrm{d}{#2}}{\mathrm{d}{#3}}}%
     {\frac{\mathrm{d}^{#1}{#2}}{{\mathrm{d}{#3}^{#1}}}}%
 }}
+\newcommand\pD[1]{{\,\mathrm{d}{#1}}}
+\newcommand\pdd[2][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\parital{#2}}%
+    {\partial^{#1}{#2}}%
+}}
+\newcommand\pdf[3][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\frac{\partial{#2}}{\partial{#3}}}%
+    {\frac{\partial^{#1}{#2}}{{\partial{#3}^{#1}}}}%
+}}
+
 
 \begin{document}
 
@@ -330,82 +342,107 @@ We then find $\V{A}_{n+1} = \V{S}_n^T \V{A}_n \V{S}_n$ and $\V{P}_{n+1} = \V{S}_
 
 Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the diagonal elements of $\V{A}_n$ will contain the eigenvalues of $\V{A}$, and the columns vectors of $\V{P}_n$ will contain the corresponding eigenvectors.
 
+\subsection{}
+% (c)
+
+% unit testing
+
+\subsection{}
+% (d)
+
+In the interactive case, we had the differential equation
+\begin{equation}
+  \label{eq:diff-interact}
+  - \pdf[2]{}{\rho} \psi(\rho) + \left( \omega_r^2 \rho 2 + 1 / \rho \right) \psi(\rho) = \lambda \psi(\rho)
+\end{equation}
+
+We used the same code as before, but changed the potential function to $V(\rho) = \omega_r^2 \rho^2 + 1/\rho$, and used different parameters $\rho_{\rm max} = 60$, $N = 800$ and $\omega_r = 0.01, 0.5, 1, 5$.
+
 \section{Results}
 
-\begin{center}
+\subsection{}
+% (b)
+
+We have implemented two different programs to solve eigenvector systems. For parameters we set $N = 5,10,15,\ldots,100$, $\rho_{\rm max} = 6$ When we run the programs on the non-interactive case, the number of similarity transforms $K$ as a function of the matrix dimensionality $N$ is shown in figure \ref{fig:b}. (Note that the two programs use exactly the same number of steps, so there's only one plot.) We have also plotted the best fit curve on the form $a x^2$, which clearly show $K \propto N^2$.
+
+When we compare the resulting eigenvalue and eigenvectors, we see that the absolute difference between any of the eigenvalues or eigenvectors is at most \num{1.2e-6}.
+
+In figure \ref{fig:b-time}, we see the time the two algorithm use, and comparing it to the time used by Armadillo's \texttt{eig\_sym} method. We see that our algorithms both run in less than half a second for $N = 100$, with one using about half the time of the other, but neither can compare to \texttt{eig\_sym}, which completes in less than \SI{3}{\milli\second} for the same value of $N$. In addition, we see that the \emph{unoptimized} version of \texttt{code-fredrik/b.cc} (compiled with \texttt{-O0} instead of \texttt{-Ofast}) is about 6 times slower than the optimized version of the same program, which demonstrates why we should use compiler optimization when compiling our algorithms.
+
+\begin{figure}[!ht]
+  \centering
   \begin{tikzpicture}
     \begin{axis}[
+        width=\textwidth,
+        height=0.5\textwidth,
         xmin=0, xmax=100,
         xlabel={Matrix dimensionality $N$},
         ymin=0, ymax=20000,
-        ylabel={Number of steps $K$},
+        ylabel={Number of similarity transformations $K$},
       ]
-      \addplot[blue,dashed,domain=0:100,samples=100] {1.4036*x^2};
-      \addplot[red,mark=*,only marks] table[x=N,y=steps] {code-fredrik/b.dat};
+      \addplot[blue,mark=*,only marks,forget plot] table[x=N,y=steps] {code-fredrik/b.dat};
+      \addplot[blue,dashed,domain=0:100,samples=100,forget plot] {14036*(x/100)^2};
+
+      % \addplot[red,mark=*,only marks,forget plot] table[x=N,y=steps] {code-joseph/steps.dat};
+      % \addplot[red,dashed,domain=0:100,samples=100,forget plot] {14036*(x/100)^2};
+
+      \addlegendimage{blue,mark=*,dashed}
+      \addlegendentry{Programs (with best fit)}
     \end{axis}
   \end{tikzpicture}
 
-  {\centering b.dat}
-\end{center}
+  \caption{Number of similarity transforms before maximal off-diagonal element is less than \num{1e-10}. Same for both programs.} \label{fig:b}
+\end{figure}
 
-\begin{center}
+\begin{figure}[!ht]
+  \centering
   \begin{tikzpicture}
     \begin{axis}[
+        width=\textwidth,
+        height=0.5\textwidth,
         xmin=0, xmax=100,
         xlabel={Matrix dimensionality $N$},
-        ymin=0, ymax=4000,
-        ylabel={Time per step $t$},
-        y unit={\milli\second},
+        ymin=0, ymax=0.5,
+        ylabel={Time $t$},
+        y unit={\second},
       ]
-      \addplot[blue,dashed,domain=0:100,samples=100] {2.5743e-3*x^3};
-      \addplot[red,mark=*,only marks] table[x=N,y expr={1e6*\thisrow{step_time}}] {code-fredrik/b.dat};
+      \addplot[blue,mark=*,only marks,forget plot] table[x=N,y expr={\thisrow{steps}*\thisrow{step_time}}] {code-fredrik/b.dat};
+      % \addplot[blue,dashed,domain=0:100,samples=100,forget plot] {0.270*(x/100)^3.5};
+
+      \addlegendimage{blue,mark=*,only marks}
+      \addlegendentry{\texttt{code-fredrik/b.cc}}
+
+      \addplot[red,mark=*,only marks,forget plot] table[x=N,y expr={\thisrow{steps}*\thisrow{step_time}}] {code-joseph/steps.dat};
+      % \addplot[red,dashed,domain=0:100,samples=100,forget plot] {0.097*(x/100)^3.5};
+
+      \addlegendimage{red,mark=*,only marks}
+      \addlegendentry{\texttt{code-joseph/jacobi\_step\_data.cpp}}
+
+      \addplot[blue,mark=o,only marks,forget plot] table[x=N,y expr={\thisrow{steps}*\thisrow{step_time}}] {code-fredrik/b_slow.dat};
+
+      \addlegendimage{blue,mark=o,only marks}
+      \addlegendentry{\texttt{code-fredrik/b.cc} (unoptimized)}
+
+      \addplot[purple,mark=o,only marks] table[x=N,y=arma_time] {code-fredrik/b.dat};
+      \addlegendentry{Armadilo (\texttt{eig\_sym})}
     \end{axis}
   \end{tikzpicture}
 
-  {\centering b.dat}
-\end{center}
+  \caption{Total computation time as a function of matrix dimensionality $N$ for both programs, compared with Armadillo's \texttt{eig\_sym} function and an unoptimized version of \texttt{code-fredrik/b.cc}.} \label{fig:b-time}
+\end{figure}
 
-\begin{center}
-  \begin{tikzpicture}
-    \begin{axis}[
-        xmin=0, xmax=100,
-        xlabel={Matrix dimensionality $N$},
-        ymin=0, ymax=20000,
-        ylabel={Number of steps $K$},
-      ]
-      \addplot[blue,dashed,domain=0:100,samples=100] {1.4036*x^2};
-      \addplot[red,mark=*,only marks] table[x=N,y=steps] {code-joseph/steps.dat};
-    \end{axis}
-  \end{tikzpicture}
+\subsection{}
+% (d)
 
-  {\centering steps.dat}
-\end{center}
-
-\begin{center}
-  \begin{tikzpicture}
-    \begin{axis}[
-        xmin=0, xmax=100,
-        xlabel={Matrix dimensionality $N$},
-        ymin=0, ymax=10,
-        ylabel={Time per step $t$},
-        y unit={\milli\second},
-      ]
-      \addplot[blue,dashed,domain=0:100,samples=100] {8.41835*(x/100)^1.5};
-      \addplot[red,mark=*,only marks] table[x=N,y expr={1e6*\thisrow{step_time}}] {code-joseph/steps.dat};
-    \end{axis}
-  \end{tikzpicture}
-
-  {\centering steps.dat}
-\end{center}
-
-\begin{center}
+\begin{figure}[!ht]
+  \centering
   \begin{tikzpicture}
     \begin{axis}[
         width=\textwidth,
         height=0.5\textwidth,
         xmin=0, xmax=30,
         xlabel={$\rho$},
-        ymin=0, ymax=2,
+        ymin=0, ymax=1.5,
         ylabel={$u(\rho)$},
       ]
       \addplot[red,thick,smooth] table[x=r,y expr={-\thisrow{u}}] {code-fredrik/d-0.01.dat};
@@ -416,8 +453,8 @@ Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the
     \end{axis}
   \end{tikzpicture}
 
-  {\centering d-*.dat}
-\end{center}
+  \caption{Numerical solutions of \eqref{eq:diff-interact} for different values of $\omega_r$, with $N = 800$ and $\rho_{\rm max} = 60$.} \label{fig:d}
+\end{figure}
 
 \section{Conclusions}
 

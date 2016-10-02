@@ -11,7 +11,14 @@ using namespace arma;
 
 const double rmin = 0;
 const double rmax = 6;
-const double epsilon = 1e-14;
+const double epsilon = 1e-10;
+
+struct program_output {
+  size_t steps;
+  double step_time;
+  double arma_time;
+  double err;
+};
 
 // potential function
 static constexpr double V(double r) {
@@ -37,6 +44,32 @@ static double maxoff(const mat &A, size_t &i, size_t &j) {
   }
 
   return a;
+}
+
+static void apply_rot_col(size_t k, size_t l, double t, mat &M) {
+  if(k == l) return;
+
+  const double c = 1 / sqrt( 1 + t * t );
+  const double s = t * c;
+
+  colvec kvec = c * M.col(k) - s * M.col(l);
+  colvec lvec = s * M.col(k) + c * M.col(l);
+
+  M.col(k) = kvec;
+  M.col(l) = lvec;
+}
+
+static void apply_rot_row(size_t k, size_t l, double t, mat &M) {
+  if(k == l) return;
+
+  const double c = 1 / sqrt( 1 + t * t );
+  const double s = t * c;
+
+  rowvec kvec = c * M.row(k) - s * M.row(l);
+  rowvec lvec = s * M.row(k) + c * M.row(l);
+
+  M.row(k) = kvec;
+  M.row(l) = lvec;
 }
 
 // solve with Jacobi's method
@@ -68,27 +101,21 @@ static void jacobi_solve(const mat &A, mat &P, vec &L, size_t &steps, double &st
     const double a = maxoff(B, k, l);
 
     // if less than epsilon, stop
-    if(a < epsilon) {
+    if(a < epsilon)
       break;
-    }
 
     // calculate sin θ and cos θ
     const double tau = (B(l, l) - B(k, k)) / (2 * B(k, l));
     const double t = (tau >= 0 ? - tau - sqrt( 1 + tau * tau ) : - tau + sqrt( 1 + tau * tau ));
-    const double c = 1 / sqrt( 1 + t * t );
-    const double s = t * c;
-
-    // generate rotation matrix
-    S.eye();
-    S(k, k) = S(l, l) = c;
-    S(k, l) = s;
-    S(l, k) = -s;
 
     // apply similarity transform
-    B = S.t() * B * S;
+    //   B = S.t() * B * S;
+    apply_rot_col(k, l, t, B);
+    apply_rot_row(k, l, t, B);
 
     // apply S^T to P
-    P = P * S;
+    //   P = P * S;
+    apply_rot_col(k, l, t, P);
 
     // timing
     time_end = clock();
@@ -107,7 +134,7 @@ static void jacobi_solve(const mat &A, mat &P, vec &L, size_t &steps, double &st
     L(i) = B(i, i);
 }
 
-int run_program(size_t N, size_t &steps, double &step_time, double &err) {
+int run_program(size_t N, struct program_output &out) {
   const double h = (rmax - rmin) / N;
 
   // array of ρ valuses
@@ -137,36 +164,38 @@ int run_program(size_t N, size_t &steps, double &step_time, double &err) {
   // solve with Jacobi method
   vec eigenvalues;
   mat eigenvectors;
-  jacobi_solve(A, eigenvectors, eigenvalues, steps, step_time);
+  jacobi_solve(A, eigenvectors, eigenvalues, out.steps, out.step_time);
 
   // solve with Armadillo's eig_sym
+  clock_t arma_start, arma_finish;
   vec arma_eigenvalues;
   mat arma_eigenvectors;
+  arma_start = clock();
   eig_sym(arma_eigenvalues, arma_eigenvectors, A);
+  arma_finish = clock();
+  out.arma_time = (double)(arma_finish - arma_start)/CLOCKS_PER_SEC;
 
-  err = comp_eig(eigenvalues, eigenvectors, arma_eigenvalues, arma_eigenvectors);
+  out.err = comp_eig(eigenvalues, eigenvectors, arma_eigenvalues, arma_eigenvectors);
 }
 
 int main(int argc, char **argv) {
-  const size_t Nvalues[] = { 4, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+  const size_t Nvalues[] = { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 };
   const size_t Nlen = sizeof(Nvalues) / sizeof(*Nvalues);
 
   FILE *fp = fopen("b.dat", "w");
-  fprintf(fp, "N          epsilon    steps      step_time  error\n");
+  fprintf(fp, "N          epsilon    steps      step_time  arma_time  error\n");
 
   for(size_t i = 0; i < Nlen; i++) {
     size_t N = i[Nvalues]; // aww yeah abusing valid C++ syntax for no reason
 
-    size_t K; // number of steps
-    double t; // time per step
-    double e; // average error
+    struct program_output out;
 
     std::cout << "running with N = " << N << std::endl;
 
-    run_program(N, K, t, e);
+    run_program(N, out);
 
     // write result row
-    fprintf(fp, "%-10ld %-10.5g %-10ld %-10.5g %-10.5g\n", N, epsilon, K, t, e);
+    fprintf(fp, "%-10ld %-10.5g %-10ld %-10.5g %-10.5g %-10.5g\n", N, epsilon, out.steps, out.step_time, out.arma_time, out.err);
     fflush(fp);
   }
 
