@@ -5,15 +5,16 @@ LIBS=-lm -larmadillo
 
 .PHONY: all
 
-all: b d
+all: b b.test d
 
 clean:
 	rm -rf b d *.o *.dat
 
-b: b.o
-	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS}
-d: d.o
-	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS}
+b: b.cc comp_eig.hh
+	${CXX} ${CXXFLAGS} ${LDFLAGS} -o $@ $< ${LIBS}
 
-%.o: %.cc
-	${CXX} ${CXXFLAGS} -c -o $@ $<
+b.test: b.test.cc b.cc comp_eig.hh
+	${CXX} ${CXXFLAGS} ${LDFLAGS} -o $@ $< ${LIBS}
+
+d: d.cc
+	${CXX} ${CXXFLAGS} ${LDFLAGS} -o $@ $< ${LIBS}

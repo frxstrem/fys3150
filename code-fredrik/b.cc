@@ -26,9 +26,10 @@ static constexpr double V(double r) {
 }
 
 // calculate maximal off-diagonal element with respect to absolute value
+// return square of maximal off-diagonal element
 static double maxoff(const mat &A, size_t &i, size_t &j) {
   i = 1; j = 0; // indices of maximal lement
-  double a = 0; // maximal element absolute value
+  double a = 0; // square of maximal element
 
   SizeMat s = size(A);
 
@@ -72,6 +73,30 @@ static void apply_rot_row(size_t k, size_t l, double t, mat &M) {
   M.row(l) = lvec;
 }
 
+// single step with Jacobi's method
+static bool jacobi_step(mat &B, mat &P) {
+  // calculate maximal off-diagonal element with respect to absolute value
+  size_t k, l;
+  const double a = maxoff(B, k, l); // square of maximal element
+
+  // if less than epsilon, stop
+  if(a < epsilon)
+    return false;
+
+  // calculate sin θ and cos θ
+  const double tau = (B(l, l) - B(k, k)) / (2 * B(k, l));
+  const double t = (tau >= 0 ? - tau - sqrt( 1 + tau * tau ) : - tau + sqrt( 1 + tau * tau ));
+
+  // apply similarity transform
+  //   B = S.t() * B * S;
+  apply_rot_col(k, l, t, B);
+  apply_rot_row(k, l, t, B);
+
+  // apply S^T to P
+  //   P = P * S;
+  apply_rot_col(k, l, t, P);
+}
+
 // solve with Jacobi's method
 // A is input matrix, P is eigenvector matrix (with column vector eigenvectors), L is eigenvalue vector
 static void jacobi_solve(const mat &A, mat &P, vec &L, size_t &steps, double &step_time) {
@@ -84,9 +109,7 @@ static void jacobi_solve(const mat &A, mat &P, vec &L, size_t &steps, double &st
   // B is similar matrix to A through matrix transforms
   mat B = A;
 
-  // S is similarity transform matrix
-  mat S(size(A));
-
+  // set P matrix (that will contain eigenvectors) to the identity matrix
   P.eye(size(A));
 
   clock_t time_start, time_end;
@@ -96,26 +119,8 @@ static void jacobi_solve(const mat &A, mat &P, vec &L, size_t &steps, double &st
     // timing
     time_start = clock();
 
-    // calculate maximal off-diagonal element with respect to absolute value
-    size_t k, l;
-    const double a = maxoff(B, k, l);
-
-    // if less than epsilon, stop
-    if(a < epsilon)
+    if(!jacobi_step(B, P))
       break;
-
-    // calculate sin θ and cos θ
-    const double tau = (B(l, l) - B(k, k)) / (2 * B(k, l));
-    const double t = (tau >= 0 ? - tau - sqrt( 1 + tau * tau ) : - tau + sqrt( 1 + tau * tau ));
-
-    // apply similarity transform
-    //   B = S.t() * B * S;
-    apply_rot_col(k, l, t, B);
-    apply_rot_row(k, l, t, B);
-
-    // apply S^T to P
-    //   P = P * S;
-    apply_rot_col(k, l, t, P);
 
     // timing
     time_end = clock();
@@ -178,6 +183,7 @@ int run_program(size_t N, struct program_output &out) {
   out.err = comp_eig(eigenvalues, eigenvectors, arma_eigenvalues, arma_eigenvectors);
 }
 
+#ifndef NO_MAIN
 int main(int argc, char **argv) {
   const size_t Nvalues[] = { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 };
   const size_t Nlen = sizeof(Nvalues) / sizeof(*Nvalues);
@@ -201,3 +207,4 @@ int main(int argc, char **argv) {
 
   fclose(fp);
 }
+#endif

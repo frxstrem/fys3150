@@ -7,7 +7,6 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage{parskip}
 \usepackage{xifthen}
-\usepackage{animate}
 
 % math packages
 \usepackage{mathtools,amsfonts,amssymb,mathdots}
@@ -203,10 +202,6 @@
 
 \maketitle
 
-\begin{abstract}
-  \color{red}\textit{INSERT ABSTRACT HERE}
-\end{abstract}
-
 \tableofcontents
 
 \clearpage
@@ -221,8 +216,9 @@ Here we present the solution of the radial part of Schroedinger's equation for o
   \frac{d}{dr} - \frac{l (l + 1)}{r^2} \right )R(r)
      + V(r) R(r) = E R(r).
 \end{equation}
-In our case $V(r)$ is the harmonic oscillator potential $(1/2)kr^2$ with
-$k=m\omega^2$.
+
+In our case $V(r)$ is the harmonic oscillator potential $(1/2)kr^2$ with $k=m\omega^2$.
+
 We substitute $R(r) = (1/r) u(r)$, set $l = 0$ and obtain
 \begin{equation}
   -\frac{\hbar^2}{2 m} \frac{d^2}{dr^2} u(r)
@@ -236,13 +232,12 @@ where $\alpha$ is a constant with dimension length. We do this to remove unecces
   -\frac{d^2}{d\rho^2} u(\rho)
        + \frac{mk}{\hbar^2} \alpha^4\rho^2u(\rho)  = \frac{2m\alpha^2}{\hbar^2}E u(\rho) .
 \end{equation}
-The constant $\alpha$ can now be fixed
-so that
+The constant $\alpha$ can now be fixed so that
 \begin{equation}
 \alpha = \left(\frac{\hbar^2}{mk}\right)^{1/4}.
 \end{equation}
-Defining
 
+Defining
 \begin{equation}
 \lambda = \frac{2m\alpha^2}{\hbar^2}E,
 \end{equation}
@@ -506,7 +501,7 @@ We have looked at the wavefunctions of two electrons in interacting and non-inte
 
 The implementations of the algorithms we used are sufficiently fast to handle cases up to at least $N = 100$ within reasonabe time, but are much slower than the native methods provided by linear algebra libraries such as Armadillo.
 
-We saw that the ground state wavefunction solutions to the eigenvalue equation in the interacting case was affected by the ``frequency'' of the system $\omega_r = \frac{1}{2} \sqrt{mk} \alpha^2 / \hbar}$, and that this in turn made interacting electron pairs with a higher frequency tend to stay closer to each other. We also saw that in the case where the electrons didn't interact, the wavefunction was very similar to that of the interacting electrons with $\omega_r = 1$.
+We saw that the ground state wavefunction solutions to the eigenvalue equation in the interacting case was affected by the ``frequency'' of the system $\omega_r = \frac{1}{2} \sqrt{mk} \alpha^2 / \hbar$, and that this in turn made interacting electron pairs with a higher frequency tend to stay closer to each other. We also saw that in the case where the electrons didn't interact, the wavefunction was very similar to that of the interacting electrons with $\omega_r = 1$.
 
 \clearpage
 \appendix
@@ -537,10 +532,10 @@ The following code files are used:
 
   \item[c)]
   \begin{itemize}
-  \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-fredrik/c.cc}{\tt code-fredrik/c.cc}
-  \begin{itemize}
-    \item {\it Contains the unit tests for \texttt{code-fredrik/b.cc}.}
-  \end{itemize}
+    \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-fredrik/b.test.cc}{\tt code-fredrik/b.test.cc}
+    \begin{itemize}
+      \item {\it Contains the unit tests for \texttt{code-fredrik/b.cc}.}
+    \end{itemize}
   \end{itemize}
 
   \item[d,e)]
@@ -555,7 +550,7 @@ The following code files are used:
     \end{itemize}
     \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-joseph/jacobi.py}{\tt code-joseph/jacobi.py}
     \begin{itemize}
-      \item {\it Gathers data from the interacting electrons solvution (jacobi_interact.cpp) in order to plot the wavefunctions of the ground state.}
+      \item {\it Gathers data from the interacting electrons solution (\texttt{jacobi\_interact.cpp}) in order to plot the wavefunctions of the ground state.}
     \end{itemize}
   \end{itemize}
 \end{enumerate}
