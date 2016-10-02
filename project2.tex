@@ -519,7 +519,11 @@ The following code files are used:
   \begin{itemize}
     \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-fredrik/b.cc}{\tt code-fredrik/b.cc}
     \begin{itemize}
-      \item {\it description}
+      \item {\it Implements method for solving eigenvector equations with symmetric matrices, and specifically solving the case where there is no Coulomb interaction between the electrons. Saves the data about number of steps, time per step and absolute error compared to Armadillo's \texttt{eig\_sym} to file \text{b.dat}.}
+    \end{itemize}
+    \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-fredrik/comp_eig.hh}{\tt code-fredrik/comp\_eig.hh}
+    \begin{itemize}
+      \item {\it Contains function \texttt{comp\_eig} used to compare two solutions to an eigenvector problem, and returns the maximal absolute difference between either the eigenvalues or eigenvectors.}
     \end{itemize}
     \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-joseph/jacobi.cpp}{\tt code-joseph/jacobi.cpp}
     \begin{itemize}
@@ -531,11 +535,19 @@ The following code files are used:
     \end{itemize}
   \end{itemize}
 
+  \item[c)]
+  \begin{itemize}
+  \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-fredrik/c.cc}{\tt code-fredrik/c.cc}
+  \begin{itemize}
+    \item {\it Contains the unit tests for \texttt{code-fredrik/b.cc}.}
+  \end{itemize}
+  \end{itemize}
+
   \item[d,e)]
   \begin{itemize}
     \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-fredrik/d.cc}{\tt code-fredrik/d.cc}
     \begin{itemize}
-      \item {\it description}
+      \item {\it Same as \texttt{code-fredrik/b.cc}, except also handles the case where there is Coulomb interaction between the electrons. Saves the plots for the ground wavefunction solutions to files \texttt{d-*.dat}.}
     \end{itemize}
     \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-joseph/jacobi_interact.cpp}{\tt code-joseph/jacobi\_interact.cpp}
     \begin{itemize}

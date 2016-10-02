@@ -8,7 +8,7 @@ LIBS=-lm -larmadillo
 all: b d
 
 clean:
-	rm b d *.o *.dat
+	rm -rf b d *.o *.dat
 
 b: b.o
 	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS}

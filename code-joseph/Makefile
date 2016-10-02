@@ -8,7 +8,7 @@ LIBS=-lm -larmadillo
 all: jacobi jacobi_step_data jacobi_interact
 
 clean:
-	rm jacobi jacobi_step_data jacobi_interact *.o *.dat
+	rm -rf jacobi jacobi_step_data jacobi_interact *.o *.dat
 
 jacobi: jacobi.o
 	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS}
