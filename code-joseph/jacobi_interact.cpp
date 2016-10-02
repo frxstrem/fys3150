@@ -1,6 +1,7 @@
 #include <iostream>
 #include <armadillo>
 #include <cmath>
+#include <cstdlib>
 #include <time.h>
 #include <fstream>
 using namespace std;
@@ -10,13 +11,16 @@ void RHO_A_FILL(vec &rho, mat &A, int N,double rhoN); //rho, kind of like a line
                                                  //A, Tridiagonal matrix
 void Maxoff(mat &A, int N,int &k, int &l, double &max);        //Finds the max element of a matrix
 
+void Maxoff_test(double &max,int &k,int &l);
+
+void Ortho_test(mat &S,int N);
+
 int main(){
-//int omega[] = 
-//for(int iter = 0; iter <
-    int N = 100; //matrix size; N x N
-    double rhoN = 25;
+    int N = 400; //matrix size; N x N
+    double rhoN = 60;
     double max;
     int k,l;
+    Maxoff_test(max,k,l);
 
     mat A = mat(N,N,fill::zeros); //indexes go from (0) to (N-1)
     mat S = mat(N,N,fill::eye);
@@ -25,7 +29,6 @@ int main(){
 
     RHO_A_FILL(rho,A,N,rhoN);
     Maxoff(A,N,k,l,max);
-    A.print();
     int iterations = 0;
 
     double eps = 1E-10;
@@ -70,7 +73,10 @@ int main(){
 
         iterations++;
         Maxoff(A,N,k,l,max);
-
+        //Ortho test
+        if (iterations%N*2==0){
+            Ortho_test(S,N);
+            }
 
         } //end of while
     finish = clock();                    //clock value after eigen solve
@@ -83,9 +89,9 @@ int main(){
     eigen.print();
 
     double time = (finish -start)/CLOCKS_PER_SEC/iterations;
-    
+    /*    
     fstream outfile;
-    outfile.open("eigenvectors.data",ios::out);
+    outfile.open("eigenvectors5.data",ios::out);
 
     for (int i = 0; i<N; i++){
         for (int j = 0; j<N; j++){
@@ -97,13 +103,13 @@ int main(){
     
     
     fstream utfile;
-    utfile.open("eigenvalues.data",ios::out);
+    utfile.open("eigenvalues5.data",ios::out);
 
     for (int i = 0; i<N; i++){
         utfile << eigen(i)<<endl;
         }
     utfile.close();
-    
+    */
     //fstream Outfile;
     //Outfile.open("steps.dat",ios::out);
     //Outfile << "N     epsilon    steps  step_time"<<endl;
@@ -121,7 +127,7 @@ void RHO_A_FILL(vec &rho, mat &A, int N,double rhoN){
     rho(0) = 0.000001;
     for(int i = 0; i < N;i++){
         if(i > 0) rho(i) = i*h;   
-        A(i,i) = 2./(h*h)+ rho(i)*rho(i)+(double(1)/rho(i));
+        A(i,i) = 2./(h*h)+ double(25)*rho(i)*rho(i)+(double(1)/rho(i));
         if(i<N-1){
             A(i+1,i) = -1./(h*h);
             A(i,i+1) = -1./(h*h);         
@@ -130,6 +136,7 @@ void RHO_A_FILL(vec &rho, mat &A, int N,double rhoN){
     }
 
 void Maxoff(mat &A, int N,int &k, int &l, double &max){
+    N = A.n_rows;    
     max = 0;
     for(int i = 0; i < N ; i++){
         for(int j = i+1; j < N ; j++){
@@ -142,3 +149,25 @@ void Maxoff(mat &A, int N,int &k, int &l, double &max){
         }
     
     }
+////////////Unit tests
+void Maxoff_test(double &max,int &k,int &l){
+    mat matrix = mat(5,5,fill::zeros);
+    matrix(0,3) = -9;
+    matrix(3,0) = -9;
+    matrix(4,4) = -3;
+    matrix(3,4) = -1;
+    matrix(4,3) = -1;
+    Maxoff(matrix,5,k,l,max);
+    if(abs(max-81) < 1E-13){cout << "Maxoff function passes the test"<<endl;}
+    else{cout<<"Maxoff might not be working properly"<<endl;}
+    }
+void Ortho_test(mat &S,int N){
+    double error = 0;
+    error = dot(S.col(int(double(rand())/RAND_MAX*N)),S.col(int(double(rand())/RAND_MAX*N)));
+    if (abs(error) < 1e-10){
+        cout << "ortho pass" << endl;}
+    else{cout<<"ortho fail" << endl;}
+    }
+
+
+
