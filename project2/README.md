@@ -19,7 +19,7 @@ To build from scratch:
      * *writes output to `d-{W}.dat`*
    * [comp_eig.hh](code-fredrik/comp_eig.hh)
  * [code-joseph/](code-joseph/)
-   * [jacobi.cc](code-joseph/jacobi.cc)
-   * [jacobi_step_data.cc](code-joseph/jacobi_step_data.cc)
-   * [jacobi_interact.cc](code-joseph/jacobi_interact.cc)
+   * [jacobi.cpp](code-joseph/jacobi.cpp)
+   * [jacobi_step_data.cpp](code-joseph/jacobi_step_data.cpp)
+   * [jacobi_interact.cpp](code-joseph/jacobi_interact.cpp)
    * [jacobi.py](code-joseph/jacobi.py)
