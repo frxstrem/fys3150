@@ -95,6 +95,8 @@ static bool jacobi_step(mat &B, mat &P) {
   // apply S^T to P
   //   P = P * S;
   apply_rot_col(k, l, t, P);
+
+  return true;
 }
 
 // solve with Jacobi's method

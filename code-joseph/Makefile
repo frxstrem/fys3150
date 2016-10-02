@@ -7,6 +7,12 @@ LIBS=-lm -larmadillo
 
 all: jacobi jacobi_step_data jacobi_interact
 
+run: all
+	./jacobi
+	./jacobi_step_data
+	./jacobi_interact
+	python jacobi.py
+
 clean:
 	rm -rf jacobi jacobi_step_data jacobi_interact *.o *.dat
 

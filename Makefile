@@ -12,7 +12,6 @@ clean:
 pdf: project2.tex
 	latexmk -pdf -interaction=nonstopmode -pdflatex="lualatex -file-line-error --shell-escape" project2.tex
 
-run: programs
-
-programs:
-	make -C code all
+run:
+	make -C code-fredrik run
+	make -C code-joseph run
