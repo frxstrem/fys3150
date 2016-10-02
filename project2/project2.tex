@@ -7,6 +7,7 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage{parskip}
 \usepackage{xifthen}
+\usepackage{animate}
 
 % math packages
 \usepackage{mathtools,amsfonts,amssymb,mathdots}
@@ -180,6 +181,19 @@
     {\frac{\mathrm{d}{#2}}{\mathrm{d}{#3}}}%
     {\frac{\mathrm{d}^{#1}{#2}}{{\mathrm{d}{#3}^{#1}}}}%
 }}
+\newcommand\pD[1]{{\,\mathrm{d}{#1}}}
+\newcommand\pdd[2][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\parital{#2}}%
+    {\partial^{#1}{#2}}%
+}}
+\newcommand\pdf[3][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\frac{\partial{#2}}{\partial{#3}}}%
+    {\frac{\partial^{#1}{#2}}{{\partial{#3}^{#1}}}}%
+}}
+\let\epsilon\varepsilon
+
 
 \begin{document}
 
@@ -240,7 +254,7 @@ we can rewrite Schroedinger's equation as
 
 \section{Methods}
 
-\subsection{}
+\subsection{Preservation of orthogonality and dot product in a unitary matrix}
 % (a)
 
 Assume that $\V{U}$ is an orthogonal transformation. Then by definition, $\V{U}^T \V{U} = \V{I}$,
@@ -255,7 +269,7 @@ so for any vectors $\V{u}$ and $\V{v}$ we see that
 Since the dot product of vectors are preserved by $\V{U}$, orthogonality (that is, the dot product
 being zero) is also preserved.
 
-\subsection{}
+\subsection{Non-interacting case}
 % (b)
 
 We have the differential equation
@@ -330,95 +344,169 @@ We then find $\V{A}_{n+1} = \V{S}_n^T \V{A}_n \V{S}_n$ and $\V{P}_{n+1} = \V{S}_
 
 Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the diagonal elements of $\V{A}_n$ will contain the eigenvalues of $\V{A}$, and the columns vectors of $\V{P}_n$ will contain the corresponding eigenvectors.
 
+\subsection{Unit Testing}
+% (c)
+
+We have chosen to implement two tests. Both of us have made a test for checking the preservation of orthogonality. The second test we implemented checks for anomalies in our function which finds the biggest off-diagonal element.
+
+\subsubsection{Orthogonality Test}
+
+To check if the orthogonality of the vectors are preserved, simply produce the dot product between them. The dot product between two orthonormal vector is always zero:
+\begin{equation}
+  \V{V}_{\lambda1} \cdot \V{V}_{\lambda2} = 0
+\end{equation}
+
+On a computer, we rarely end up with zero due to misrepresentation of various numbers. We therefore calculate the dot product and ask if the product is smaller than a tolerance $\epsilon$:
+\begin{equation}
+  \left| \V{V}_{\lambda1} \cdot \V{V}_{\lambda2} \right| < \epsilon
+\end{equation}
+
+If not, we print that the test has failed and maybe stop the program.
+
+We have $N$ eigenvectors when solving our problem for an $N \times N$ matrix. I other words, there are a lot of possible dot products, ($N^2$). We have each chosen different ways of testing orthogonality between the vectors.
+Fredrik's unit test produces all $N^2$ dot products and finds the dot product with the biggest error. This biggest error is then compared with a tolerance.
+
+Joseph's unit test is run every now and then during the similarity transformations. It takes two random column vectors of the unitary matrix $S$ and checks if their dot product is smaller than the tolerance.
+
+\subsubsection{Max Off-Diagonal Element Test}
+
+Our unit tests regarding the largest off-diagonal value is simpler. We hardcode a symmetrical $5 \times 5$ symmetric matrix, as suggested. We then know the maximal off-diagonal value.
+
+To make sure the \texttt{Maxoff} function works, we use it to find the max value of the matrix. The value returned should be the biggest value we put into it. Our \texttt{if} expression
+will subtract the returned maximum value from the one we known maximum value of the matrix to check if the answer is within the tolerance \num{e-13} of $0$.
+
+\subsection{Interacting case}
+\label{sec:d-method}
+% (d)
+
+In the interacting case, we had the differential equation
+\begin{equation}
+  \label{eq:diff-interact}
+  - \pdf[2]{}{\rho} \psi(\rho) + \left( \omega_r^2 \rho 2 + 1 / \rho \right) \psi(\rho) = \lambda \psi(\rho)
+\end{equation}
+
+We used the same code as before, but changed the potential function to $V(\rho) = \omega_r^2 \rho^2 + 1/\rho$, and used different parameters $\rho_{\rm max} = 60$, $N = 800$ and $\omega_r = 0.01, 0.5, 1, 5$.
+
+We already know that the solutions $\V{v}$ that we get from the eigenvector solvers are normalized in the sense that
+\begin{equation}
+  \V{v} \cdot \V{v} = \sum_{n=0}^N u_i^2 = 1
+\end{equation}
+However, we want a solution $\V{v} = c \, \V{u}$ that is normalized in the sense that
+\begin{equation}
+  \V{u} \cdot \V{u} = \sum_{n=0}^N h v_i^2 = \sum_{n=0}^N h c^2 u_i^2 = 1
+\end{equation}
+We therefore see that $c$ must be $c = 1 / \sqrt{h}$, so we just multiply our solution by this to get the correct normalized quantum state solution.
+
 \section{Results}
 
-\begin{center}
-  \begin{tikzpicture}
-    \begin{axis}[
-        xmin=0, xmax=100,
-        xlabel={Matrix dimensionality $N$},
-        ymin=0, ymax=20000,
-        ylabel={Number of steps $K$},
-      ]
-      \addplot[blue,dashed,domain=0:100,samples=100] {1.4036*x^2};
-      \addplot[red,mark=*,only marks] table[x=N,y=steps] {code-fredrik/b.dat};
-    \end{axis}
-  \end{tikzpicture}
+\subsection{Eigenvalue solving algorthim}
+% (b)
 
-  {\centering b.dat}
-\end{center}
+We have implemented two different programs to solve eigenvector systems with symmetric matrices. For parameters we set $N = 5,10,15,\ldots,100$, $\rho_{\rm max} = 6$ When we run the programs on the non-interacting case, the number of similarity transforms $K$ as a function of the matrix dimensionality $N$ is shown in figure \ref{fig:b}. (Note that the two programs use exactly the same number of steps, so there's only one plot.) We have also plotted the best fit curve on the form $a x^2$, which clearly show $K \propto N^2$.
 
-\begin{center}
-  \begin{tikzpicture}
-    \begin{axis}[
-        xmin=0, xmax=100,
-        xlabel={Matrix dimensionality $N$},
-        ymin=0, ymax=4000,
-        ylabel={Time per step $t$},
-        y unit={\milli\second},
-      ]
-      \addplot[blue,dashed,domain=0:100,samples=100] {2.5743e-3*x^3};
-      \addplot[red,mark=*,only marks] table[x=N,y expr={1e6*\thisrow{step_time}}] {code-fredrik/b.dat};
-    \end{axis}
-  \end{tikzpicture}
+When we compare the resulting eigenvalue and eigenvectors, we see that the absolute difference between any of the eigenvalues or eigenvectors is at most \num{1.2e-6}.
 
-  {\centering b.dat}
-\end{center}
+In figure \ref{fig:b-time}, we see the time the two algorithm use, and comparing it to the time used by Armadillo's \texttt{eig\_sym} method. We see that our algorithms both run in less than half a second for $N = 100$, with one using about half the time of the other, but neither can compare to \texttt{eig\_sym}, which completes in less than \SI{3}{\milli\second} for the same value of $N$. In addition, we see that the \emph{unoptimized} version of \texttt{code-fredrik/b.cc} (compiled with \texttt{-O0} instead of \texttt{-Ofast}) is about 6 times slower than the optimized version of the same program, which means that if we want to run our code as fast as possible, we gotta \texttt{-Ofast}. \includegraphics[trim=1 1 1 1,clip,width=0.6cm]{img/Sonic-run-1.png}
 
-\begin{center}
+\begin{figure}[!ht]
+  \centering
   \begin{tikzpicture}
     \begin{axis}[
         width=\textwidth,
-        xmin=0, xmax=6,
-        xlabel={$\rho$},
-        ymin=-0.5, ymax=0.5,
-        ylabel={$u(\rho)$},
-      ]
-      \addplot[red,mark=*] table[x=r,y=u] {code-fredrik/d-0.01.dat};
-      \addplot[blue,mark=*] table[x=r,y=u] {code-fredrik/d-0.50.dat};
-      \addplot[purple,mark=*] table[x=r,y=u] {code-fredrik/d-1.00.dat};
-      \addplot[green!50!black,mark=*] table[x=r,y=u] {code-fredrik/d-5.00.dat};
-      \legend{$\omega_r = 0.01$, $\omega_r = 0.5$, $\omega_r = 1$, $\omega_r = 5$}
-    \end{axis}
-  \end{tikzpicture}
-
-  {\centering d-*.dat}
-\end{center}
-
-\begin{center}
-  \begin{tikzpicture}
-    \begin{axis}[
+        height=0.5\textwidth,
         xmin=0, xmax=100,
         xlabel={Matrix dimensionality $N$},
         ymin=0, ymax=20000,
-        ylabel={Number of steps $K$},
+        ylabel={Number of similarity transformations $K$},
       ]
-      \addplot[blue,dashed,domain=0:100,samples=100] {1.4036*x^2};
-      \addplot[red,mark=*,only marks] table[x=N,y=steps] {code-joseph/steps.dat};
+      \addplot[blue,mark=*,only marks,forget plot] table[x=N,y=steps] {code-fredrik/b.dat};
+      \addplot[blue,dashed,domain=0:100,samples=100,forget plot] {14036*(x/100)^2};
+
+      % \addplot[red,mark=*,only marks,forget plot] table[x=N,y=steps] {code-joseph/steps.dat};
+      % \addplot[red,dashed,domain=0:100,samples=100,forget plot] {14036*(x/100)^2};
+
+      \addlegendimage{blue,mark=*,dashed}
+      \addlegendentry{Programs (with best fit)}
     \end{axis}
   \end{tikzpicture}
 
-  {\centering steps.dat}
-\end{center}
+  \caption{Number of similarity transforms before maximal off-diagonal element is less than \num{1e-10}. Same for both programs.} \label{fig:b}
+\end{figure}
 
-\begin{center}
+\begin{figure}[!ht]
+  \centering
   \begin{tikzpicture}
     \begin{axis}[
+        width=\textwidth,
+        height=0.5\textwidth,
         xmin=0, xmax=100,
         xlabel={Matrix dimensionality $N$},
-        ymin=0, ymax=10,
-        ylabel={Time per step $t$},
-        y unit={\milli\second},
+        ymin=0, ymax=0.5,
+        ylabel={Time $t$},
+        y unit={\second},
       ]
-      \addplot[blue,dashed,domain=0:100,samples=100] {8.41835*(x/100)^1.5};
-      \addplot[red,mark=*,only marks] table[x=N,y expr={1e6*\thisrow{step_time}}] {code-joseph/steps.dat};
+      \addplot[blue,mark=*,only marks,forget plot] table[x=N,y expr={\thisrow{steps}*\thisrow{step_time}}] {code-fredrik/b.dat};
+      % \addplot[blue,dashed,domain=0:100,samples=100,forget plot] {0.270*(x/100)^3.5};
+
+      \addlegendimage{blue,mark=*,only marks}
+      \addlegendentry{\texttt{code-fredrik/b.cc}}
+
+      \addplot[red,mark=*,only marks,forget plot] table[x=N,y expr={\thisrow{steps}*\thisrow{step_time}}] {code-joseph/steps.dat};
+      % \addplot[red,dashed,domain=0:100,samples=100,forget plot] {0.097*(x/100)^3.5};
+
+      \addlegendimage{red,mark=*,only marks}
+      \addlegendentry{\texttt{code-joseph/jacobi\_step\_data.cpp}}
+
+      \addplot[blue,mark=o,only marks,forget plot] table[x=N,y expr={\thisrow{steps}*\thisrow{step_time}}] {code-fredrik/b_slow.dat};
+
+      \addlegendimage{blue,mark=o,only marks}
+      \addlegendentry{\texttt{code-fredrik/b.cc} (unoptimized)}
+
+      \addplot[purple,mark=o,only marks] table[x=N,y=arma_time] {code-fredrik/b.dat};
+      \addlegendentry{Armadilo (\texttt{eig\_sym})}
     \end{axis}
   \end{tikzpicture}
 
-  {\centering steps.dat}
-\end{center}
+  \caption{Total computation time as a function of matrix dimensionality $N$ for both programs, compared with Armadillo's \texttt{eig\_sym} function and an unoptimized version of \texttt{code-fredrik/b.cc}.} \label{fig:b-time}
+\end{figure}
+
+\subsection{Interacting and non-interacting case}
+% (d)
+
+In the interacting case, we calculate the wavefunction solutions as described in section \ref{sec:d-method}, and we plot the lowest energy eigenvector solutions (normalized) in figure \ref{fig:d} for $\omega_r$ values $0.01$, $0.5$, $1$ and $5$. In the same figure we also have the plot for the case where there is no repulsion between the electrons.
+
+We see that the shape of the wavefunctions are approximately the same, regardless of $\omega_r$, except that larger values of $\omega_r$ give a narrower curve. This means that the electrons are more likely to be found closer to each other for higher $\omega_r$ values. We also see that the curve for the non-interacting case closely resembles the curve for $\omega_r = 1$, which makes sense since the non-interacting potential is $V(\rho) = \rho^2$, while in the case $\omega_r = 1$ it is $V(\rho) = \rho^2 + 1 / \rho$.
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\textwidth,
+        height=0.5\textwidth,
+        xmin=0, xmax=30,
+        xlabel={$\rho$},
+        ymin=0, ymax=1.5,
+        ylabel={$u(\rho)$},
+      ]
+      \addplot[black,thick,dashed,smooth] table[x=r,y expr={-\thisrow{u}}] {code-fredrik/d-0.00.dat};
+      \addplot[red,thick,smooth] table[x=r,y expr={-\thisrow{u}}] {code-fredrik/d-0.01.dat};
+      \addplot[blue,thick,smooth] table[x=r,y expr={-\thisrow{u}}] {code-fredrik/d-0.50.dat};
+      \addplot[purple,thick,smooth] table[x=r,y expr={-\thisrow{u}}] {code-fredrik/d-1.00.dat};
+      \addplot[green!50!black,thick,smooth] table[x=r,y expr={-\thisrow{u}}] {code-fredrik/d-5.00.dat};
+      \legend{Non-interacting, $\omega_r = 0.01$, $\omega_r = 0.5$, $\omega_r = 1$, $\omega_r = 5$}
+    \end{axis}
+  \end{tikzpicture}
+
+  \caption{Normalized numerical solutions of \eqref{eq:diff-interact} for different values of $\omega_r$, with $N = 800$ and $\rho_{\rm max} = 60$.} \label{fig:d}
+\end{figure}
 
 \section{Conclusions}
+
+We have looked at the wavefunctions of two electrons in interacting and non-interacting systems, and by using Poisson's equation we have turned the Schrödinger equation into an eigenvalue problem, and solved that numerically using our own implementations of the Jacobi method.
+
+The implementations of the algorithms we used are sufficiently fast to handle cases up to at least $N = 100$ within reasonabe time, but are much slower than the native methods provided by linear algebra libraries such as Armadillo.
+
+We saw that the ground state wavefunction solutions to the eigenvalue equation in the interacting case was affected by the ``frequency'' of the system $\omega_r = \frac{1}{2} \sqrt{mk} \alpha^2 / \hbar}$, and that this in turn made interacting electron pairs with a higher frequency tend to stay closer to each other. We also saw that in the case where the electrons didn't interact, the wavefunction was very similar to that of the interacting electrons with $\omega_r = 1$.
 
 \clearpage
 \appendix
@@ -430,8 +518,33 @@ The following code files are used:
   \item[b)]
   \begin{itemize}
     \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-fredrik/b.cc}{\tt code-fredrik/b.cc}
+    \begin{itemize}
+      \item {\it description}
+    \end{itemize}
     \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-joseph/jacobi.cpp}{\tt code-joseph/jacobi.cpp}
+    \begin{itemize}
+      \item {\it description}
+    \end{itemize}
     \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-joseph/jacobi_step_data.cpp}{\tt code-joseph/jacobi\_step\_data.cpp}
+    \begin{itemize}
+      \item {\it description}
+    \end{itemize}
+  \end{itemize}
+
+  \item[d,e)]
+  \begin{itemize}
+    \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-fredrik/d.cc}{\tt code-fredrik/d.cc}
+    \begin{itemize}
+      \item {\it description}
+    \end{itemize}
+    \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-joseph/jacobi_interact.cpp}{\tt code-joseph/jacobi\_interact.cpp}
+    \begin{itemize}
+      \item {\it description}
+    \end{itemize}
+    \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-joseph/jacobi.py}{\tt code-joseph/jacobi.py}
+    \begin{itemize}
+      \item {\it description}
+    \end{itemize}
   \end{itemize}
 \end{enumerate}
 

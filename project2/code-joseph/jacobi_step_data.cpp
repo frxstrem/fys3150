@@ -14,11 +14,11 @@ void RHO_A_FILL(vec &rho, mat &A, int N,double rhoN); //rho, kind of like a line
 void Maxoff(mat &A, int N,int &k, int &l, double &max);        //Finds the max element of a matrix
 
 int main(){
-    int values[] = {4,10,20,30,40,50,60,70,80,90,100};
+    int values[] = { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 };
     fstream Outfile;
     Outfile.open("steps.dat",ios::out);
     Outfile << "N     epsilon    steps  step_time  error"<<endl;
-    for(int iter = 0; iter < 11; iter++){
+    for(int iter = 0; iter < 20; iter++){
         int N = values[iter]; //matrix size; N x N
         double rhoN = 6;
         double eps = 1E-10;
