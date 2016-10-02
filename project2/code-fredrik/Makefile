@@ -3,17 +3,22 @@ CXXFLAGS=--std=c++14 -Ofast
 LDFLAGS=
 LIBS=-lm -larmadillo
 
-.PHONY: all
+.PHONY: all run
 
-all: b d
+all: b b.test d
+
+run: all
+	./b
+	./d
 
 clean:
-	rm b d *.o *.dat
+	rm -rf b d *.o *.dat
 
-b: b.o
-	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS}
-d: d.o
-	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS}
+b: b.cc comp_eig.hh
+	${CXX} ${CXXFLAGS} ${LDFLAGS} -o $@ $< ${LIBS}
 
-%.o: %.cc
-	${CXX} ${CXXFLAGS} -c -o $@ $<
+b.test: b.test.cc b.cc comp_eig.hh
+	${CXX} ${CXXFLAGS} ${LDFLAGS} -o $@ $< ${LIBS}
+
+d: d.cc
+	${CXX} ${CXXFLAGS} ${LDFLAGS} -o $@ $< ${LIBS}

@@ -1,13 +1,13 @@
 from matplotlib.pyplot import *
 from numpy import *
-S1 = loadtxt("eigenvectorsminmin.data")
-E1 = loadtxt("eigenvaluesminmin.data")
-S2 = loadtxt("eigenvectorsmin.data")
-E2 = loadtxt("eigenvaluesmin.data")
-S3 = loadtxt("eigenvectors1.data")
-E3 = loadtxt("eigenvalues1.data")
-S4 = loadtxt("eigenvectors5.data")
-E4 = loadtxt("eigenvalues5.data")
+S1 = loadtxt("eigenvectorsminmin.dat")
+E1 = loadtxt("eigenvaluesminmin.dat")
+S2 = loadtxt("eigenvectorsmin.dat")
+E2 = loadtxt("eigenvaluesmin.dat")
+S3 = loadtxt("eigenvectors1.dat")
+E3 = loadtxt("eigenvalues1.dat")
+S4 = loadtxt("eigenvectors5.dat")
+E4 = loadtxt("eigenvalues5.dat")
 index1 = argmin(E1)
 index2 = argmin(E2)
 index3 = argmin(E3)
@@ -22,7 +22,7 @@ vector4 = S4[:,index4]/sqrt(60./800.)
 x =linspace(0,60,len(vector1))
 
 ##############Writing to file for Latex representation
-with open("vectors.data","w") as fp:
+with open("vectors.dat","w") as fp:
     fp.write("rho  rhoN  omega  vec \n")
     for i in range(len(vector1)):
         fp.write("%f %d %f %f \n" %(x[i], 60, 0.01, vector1[i]))

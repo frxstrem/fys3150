@@ -89,9 +89,9 @@ int main(){
     eigen.print();
 
     double time = (finish -start)/CLOCKS_PER_SEC/iterations;
-    /*    
+        
     fstream outfile;
-    outfile.open("eigenvectors5.data",ios::out);
+    outfile.open("eigenvectors5.dat",ios::out);
 
     for (int i = 0; i<N; i++){
         for (int j = 0; j<N; j++){
@@ -103,13 +103,13 @@ int main(){
     
     
     fstream utfile;
-    utfile.open("eigenvalues5.data",ios::out);
+    utfile.open("eigenvalues5.dat",ios::out);
 
     for (int i = 0; i<N; i++){
         utfile << eigen(i)<<endl;
         }
     utfile.close();
-    */
+    
     //fstream Outfile;
     //Outfile.open("steps.dat",ios::out);
     //Outfile << "N     epsilon    steps  step_time"<<endl;
