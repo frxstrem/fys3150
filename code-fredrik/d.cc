@@ -14,9 +14,13 @@ const double rmin = 1e-10;
 const double rmax = 60;
 const double epsilon = 1e-10;
 
-// potential function
-static constexpr double V(double r, double w) {
-  // if(abs(r) < 1e-6) r = 1e-6;
+// potential function (non-intercting)
+static constexpr double V0(double r) {
+  return r * r;
+}
+
+// potential function (interacting)
+static constexpr double Vw(double r, double w) {
   return w * w * r * r + 1 / r;
 }
 
@@ -129,7 +133,7 @@ static void jacobi_solve(const mat &A, mat &P, vec &L, size_t &steps, double &st
     L(i) = B(i, i);
 }
 
-int run_program(size_t N, double w) {
+int run_program(size_t N, double w, const std::function<double(double)> &V) {
   const double h = (rmax - rmin) / N;
 
   // array of ρ valuses
@@ -143,7 +147,7 @@ int run_program(size_t N, double w) {
   // calculate d_i, which depend on V(ρ_i)
   vec d(N);
   for(size_t i = 0; i < N; i++)
-    d(i) = 2 / (h * h) + V(r[i], w);
+    d(i) = 2 / (h * h) + V(r[i]);
 
   // calculate matrix A
   mat A(N, N, arma::fill::zeros);
@@ -190,9 +194,15 @@ int main(int argc, char **argv) {
   const double Wvalues[] = { 0.01, 0.5, 1, 5 };
   const size_t Wlen = sizeof(Wvalues) / sizeof(*Wvalues);
 
+  // run for non-interacting case
+  std::cout << "running for non-interactive case" << std::endl;
+  run_program(N, 0, V0);
+
+  // run for interacting cases
   for(size_t i = 0; i < Wlen; i++) {
     double W = Wvalues[i];
     std::cout << "running with W = " << W << std::endl;
-    run_program(N, W);
+    const auto V = [W] (double r) -> double { return Vw(r, W); };
+    run_program(N, W, V);
   }
 }

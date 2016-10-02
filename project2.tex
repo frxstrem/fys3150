@@ -252,7 +252,7 @@ we can rewrite Schroedinger's equation as
 
 \section{Methods}
 
-\subsection{}
+\subsection{Preservation of orthogonality and dot product in a unitary matrix}
 % (a)
 
 Assume that $\V{U}$ is an orthogonal transformation. Then by definition, $\V{U}^T \V{U} = \V{I}$,
@@ -267,7 +267,7 @@ so for any vectors $\V{u}$ and $\V{v}$ we see that
 Since the dot product of vectors are preserved by $\V{U}$, orthogonality (that is, the dot product
 being zero) is also preserved.
 
-\subsection{}
+\subsection{Non-interacting case}
 % (b)
 
 We have the differential equation
@@ -360,14 +360,15 @@ Fredrik's unit test produces all $N^2$ dot products and finds the dot product wi
 Joseph's unit test is run every now and then during the similarity transformations. It takes two random eigenvectors and checks if their dot product is small enough to pass the tolerance.
 \subsubsection{Max Offdiagonal Element Test}
 Our unit tests regarding the largest off-diagonal value is simpler. We hardcode a symmetrical 5x5 matrix, as suggested. We then know the max off-diagonal value.
-To make sure the "Maxoff" function works, we use it to find the max value of the matrix. The value returned should be the biggest value we put into it. Our \emph{if} expression 
+To make sure the "Maxoff" function works, we use it to find the max value of the matrix. The value returned should be the biggest value we put into it. Our \emph{if} expression
 will subtract the returned max value from the one we inserted to check if the answer is within the tolerance ($10^-13$)
 % unit testing
 
-\subsection{}
+\subsection{Interacting case}
+\label{sec:d-method}
 % (d)
 
-In the interactive case, we had the differential equation
+In the interacting case, we had the differential equation
 \begin{equation}
   \label{eq:diff-interact}
   - \pdf[2]{}{\rho} \psi(\rho) + \left( \omega_r^2 \rho 2 + 1 / \rho \right) \psi(\rho) = \lambda \psi(\rho)
@@ -375,12 +376,22 @@ In the interactive case, we had the differential equation
 
 We used the same code as before, but changed the potential function to $V(\rho) = \omega_r^2 \rho^2 + 1/\rho$, and used different parameters $\rho_{\rm max} = 60$, $N = 800$ and $\omega_r = 0.01, 0.5, 1, 5$.
 
+We already know that the solutions $\V{v}$ that we get from the eigenvector solvers are normalized in the sense that
+\begin{equation}
+  \V{v} \cdot \V{v} = \sum_{n=0}^N u_i^2 = 1
+\end{equation}
+However, we want a solution $\V{v} = c \, \V{u}$ that is normalized in the sense that
+\begin{equation}
+  \V{u} \cdot \V{u} = \sum_{n=0}^N h v_i^2 = \sum_{n=0}^N h c^2 u_i^2 = 1
+\end{equation}
+We therefore see that $c$ must be $c = 1 / \sqrt{h}$, so we just multiply our solution by this to get the correct normalized quantum state solution.
+
 \section{Results}
 
-\subsection{}
+\subsection{Eigenvalue solving algorthim}
 % (b)
 
-We have implemented two different programs to solve eigenvector systems. For parameters we set $N = 5,10,15,\ldots,100$, $\rho_{\rm max} = 6$ When we run the programs on the non-interactive case, the number of similarity transforms $K$ as a function of the matrix dimensionality $N$ is shown in figure \ref{fig:b}. (Note that the two programs use exactly the same number of steps, so there's only one plot.) We have also plotted the best fit curve on the form $a x^2$, which clearly show $K \propto N^2$.
+We have implemented two different programs to solve eigenvector systems with symmetric matrices. For parameters we set $N = 5,10,15,\ldots,100$, $\rho_{\rm max} = 6$ When we run the programs on the non-interacting case, the number of similarity transforms $K$ as a function of the matrix dimensionality $N$ is shown in figure \ref{fig:b}. (Note that the two programs use exactly the same number of steps, so there's only one plot.) We have also plotted the best fit curve on the form $a x^2$, which clearly show $K \propto N^2$.
 
 When we compare the resulting eigenvalue and eigenvectors, we see that the absolute difference between any of the eigenvalues or eigenvectors is at most \num{1.2e-6}.
 
@@ -448,8 +459,12 @@ In figure \ref{fig:b-time}, we see the time the two algorithm use, and comparing
   \caption{Total computation time as a function of matrix dimensionality $N$ for both programs, compared with Armadillo's \texttt{eig\_sym} function and an unoptimized version of \texttt{code-fredrik/b.cc}.} \label{fig:b-time}
 \end{figure}
 
-\subsection{}
+\subsection{Interacting and non-interacting case}
 % (d)
+
+In the interacting case, we calculate the wavefunction solutions as described in section \ref{sec:d-method}, and we plot the lowest energy eigenvector solutions (normalized) in figure \ref{fig:d} for $\omega_r$ values $0.01$, $0.5$, $1$ and $5$. In the same figure we also have the plot for the case where there is no repulsion between the electrons.
+
+We see that the shape of the wavefunctions are approximately the same, regardless of $\omega_r$, except that larger values of $\omega_r$ give a narrower curve. This means that the electrons are more likely to be found closer to each other for higher $\omega_r$ values. We also see that the curve for the non-interacting case closely resembles the curve for $\omega_r = 1$, which makes sense since the non-interacting potential is $V(\rho) = \rho^2$, while in the case $\omega_r = 1$ it is $V(\rho) = \rho^2 + 1 / \rho$.
 
 \begin{figure}[!ht]
   \centering
@@ -462,15 +477,16 @@ In figure \ref{fig:b-time}, we see the time the two algorithm use, and comparing
         ymin=0, ymax=1.5,
         ylabel={$u(\rho)$},
       ]
+      \addplot[black,thick,dashed,smooth] table[x=r,y expr={-\thisrow{u}}] {code-fredrik/d-0.00.dat};
       \addplot[red,thick,smooth] table[x=r,y expr={-\thisrow{u}}] {code-fredrik/d-0.01.dat};
       \addplot[blue,thick,smooth] table[x=r,y expr={-\thisrow{u}}] {code-fredrik/d-0.50.dat};
       \addplot[purple,thick,smooth] table[x=r,y expr={-\thisrow{u}}] {code-fredrik/d-1.00.dat};
       \addplot[green!50!black,thick,smooth] table[x=r,y expr={-\thisrow{u}}] {code-fredrik/d-5.00.dat};
-      \legend{$\omega_r = 0.01$, $\omega_r = 0.5$, $\omega_r = 1$, $\omega_r = 5$};
+      \legend{Non-interacting, $\omega_r = 0.01$, $\omega_r = 0.5$, $\omega_r = 1$, $\omega_r = 5$}
     \end{axis}
   \end{tikzpicture}
 
-  \caption{Numerical solutions of \eqref{eq:diff-interact} for different values of $\omega_r$, with $N = 800$ and $\rho_{\rm max} = 60$.} \label{fig:d}
+  \caption{Normalized numerical solutions of \eqref{eq:diff-interact} for different values of $\omega_r$, with $N = 800$ and $\rho_{\rm max} = 60$.} \label{fig:d}
 \end{figure}
 
 \section{Conclusions}
