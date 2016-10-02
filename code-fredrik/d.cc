@@ -10,9 +10,9 @@
 using namespace std;
 using namespace arma;
 
-const double rmin = 1e-6;
-const double rmax = 10;
-const double epsilon = 1e-14;
+const double rmin = 1e-10;
+const double rmax = 60;
+const double epsilon = 1e-10;
 
 // potential function
 static constexpr double V(double r, double w) {
@@ -142,10 +142,12 @@ int run_program(size_t N, double w, vec &out, size_t &steps, double &step_time, 
   // jacobi_solve(A, eigenvectors, eigenvalues, steps, step_time);
   eig_sym(eigenvalues, eigenvectors, A);
 
+  // normalize w.r.t. N
+  eigenvectors /= sqrt(h);
 
   // find lowest eigenvalue
   size_t lowest_index = 0;
-  double lowest_eigenvalue = std::numeric_limits<double>::infinity();
+  double lowest_eigenvalue = eigenvalues(0);
   for(size_t i = 1; i < N; i++) {
     double l = eigenvalues(i);
     if(l < lowest_eigenvalue) {
@@ -165,7 +167,7 @@ int run_program(size_t N, double w, vec &out, size_t &steps, double &step_time, 
 }
 
 int main(int argc, char **argv) {
-  const size_t N = 200;
+  const size_t N = 800;
   const double Wvalues[] = { 0.01, 0.5, 1, 5 };
   const size_t Wlen = sizeof(Wvalues) / sizeof(*Wvalues);
 
