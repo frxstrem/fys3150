@@ -7,6 +7,7 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage{parskip}
 \usepackage{xifthen}
+\usepackage{animate}
 
 % math packages
 \usepackage{mathtools,amsfonts,amssymb,mathdots}
@@ -191,6 +192,7 @@
     {\frac{\partial{#2}}{\partial{#3}}}%
     {\frac{\partial^{#1}{#2}}{{\partial{#3}^{#1}}}}%
 }}
+\let\epsilon\varepsilon
 
 
 \begin{document}
@@ -344,25 +346,34 @@ Once the off-diagonal elements elements of $\V{A}_n$ are sufficiently small, the
 
 \subsection{Unit Testing}
 % (c)
-We have chosen to implement two tests. Both of us have made a test for checking the preservation of normality. The second test we implemented checks for anomalies in our function which finds the biggest offdiagonal element.
+
+We have chosen to implement two tests. Both of us have made a test for checking the preservation of orthogonality. The second test we implemented checks for anomalies in our function which finds the biggest off-diagonal element.
+
 \subsubsection{Orthogonality Test}
-To check if the orthogonality of the eigenvectors are preserved, simply produce the dot product between them. The dot product between two orthonormal vector are are always zero:
-$$\vec{V_\lambda1} \cdot \vec{V_\lambda2} = 0$$
-On a computer, we rarely end up with zero due to misrepresentation of various numbers. We therefore calculate the dot product and ask if the product is smaller than this tolerance ($\epsilon$):
-$$\vec{V_\lambda1} \cdot \vec{V_\lambda2} < \epsilon ?$$
-If yes, we print that the test  has failed and maybe stop the program.
-\\
-\\
-We have N eigenvectors when solving our problem for an N x N matrix. I other words, there are a lot of possible dot products, ($N^2$). Fredrik and I have chosen two different ways of testing orthogonality between the vectors.
+
+To check if the orthogonality of the vectors are preserved, simply produce the dot product between them. The dot product between two orthonormal vector is always zero:
+\begin{equation}
+  \V{V}_{\lambda1} \cdot \V{V}_{\lambda2} = 0
+\end{equation}
+
+On a computer, we rarely end up with zero due to misrepresentation of various numbers. We therefore calculate the dot product and ask if the product is smaller than a tolerance $\epsilon$:
+\begin{equation}
+  \left| \V{V}_{\lambda1} \cdot \V{V}_{\lambda2} \right| < \epsilon
+\end{equation}
+
+If not, we print that the test has failed and maybe stop the program.
+
+We have $N$ eigenvectors when solving our problem for an $N \times N$ matrix. I other words, there are a lot of possible dot products, ($N^2$). We have each chosen different ways of testing orthogonality between the vectors.
 Fredrik's unit test produces all $N^2$ dot products and finds the dot product with the biggest error. This biggest error is then compared with a tolerance.
-\\
-\\
-Joseph's unit test is run every now and then during the similarity transformations. It takes two random eigenvectors and checks if their dot product is small enough to pass the tolerance.
-\subsubsection{Max Offdiagonal Element Test}
-Our unit tests regarding the largest off-diagonal value is simpler. We hardcode a symmetrical 5x5 matrix, as suggested. We then know the max off-diagonal value.
-To make sure the "Maxoff" function works, we use it to find the max value of the matrix. The value returned should be the biggest value we put into it. Our \emph{if} expression
-will subtract the returned max value from the one we inserted to check if the answer is within the tolerance ($10^-13$)
-% unit testing
+
+Joseph's unit test is run every now and then during the similarity transformations. It takes two random column vectors of the unitary matrix $S$ and checks if their dot product is smaller than the tolerance.
+
+\subsubsection{Max Off-Diagonal Element Test}
+
+Our unit tests regarding the largest off-diagonal value is simpler. We hardcode a symmetrical $5 \times 5$ symmetric matrix, as suggested. We then know the maximal off-diagonal value.
+
+To make sure the \texttt{Maxoff} function works, we use it to find the max value of the matrix. The value returned should be the biggest value we put into it. Our \texttt{if} expression
+will subtract the returned maximum value from the one we known maximum value of the matrix to check if the answer is within the tolerance \num{e-13} of $0$.
 
 \subsection{Interacting case}
 \label{sec:d-method}
@@ -395,7 +406,7 @@ We have implemented two different programs to solve eigenvector systems with sym
 
 When we compare the resulting eigenvalue and eigenvectors, we see that the absolute difference between any of the eigenvalues or eigenvectors is at most \num{1.2e-6}.
 
-In figure \ref{fig:b-time}, we see the time the two algorithm use, and comparing it to the time used by Armadillo's \texttt{eig\_sym} method. We see that our algorithms both run in less than half a second for $N = 100$, with one using about half the time of the other, but neither can compare to \texttt{eig\_sym}, which completes in less than \SI{3}{\milli\second} for the same value of $N$. In addition, we see that the \emph{unoptimized} version of \texttt{code-fredrik/b.cc} (compiled with \texttt{-O0} instead of \texttt{-Ofast}) is about 6 times slower than the optimized version of the same program, which demonstrates why we should use compiler optimization when compiling our algorithms.
+In figure \ref{fig:b-time}, we see the time the two algorithm use, and comparing it to the time used by Armadillo's \texttt{eig\_sym} method. We see that our algorithms both run in less than half a second for $N = 100$, with one using about half the time of the other, but neither can compare to \texttt{eig\_sym}, which completes in less than \SI{3}{\milli\second} for the same value of $N$. In addition, we see that the \emph{unoptimized} version of \texttt{code-fredrik/b.cc} (compiled with \texttt{-O0} instead of \texttt{-Ofast}) is about 6 times slower than the optimized version of the same program, which means that if we want to run our code as fast as possible, we gotta \texttt{-Ofast}. \includegraphics[trim=1 1 1 1,clip,width=0.6cm]{img/Sonic-run-1.png}
 
 \begin{figure}[!ht]
   \centering
@@ -491,6 +502,12 @@ We see that the shape of the wavefunctions are approximately the same, regardles
 
 \section{Conclusions}
 
+We have looked at the wavefunctions of two electrons in interacting and non-interacting systems, and by using Poisson's equation we have turned the Schrödinger equation into an eigenvalue problem, and solved that numerically using our own implementations of the Jacobi method.
+
+The implementations of the algorithms we used are sufficiently fast to handle cases up to at least $N = 100$ within reasonabe time, but are much slower than the native methods provided by linear algebra libraries such as Armadillo.
+
+We saw that the ground state wavefunction solutions to the eigenvalue equation in the interacting case was affected by the ``frequency'' of the system $\omega_r = \frac{1}{2} \sqrt{mk} \alpha^2 / \hbar}$, and that this in turn made interacting electron pairs with a higher frequency tend to stay closer to each other. We also saw that in the case where the electrons didn't interact, the wavefunction was very similar to that of the interacting electrons with $\omega_r = 1$.
+
 \clearpage
 \appendix
 \section{Appendix}
@@ -514,13 +531,17 @@ The following code files are used:
     \end{itemize}
   \end{itemize}
 
-  \item[d)]
+  \item[d,e)]
   \begin{itemize}
     \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-fredrik/d.cc}{\tt code-fredrik/d.cc}
     \begin{itemize}
       \item {\it description}
     \end{itemize}
     \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-joseph/jacobi_interact.cpp}{\tt code-joseph/jacobi\_interact.cpp}
+    \begin{itemize}
+      \item {\it description}
+    \end{itemize}
+    \item \href{https://github.com/frxstrem/fys3150/tree/master/project2/code-joseph/jacobi.py}{\tt code-joseph/jacobi.py}
     \begin{itemize}
       \item {\it description}
     \end{itemize}
