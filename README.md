@@ -5,7 +5,5 @@
 ## Projects
 
 * [**Project 1**](./project1)
-
-## Code libraries
-
-* [**mat**](./mat): Matrix library
+* [**Project 2**](./project2)
+* [**Project 3**](./project3)
