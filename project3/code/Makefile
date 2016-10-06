@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=--std=c++14 -O0
+CXXFLAGS=--std=c++14 -Ofast
 LDFLAGS=
 LIBS=-lm
 

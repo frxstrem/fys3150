@@ -1,43 +1,75 @@
 #include <iostream>
+#include <fstream>
 #include <cmath>
+#include <string>
 #include <stdlib.h>
 #include "solarsystem.h"
 #include "solver.hh"
 using namespace std;
 
-int main(int numArguments, char **arguments)
+/**
+ * Read simulation parameters from file (uses SolarSystem.dat if none is specified),
+ * then run simulation.
+**/
+int main(int argc, char **argv)
 {
-  int numTimesteps = 1000;
-  if(numArguments >= 2) numTimesteps = atoi(arguments[1]);
+  const char *filename;
+  if(argc > 1)
+    filename = argv[1];
+  else
+    filename = "SolarSystem.dat";
+  std::ifstream in(filename);
 
-  SolarSystem solarSystem(4 * M_PI * M_PI); // pass gravitational constant as a paremeter
+  // IMPORTANT! this code *assumes* that the file is in the right format
 
-  CelestialBody &sun = solarSystem.createCelestialBody( vec3(0,0,0), vec3(0,0,0), 1.0 );
+  // first line: comment line (ignore)
+  std::string line; getline(in, line);
 
-  // We don't need to store the reference, but just call the function without a left hand side
-  solarSystem.createCelestialBody( vec3(1, 0, 0), vec3(0, 2 * M_PI, 0), 3e-6 );
+  // second line: total simulation time
+  // third line: simulation time steps
+  double T;
+  double dt;
+  in >> T >> dt;
 
-  // To get a list (a reference, not copy) of all the bodies in the solar system, we use the .bodies() function
-  vector<CelestialBody> &bodies = solarSystem.bodies();
+  // calculate number of steps M
+  int M = T / dt;
 
-  for(int i = 0; i<bodies.size(); i++) {
-    CelestialBody &body = bodies[i]; // Reference to this body
-    cout << "The position of this object is " << body.position << " with velocity " << body.velocity << endl;
+  // fourth line: gravitational constant (divided by 4 * π²)
+  double G;
+  in >> G;
+  G *= 4 * M_PI * M_PI;
+
+  // fifth line: number of planets N
+  int N;
+  in >> N;
+
+  // create solar system
+  SolarSystem system(G);
+
+  // next N lines: (m x y z vx vy vz) initial conditions for each body
+  for(int i = 0; i < N; i++) {
+    double m, x, y, z, vx, vy, vz;
+    in >> m >> x >> y >> z >> vx >> vy >> vz;
+
+    system.createCelestialBody( vec3(x, y, z), vec3(vx, vy, vz), m );
   }
 
-  double dt = 0.001;
-  VerletSolver integrator(dt);
-  for(int timestep=0; timestep<numTimesteps; timestep++) {
-    integrator.step(solarSystem);
-    cout << "E = " << solarSystem.totalEnergy() << endl;
-    solarSystem.writeToFile("positions.xyz");
+  // print list of celestial bodies
+  cout << "Celestial bodies:" << endl;
+  for(CelestialBody &body : system.bodies())
+    cout << "  mass=" << body.mass << ", pos=" << body.position << ", vel=" << body.velocity << endl;
+
+  // integrate
+  EulerSolver solver(dt);
+  for(int m = 0; m < M; m++) {
+    solver.step(system);
+    system.writeToFile("positions.xyz");
   }
 
-  for(int i = 0; i<bodies.size(); i++) {
-    CelestialBody &body = bodies[i]; // Reference to this body
-    cout << "The position of this object is " << body.position << " with velocity " << body.velocity << endl;
-  }
+  cout << "DONE!" << endl;
 
-  cout << "I just created my first solar system that has " << solarSystem.bodies().size() << " objects." << endl;
-  return 0;
+  // print list of celestial bodies
+  cout << "Celestial bodies:" << endl;
+  for(CelestialBody &body : system.bodies())
+    cout << "  mass=" << body.mass << ", pos=" << body.position << ", vel=" << body.velocity << endl;
 }
