@@ -9,7 +9,7 @@
 class SolarSystem
 {
 public:
-    SolarSystem();
+    SolarSystem(double gravitationalConstant);
     CelestialBody &createCelestialBody(vec3 position, vec3 velocity, double mass);
     void calculateForcesAndEnergy();
     int numberOfBodies() const;
@@ -27,6 +27,7 @@ private:
     std::ofstream m_file;
     double m_kineticEnergy;
     double m_potentialEnergy;
+    const double m_G;
 };
 
 #endif // SOLARSYSTEM_H

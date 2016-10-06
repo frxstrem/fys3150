@@ -2,9 +2,10 @@
 #include <iostream>
 using namespace std;
 
-SolarSystem::SolarSystem() :
+SolarSystem::SolarSystem(double gravitationalConstant) :
     m_kineticEnergy(0),
-    m_potentialEnergy(0)
+    m_potentialEnergy(0),
+    m_G(gravitationalConstant)
 {
 }
 
@@ -30,7 +31,13 @@ void SolarSystem::calculateForcesAndEnergy()
             CelestialBody &body2 = m_bodies[j];
             vec3 deltaRVector = body1.position - body2.position;
             double dr = deltaRVector.length();
+
             // Calculate the force and potential energy here
+            vec3 F = (m_G * body1.mass * body2.mass / (dr * dr)) * (deltaRVector / dr);
+            body1.force -= F;
+            body2.force += F;
+
+            m_potentialEnergy -= m_G * body1.mass * body2.mass / dr;
         }
 
         m_kineticEnergy += 0.5*body1.mass*body1.velocity.lengthSquared();
