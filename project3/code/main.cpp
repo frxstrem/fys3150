@@ -13,7 +13,7 @@ struct SimulationParameters {
   shared_ptr<SolarSystem> system;
 
   // number of time steps
-  int M;
+  int numSteps;
   // length of time steps
   double dt;
 };
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
   // read simulation parameters from file
   SimulationParameters params = read_params_file(filename);
   SolarSystem &system = *params.system;
-  int M = params.M;
+  int numSteps = params.numSteps;
   double dt = params.dt;
 
   // print list of celestial bodies
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 
   // integrate
   EulerSolver solver(dt);
-  for(int m = 0; m < M; m++) {
+  for(int m = 0; m < numSteps; m++) {
     solver.step(system);
     system.writeToFile("positions.xyz");
   }
@@ -72,14 +72,14 @@ static SimulationParameters read_params_file(const char *filename) {
   double T, dt;
   in >> T >> dt;
 
-  // calculate number of steps M
-  params.M = T / dt;
+  // calculate number of steps and time step length
+  params.numSteps = T / dt;
   params.dt = dt;
 
-  // fourth line: gravitational constant (divided by 4 * π²)
+  // fourth line: gravitational constant / 4π²
   double G;
   in >> G;
-  G *= 4 * M_PI * M_PI;
+  G *= 4 * M_PI * M_PI; // scale by 4π²
 
   // fifth line: number of planets N
   int N;
