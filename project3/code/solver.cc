@@ -1,13 +1,12 @@
 #include "solver.hh"
-#include "solarsystem.h"
-#include "vec3.h"
+#include "vec3.hh"
 
 void EulerSolver::step(class SolarSystem &system) {
   system.calculateForcesAndEnergy();
 
   for(CelestialBody &body : system.bodies()) {
-    body.velocity += body.force / body.mass * m_dt;
     body.position += body.velocity * m_dt;
+    body.velocity += body.force / body.mass * m_dt;
   }
 }
 

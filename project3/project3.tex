@@ -1,0 +1,745 @@
+% standard LaTeX packages
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+% \usepackage[margin=3cm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{parskip}
+\usepackage{xifthen,xparse}
+
+% math packages
+\usepackage{mathtools,amsfonts,amssymb,mathdots}
+\usepackage{siunitx}
+\usepackage{nicefrac}
+\mathtoolsset{showonlyrefs}
+\DeclareSIUnit{\year}{yr}
+\DeclareSIUnit{\astronomicalunit}{AU}
+\DeclareSIUnit{\solarmass}{M_\odot}
+
+% plotting and tables
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{caption}
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=tikz/,mode=list and make]
+\usetikzlibrary{spy}
+\usepgfplotslibrary{units}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{
+  compat=1.13,
+  % scaled x ticks = false,
+  % x tick label style={
+  %   /pgf/number format/fixed,
+  %   /pgf/number format/1000 sep = \thinspace
+  % },
+  % scaled y ticks = false,
+  % y tick label style={
+  %   /pgf/number format/fixed,
+  %   /pgf/number format/1000 sep = \thinspace
+  % },
+  legend cell align=left,
+  % unit
+  unit markings=slash space,
+  unit code/.code 2 args=
+    \expandafter\expandafter\expandafter\expandafter
+    \expandafter\expandafter\expandafter\si
+    \expandafter\expandafter\expandafter\expandafter
+    \expandafter\expandafter\expandafter{#2},
+  % legend style={
+  %   at={(1.02,1)},
+  %   anchor=north west,
+  % },
+  filter discard warning=false,
+  discard if not/.style 2 args={
+    x filter/.code={
+      \edef\tempa{\thisrow{#1}}
+      \edef\tempb{#2}
+      \ifx\tempa\tempb
+      \else
+        \def\pgfmathresult{inf}
+      \fi
+    }
+  },
+}
+
+% bibliography packages
+% \usepackage[backend=bibtex8,style=numeric,autocite=inline,sorting=ynt]{biblatex}
+
+% other packages
+% \usepackage{filecontents}
+\usepackage{marginnote}
+
+% bibliography
+% \begin{filecontents}{bibliography.bib}
+% \end{filecontents}
+% \addbibresource{bibliography.bib}
+% \nocite{*}
+
+% custom math commands
+\newcommand\V[1]{\mathbf{#1}}                  % vector notation
+\newcommand\M[1]{\begin{bmatrix} #1 \end{bmatrix}} % matrix shorthand
+
+% commands for derivatives/integral dx expressions
+\newcommand\D[1]{{\,\mathrm{d}{#1}}}
+\newcommand\dd[2][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\mathrm{d}{#2}}%
+    {\mathrm{d}^{#1}{#2}}%
+}}
+\newcommand\df[3][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\frac{\mathrm{d}{#2}}{\mathrm{d}{#3}}}%
+    {\frac{\mathrm{d}^{#1}{#2}}{{\mathrm{d}{#3}^{#1}}}}%
+}}
+\newcommand\pD[1]{{\,\mathrm{d}{#1}}}
+\newcommand\pdd[2][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\parital{#2}}%
+    {\partial^{#1}{#2}}%
+}}
+\newcommand\pdf[3][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\frac{\partial{#2}}{\partial{#3}}}%
+    {\frac{\partial^{#1}{#2}}{{\partial{#3}^{#1}}}}%
+}}
+\let\epsilon\varepsilon
+
+\def\sun{\odot}
+
+\DeclareDocumentCommand{\reversemarginnote}{ m O{} }{\reversemarginpar\marginnote{#1}[#2]\reversemarginpar}
+\newcommand\oppg[1]{\reversemarginnote{\textcolor{black!40}{#1)}}[2mm]}
+
+\begin{document}
+
+\title{Project 3 - FYS3150 Computational Physics}
+\author{Fredrik Østrem (\texttt{fredost})}
+\date{\today}
+
+\maketitle
+
+\begin{abstract}
+  In this project, we will study different simulations of the solar system. We will discuss the differences between Euler's forward algorithm and the Verlet algorithm
+  in such simulations, and we will build up a program which can simulate the gravitational interaction between the Sun and all the planets. Finally, we will use this program to
+  study the perihelion precession of Mercury due to general relativity.
+\end{abstract}
+
+\tableofcontents
+
+\clearpage
+\section{Introduction}
+In this project, we will build a simple object-oriented program that simulates the gravitational interaction between the sun and planets in the solar system, by using the velocity Verlet
+algorithm. We will start writing a simple program for simulating the Earth-Sun system with the Sun fixed at the origin, and use this to compare the Verlet algorithm to an algorithm
+that we're already very familiar with: Euler's forward algorithm. We will expand this program to simulate three bodies (Earth, Sun and Jupiter) and then the entire solar system (Sun, Moon
+and all the eight planets). We will also use our code to explore two specific problems: the escape velocity of Earth in the gravity of the Sun, and the perihelion precession of Mercury due to
+general relativity.
+
+\subsection{Units and constants}
+
+We will throughout this assignment assume that the base units are expressed in \emph{astronomical units} (\si{\astronomicalunit}) for distance, \emph{years} (\si{\year}) for time, and \emph{solar masses} (\si{\solarmass}) for mass. All other units will be derived from these, such as energy (\si{\solarmass \astronomicalunit^2 \per \year^2}) and angular momentum (\si{\solarmass \astronomicalunit^2 \per \year}).
+
+When using these units, we get nice expressions for relevant constants:
+\begin{itemize}
+  \item The distance between the Earth and the Sun is $r = \SI{1}{\astronomicalunit}$.
+  \item The velocity of the Earth is $v = 2 \pi \, \si{\astronomicalunit . \year^{-1}}$.
+  \item The universal gravitational constant is $G = 4 \pi^2 \, \si{\astronomicalunit^3 . \solarmass^{-1} . \year^{-2}}$.
+\end{itemize}
+
+\clearpage
+\section{Methods}
+
+\subsection{Discretization of a two-body system}
+\oppg{a}
+
+We start by only considering a simple two-body gravitational system, such as the Earth-Sun system. We can express the gravitational interaction of the Sun on the Earth by the differential equation
+\begin{equation}
+  \V{a} = \df[2]{\V{x}}{t} = - \frac{F_G}{M} \cdot \frac{\V{r}}{r} = - \frac{G M_\sun \V{r}}{r^3}
+\end{equation}
+where $\V{x}$ is the position of the Earth, $\V{r}$ is the position of the Earth relative to the Sun, and $M$ and $M_\sun$ are the masses of the Earth and the Sun.
+
+To be able to solve this differential equation numerically, we want to discretize it. If we use Euler's forward algorithm to discretize this with time steps $\Delta{t}$, we get
+the equations
+\begin{alignat}{4}
+  \V{x}_{n+1} &= \V{x}_n + \V{v}_n \cdot \Delta{t} \\
+  \V{v}_{n+1} &= \V{v}_n + \V{a}_n \cdot \Delta{t} &&= \V{v}_n - \frac{G M_\sun \V{r}_n}{r_n^3} \cdot \Delta{t} \\
+\intertext{where}
+  \V{r}_n &= \V{x}_n - \V{x}_{\sun,n}
+\end{alignat}
+
+We can also use the Verlet algorithm, which is based on Netwon's laws of motion. If we use that, we get the equations
+\begin{alignat}{4}
+  \V{x}_{n+1} &= \V{x}_n + \V{v}_n \cdot \Delta{t} + \frac{1}{2} \V{a}_n \cdot \Delta{t}^2 \\
+  \V{v}_{n+1} &= \V{v}_n + \frac{ \V{a}_n + \V{a}_{n+1} }{2} \cdot \Delta{t} \\
+  \V{a}_{n}   &= - \frac{G M_\sun \V{r}_n}{r^3}
+\end{alignat}
+
+Since the mass of the Sun is about \num{300000} times larger than that of the Earth, we can assume that the Sun is position in the center of mass, and we will assume that it lies in the origin.
+
+As we will see later, Euler's forward algorithm is not numerically stable with respect to total energy, while Verlet keeps the total energy of the system constant.
+
+\subsection{Implementation of the Earth-Sun system}
+\oppg{b}
+
+When implementing the simulation of the Earth-Sun system, we may want to create and generalize classes to be able to reuse functionality. In particular, we may want to write:
+\begin{itemize}
+  \item A \texttt{vec3} class, that stores a 3D vector and handles vector operations.
+  \item A \texttt{CelestialBody} class, that stores the properties of some celestial body (in this case, the Earth and the Sun).
+  \item A \texttt{SolarSystem} class, that stores all the celestial bodies of the simulation (in this case, the Earth and the Sun).
+  \item A \texttt{Solver} class, that solves the differential equations for the movement of the celestial bodies, and that can be subclassed to provide different algorithms (such as Euler's forward algorithm or the Verlet algorithm).
+\end{itemize}
+
+Writing classes like this can have many advantages. In particular, we keep the information about an object and the functions that act on it bundled together, and we can easily replace or extend the functionality of a class by creating a subclass (like we do with the \texttt{Solver} class).
+
+\clearpage
+\section{Results}
+
+\subsection{Earth-Sun system}
+\oppg{c}
+
+When we run the program \texttt{code/3b}, we will get two data files \texttt{3b\_euler.dat} and \texttt{3b\_verlet.dat}, that contain the data for the simulation over a five-year period with time steps at $\nicefrac{1}{1000}$ of a year.
+
+In figure \ref{fig:3c}, we see the $x$ and $y$ coordinates of the Earth's orbit around the sun (fixed at the origin). In figure \ref{fig:3c-E}, we can see the kinetic, potential and total energies over time, and in figure \ref{fig:3c-L}, we can see the total angular momentum of the system over time.
+
+In all three plots, we can see that the Verlet algorithm (in blue) is stable; the Earth moves in a near perfect circle around the sun, total energy is constant and so is total angular momentum. This reflects what we already know about the conservation of energy and angular momentum in a closed system: that these quantities are preserved.
+
+On the other hand, Euler's forward algorithm (in red) is numerically unstable: instead of moving in a circular orbit, the Earth's distance from the sun gradually increases, and its total energy and angular momentum increase significantly, despite being a closed system.
+
+The Verlet algorithm is specifically designed for calculations of forces, being based on Newton's laws of motion. Because of this, it ensures that quantities such as total energy or total angular momentum is preserved when we have conservative forces, such as gravity. However, Euler's forward algorithm is a generic algorithms for all differential equations, and pretty much the simplest algorithm you could use.
+
+The Verlet algorithm uses three times more FLOPs than Euler's forward algorithm: while Euler uses 4 FLOPs\footnote{\textbf{F}loating \textbf{p}oint \textbf{op}erations.} per calculation per dimension, Verlet uses 12. (For a three-dimensional system such as ours, this means Euler will use 12 FLOPs while Verlet will use 36.) The naïvely implemented Verlet algorithm also has to recalculate the forces twice: once for the previous position, and once for the new position. However, this can be reduced by simply only recalculating when the position has changed; when it has not, you can just reuse the forces calculated for the previous Verlet step. It will often be the calculation of the forces that is the most expensive, especially in systems with more than one moving body, since the number of forces to be calculated is approximately $N^2$ for $N$ bodies.
+
+\begin{figure}[!ht]
+  \centering
+
+  \tikzpicturedependsonfile{data/3b_verlet.dat}
+  \tikzpicturedependsonfile{data/3b_euler.dat}
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=0.8\textwidth,
+        height=0.8\textwidth,
+        xlabel={$x$}, x unit={\astronomicalunit},
+        xmin=-1.5, xmax=1.5,
+        xtick={-1,0,1},
+        ylabel={$y$}, y unit={\astronomicalunit},
+        ymin=-1.5, ymax=1.5,
+        ytick={-1,0,1},
+      ]
+
+      \draw[fill=yellow] (axis cs:0,0) circle (2mm);
+      \addlegendimage{only marks,mark=*,black,mark options={scale=2, fill=yellow}}
+      \addlegendentry{Sun}
+
+      \addplot[blue,thick,smooth,->] table[x=earth_x, y=earth_y] {data/3b_verlet.dat};
+      \addlegendentry{Verlet}
+
+      \addplot[red,thick,smooth,->] table[x=earth_x, y=earth_y] {data/3b_euler.dat};
+      \addlegendentry{Euler}
+    \end{axis}
+  \end{tikzpicture}
+
+  \caption{Five-year simulation of the Earth-Sun system, using the Verlet algorithm and Euler's forward algorithm. Sun is not to scale.} \label{fig:3c}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+
+  \tikzpicturedependsonfile{data/3b_verlet.dat}
+  \tikzpicturedependsonfile{data/3b_euler.dat}
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\textwidth,
+        height=0.6\textwidth,
+        xlabel={Time}, x unit={\year},
+        xmin=0, xmax=5,
+        ylabel={Energy}, y unit={\solarmass . \astronomicalunit^2 . \year^{-2}},
+        ymin=-1.5e-4, ymax=1.5e-4,
+        grid=both,
+      ]
+
+      \addplot[blue,dashed,thick,smooth,forget plot] table[x=t, y=K] {data/3b_verlet.dat};
+      \addplot[blue,dotted,thick,smooth,forget plot] table[x=t, y=U] {data/3b_verlet.dat};
+      \addplot[blue,thick,smooth,forget plot] table[x=t, y expr={\thisrow{U}+\thisrow{K}}] {data/3b_verlet.dat};
+
+      \addplot[red,dashed,thick,smooth,forget plot] table[x=t, y=K] {data/3b_euler.dat};
+      \addplot[red,dotted,thick,smooth,forget plot] table[x=t, y=U] {data/3b_euler.dat};
+      \addplot[red,thick,smooth,forget plot] table[x=t, y expr={\thisrow{U}+\thisrow{K}}] {data/3b_euler.dat};
+
+      \addlegendimage{black,dashed,thick} \addlegendentry{Kinetic energy $K$}
+      \addlegendimage{black,dotted,thick} \addlegendentry{Potential energy $U$}
+      \addlegendimage{black,thick} \addlegendentry{Total energy $E$}
+    \end{axis}
+  \end{tikzpicture}
+
+  \caption{Kinetic, potential and total energy of the five-year simulation from figure \ref{fig:3c}. Blue is with Verlet algorithm, red is with Euler's forward algorithm.} \label{fig:3c-E}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+
+  \tikzpicturedependsonfile{data/3b_verlet.dat}
+  \tikzpicturedependsonfile{data/3b_euler.dat}
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\textwidth,
+        height=0.6\textwidth,
+        xlabel={Time}, x unit={\year},
+        xmin=0, xmax=5,
+        ylabel={Total angular momentum}, y unit={\solarmass . \astronomicalunit^2 . \year^{-1}},
+        ymin=0, ymax=4e-5,
+        grid=both,
+      ]
+      \addplot[blue,thick,smooth] table[x=t, y expr={sqrt((\thisrow{Lx})^2+(\thisrow{Ly})^2+(\thisrow{Lz})^2)}] {data/3b_verlet.dat};
+      \addplot[red,thick,smooth] table[x=t, y expr={sqrt((\thisrow{Lx})^2+(\thisrow{Ly})^2+(\thisrow{Lz})^2)}] {data/3b_euler.dat};
+
+      \legend{Verlet,Euler}
+    \end{axis}
+  \end{tikzpicture}
+
+  \caption{Total angular momentum $L$ of the five-year simulation from figure \ref{fig:3c}. Blue is with Verlet algorithm, red is with Euler's forward algorithm.} \label{fig:3c-L}
+\end{figure}
+
+\clearpage
+\subsection{Escape velocity}
+\oppg{d}
+
+Through trial and error (as shown in figure \ref{fig:3d}), I found the best approximation of the escape velocity be
+\begin{align}
+  v_{\mathrm{escape}}
+    &\approx 2\pi \cdot \SI{1.42}{\astronomicalunit . \year^{-1}} \\
+    &\approx \SI{8.92}{\astronomicalunit . \year^{-1}}
+\end{align}
+where $\SI{1}{\astronomicalunit \per \year} \cdot 2 \pi$ is the speed at which a circular orbit would be made.
+
+We know that the gravitational potential energy of Earth, $U(r)$, is
+\begin{equation}
+  U(r) = - \frac{G M M_\sun}{r}
+\end{equation}
+
+If we let $U_\infty = \lim_{r \to \infty} U(r)$ be the potential energy at ``infinity'', we easily see that $U_\infty = 0$. This means that to escape the gravitational well of the sun, we need to have a total energy $E_{\mathrm{tot}} \ge U_\infty$; the escape velocity occurs exactly where $E_{\mathrm{tot}} = U_\infty = 0$.
+
+This means that the escape velocity $v_{\mathrm{escape}}$ is given by the equation:
+\begin{align}
+  \frac{1}{2} M v_{\mathrm{escape}}^2 &- \frac{G M M_\sun}{r} = 0 \\
+\intertext{which when rearranged gives}
+  v_{\mathrm{escape}} &= \sqrt{\frac{2 G M_\sun}{r}} \\
+\intertext{When we insert the quantities $G$, $M_\sun$ and $r$ for the Earth-Sun system, we get}
+  v_{\mathrm{escape}} &= 2 \sqrt{2} \pi \, \si{\astronomicalunit . \year^{-1}}
+    \approx \SI{8.89}{\astronomicalunit . \year^{-1}}
+\end{align}
+which is not far off our earlier approximation.
+
+\begin{figure}[!ht]
+  \centering
+
+  \tikzpicturedependsonfile{data/3d.dat}
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=0.8\textwidth,
+        height=0.8\textwidth,
+        xlabel={$x$}, x unit={\astronomicalunit},
+        xmin=-600, xmax=100,
+        xtick={-600,-450,...,150},
+        minor x tick num=2,
+        ylabel={$y$}, y unit={\astronomicalunit},
+        ymin=-100, ymax=600,
+        ytick={-150,0,...,600},
+        minor y tick num=2,
+        grid=both,
+      ]
+      \addplot[red,thick,smooth,discard if not={v0}{1.40}] table[x=earth_x, y=earth_y] {data/3d.dat};
+      \addplot[purple,thick,smooth,discard if not={v0}{1.41}] table[x=earth_x, y=earth_y] {data/3d.dat};
+      \addplot[blue,thick,smooth,discard if not={v0}{1.42}] table[x=earth_x, y=earth_y] {data/3d.dat};
+      \addplot[cyan,thick,smooth,discard if not={v0}{1.43}] table[x=earth_x, y=earth_y] {data/3d.dat};
+      \addplot[green,thick,smooth,discard if not={v0}{1.44}] table[x=earth_x, y=earth_y] {data/3d.dat};
+
+      \legend{$k = 1.40$,$k = 1.41$,$k = 1.42$,$k = 1.43$,$k = 1.44$}
+    \end{axis}
+  \end{tikzpicture}
+
+  \caption{Plot of a planet's orbit at different initial velocities ${v_0 = 2 \pi k \cdot \SI{1}{\astronomicalunit \per \year}}$.} \label{fig:3d}
+\end{figure}
+
+\clearpage
+\subsection{Earth-Jupiter-Sun system}
+\oppg{e}
+
+We now add a third body, Jupiter, to our simulation. Because of the way we designed the program, this change only needs one or two more lines of code. We try three different ``Jupiters'': one with the realistic mass (\SI{1e-3}{\solarmass}), one with ten times this (\SI{1e-2}{\solarmass}) and one with 1000 times this (\SI{1}{\solarmass}).
+
+As we see in figure \ref{fig:3e}, adding the realistic Jupiter does not significantly affect the orbit of the Earth. If we change the mass of Jupiter to 10 times its real mass, we see that it will disturb Earth's orbit slightly, making it slowly lose speed and move towards the Sun. This will likely cause the Earth to crash into the Sun after a number of years. When we use a mass 1000 times that of Jupiter, Earth's orbit becomes completely unstable, and the Earth will crash into the sun after only a few years.
+
+\begin{figure}[!ht]
+  \centering
+
+  \tikzpicturedependsonfile{data/3b_verlet.dat}
+  \tikzpicturedependsonfile{data/3e.dat}
+  \tikzpicturedependsonfile{data/3e-10.dat}
+  \tikzpicturedependsonfile{data/3e-1000.dat}
+  \begin{tikzpicture}
+    \newsavebox{\pipboxA}
+    \savebox{\pipboxA}{%
+      \begin{tikzpicture}
+        \begin{axis}[
+            axis background/.style={fill=white},
+            width=1.5cm,
+            height=1.5cm,
+            xmin=0.97, xmax=1.03,
+            ymin=-0.03, ymax=0.03,
+            ticks=none,
+            enlargelimits=false,
+            scale only axis,
+          ]
+          \addplot[blue,smooth,->] table[x=earth_x, y=earth_y] {data/3b_verlet.dat};
+        \end{axis}
+      \end{tikzpicture}
+    }
+
+    \newsavebox{\pipboxB}
+    \savebox{\pipboxB}{%
+      \begin{tikzpicture}
+        \begin{axis}[
+            axis background/.style={fill=white},
+            width=1.5cm,
+            height=1.5cm,
+            xmin=0.97, xmax=1.03,
+            ymin=-0.03, ymax=0.03,
+            ticks=none,
+            enlargelimits=false,
+            scale only axis,
+          ]
+          \addplot[blue,smooth,->] table[x=earth_x, y=earth_y] {data/3e.dat};
+        \end{axis}
+      \end{tikzpicture}
+    }
+
+    \newsavebox{\pipboxC}
+    \savebox{\pipboxC}{%
+      \begin{tikzpicture}
+        \begin{axis}[
+            axis background/.style={fill=white},
+            width=1.5cm,
+            height=1.5cm,
+            xmin=0.97, xmax=1.03,
+            ymin=-0.03, ymax=0.03,
+            ticks=none,
+            enlargelimits=false,
+            scale only axis,
+          ]
+          \addplot[blue,smooth,->] table[x=earth_x, y=earth_y] {data/3e-10.dat};
+        \end{axis}
+      \end{tikzpicture}
+    }
+
+    \newsavebox{\pipboxD}
+    \savebox{\pipboxD}{%
+      \begin{tikzpicture}
+        \begin{axis}[
+            axis background/.style={fill=white},
+            width=1.5cm,
+            height=1.5cm,
+            xmin=0.97, xmax=1.03,
+            ymin=-0.03, ymax=0.03,
+            ticks=none,
+            enlargelimits=false,
+            scale only axis,
+          ]
+          \addplot[blue,smooth,->] table[x=earth_x, y=earth_y] {data/3e-1000.dat};
+        \end{axis}
+      \end{tikzpicture}
+    }
+
+    \begin{groupplot}[
+        group style={
+          group size=2 by 2,
+          xlabels at=edge bottom,
+          xticklabels at=edge bottom,
+          ylabels at=edge left,
+          yticklabels at=edge left,
+          % vertical sep=1pt,
+          % horizontal sep=0pt,
+        },
+        width=0.5\textwidth,
+        height=0.5\textwidth,
+        xlabel={$x$ \; / \; \si{\astronomicalunit}},
+        xmin=-2, xmax=2,
+        xtick={-2,-1,...,2},
+        ylabel={$y$ \; / \; \si{\astronomicalunit}},
+        ymin=-2, ymax=2,
+        ytick={-2,-1,...,2},
+      ]
+
+      \nextgroupplot[title={No Jupiter}]
+        \draw[fill=yellow] (axis cs:0,0) circle (2mm);
+        \addlegendimage{only marks,mark=*,black,mark options={scale=2, fill=yellow}}
+        \addlegendentry{Sun}
+
+        \addplot[blue,smooth] table[x=earth_x, y=earth_y] {data/3b_verlet.dat};
+        \addlegendentry{Earth}
+
+        \draw (axis cs:0.97,-0.03) rectangle (axis cs:1.03,0.03);
+        \draw (axis cs:1.03,-0.03) -- (axis cs:1.23,-1.4);
+        \draw (axis cs:1.23,-1.4) node[inner sep=0,outer sep=0] {\usebox{\pipboxA}};
+
+      \nextgroupplot[title={Realistic Jupiter}]
+        \draw[fill=yellow] (axis cs:0,0) circle (2mm);
+        \addlegendimage{only marks,mark=*,black,mark options={scale=2, fill=yellow}}
+        \addlegendentry{Sun}
+
+        \addplot[blue,smooth] table[x=earth_x, y=earth_y] {data/3e.dat};
+        \addlegendentry{Earth}
+
+        \draw (axis cs:0.97,-0.03) rectangle (axis cs:1.03,0.03);
+        \draw (axis cs:1.03,-0.03) -- (axis cs:1.23,-1.4);
+        \draw (axis cs:1.23,-1.4) node[inner sep=0,outer sep=0] {\usebox{\pipboxB}};
+
+      \nextgroupplot[title={$\text{Jupiter} \times 10$}]
+        \draw[fill=yellow] (axis cs:0,0) circle (2mm);
+        \addlegendimage{only marks,mark=*,black,mark options={scale=2, fill=yellow}}
+        \addlegendentry{Sun}
+
+        \addplot[blue,smooth] table[x=earth_x, y=earth_y] {data/3e-10.dat};
+        \addlegendentry{Earth}
+
+        \draw (axis cs:0.97,-0.03) rectangle (axis cs:1.03,0.03);
+        \draw (axis cs:1.03,-0.03) -- (axis cs:1.23,-1.4);
+        \draw (axis cs:1.23,-1.4) node[inner sep=0,outer sep=0] {\usebox{\pipboxC}};
+
+      \nextgroupplot[title={$\text{Jupiter} \times 1000$}]
+        \draw[fill=yellow] (axis cs:0,0) circle (2mm);
+        \addlegendimage{only marks,mark=*,black,mark options={scale=2, fill=yellow}}
+        \addlegendentry{Sun}
+
+        \addplot[blue,smooth] table[x=earth_x, y=earth_y] {data/3e-1000.dat};
+        \addlegendentry{Earth}
+
+        \draw (axis cs:0.97,-0.03) rectangle (axis cs:1.03,0.03);
+        \draw (axis cs:1.03,-0.03) -- (axis cs:1.23,-1.4);
+        \draw (axis cs:1.23,-1.4) node[inner sep=0,outer sep=0] {\usebox{\pipboxD}};
+    \end{groupplot}
+  \end{tikzpicture}
+
+  \caption{Five-year simulation of the Earth-Jupiter-Sun system, with different Jupiter masses. Sun is not to scale.} \label{fig:3e}
+\end{figure}
+
+\clearpage
+\subsection{Complete solar system}
+\oppg{f}
+
+We add all the remaining planets of the solar system, in addition to our own Moon, to the program, and run a simulation for 25 years.
+The paths of all of the planets are visualized in figures \ref{fig:3f-inner} and \ref{fig:3f-outer}.
+
+\begin{figure}[!ht]
+  \centering
+
+  \tikzpicturedependsonfile{data/3f.dat}
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=0.8\textwidth,
+        height=0.8\textwidth,
+        xlabel={$x$}, x unit={\astronomicalunit},
+        xmin=-2, xmax=2,
+        xtick={-2,-1,0,1,2},
+        ylabel={$y$}, y unit={\astronomicalunit},
+        ymin=-2, ymax=2,
+        ytick={-2,-1,0,1,2},
+      ]
+
+      \addplot[orange,ultra thick,smooth,discard if not={body}{0}] table[x=x, y=y] {data/3f.dat};
+      \addlegendentry{Sun}
+
+      \addplot[red!50!black,smooth,discard if not={body}{1}] table[x=x, y=y] {data/3f.dat};
+      \addlegendentry{Mercury}
+
+      \addplot[green!50!black,smooth,discard if not={body}{2}] table[x=x, y=y] {data/3f.dat};
+      \addlegendentry{Venus}
+
+      \addplot[blue,smooth,discard if not={body}{3}] table[x=x, y=y] {data/3f.dat};
+      \addlegendentry{Earth}
+
+      \addplot[red,smooth,discard if not={body}{5}] table[x=x, y=y] {data/3f.dat};
+      \addlegendentry{Mars}
+    \end{axis}
+  \end{tikzpicture}
+
+  \caption{25-year simulation of the inner solar system (Sun, Mercury, Venus, Earth, Mars).} \label{fig:3f-inner}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+
+  \tikzpicturedependsonfile{data/3f.dat}
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=0.8\textwidth,
+        height=0.8\textwidth,
+        xlabel={$x$}, x unit={\astronomicalunit},
+        xmin=-35, xmax=35,
+        xtick={-30,-20,...,30},
+        ylabel={$y$}, y unit={\astronomicalunit},
+        ymin=-35, ymax=35,
+        ytick={-30,-20,...,30},
+        legend style={
+          at={(1.02,1)},
+          anchor=north west,
+        },
+      ]
+
+      \addplot[orange,ultra thick,smooth,discard if not={body}{0}] table[x=x, y=y] {data/3f.dat};
+      \addlegendentry{Sun}
+
+      \addplot[red!50!black,thick,smooth,discard if not={body}{1}] table[x=x, y=y] {data/3f.dat};
+      \addlegendentry{Mercury}
+
+      \addplot[green!50!black,thick,smooth,discard if not={body}{2}] table[x=x, y=y] {data/3f.dat};
+      \addlegendentry{Venus}
+
+      \addplot[blue!50!green,thick,smooth,discard if not={body}{3}] table[x=x, y=y] {data/3f.dat};
+      \addlegendentry{Earth}
+
+      \addplot[red,thick,smooth,discard if not={body}{5}] table[x=x, y=y] {data/3f.dat};
+      \addlegendentry{Mars}
+
+      \addplot[purple,thick,smooth,discard if not={body}{6}] table[x=x, y=y] {data/3f.dat};
+      \addlegendentry{Jupiter}
+
+      \addplot[orange,thick,smooth,discard if not={body}{7}] table[x=x, y=y] {data/3f.dat};
+      \addlegendentry{Saturn}
+
+      \addplot[blue!50,thick,smooth,discard if not={body}{8}] table[x=x, y=y] {data/3f.dat};
+      \addlegendentry{Uranus}
+
+      \addplot[blue,thick,smooth,discard if not={body}{9}] table[x=x, y=y] {data/3f.dat};
+      \addlegendentry{Neptune}
+    \end{axis}
+  \end{tikzpicture}
+
+  \caption{25-year simulation of the outer solar system (Jupiter, Saturn, Uranus, Neptune).} \label{fig:3f-outer}
+\end{figure}
+
+\clearpage
+\subsection{Perihelion precession of Mercury}
+\oppg{g}
+
+We rewrite our simulation to only handle the Mercury-Sun two-body system, with the Sun fixed at the origin. However,
+we modify the gravitational force wih a corrective factor for relativistic effects, so that it becomes
+\begin{equation}
+  F_G = \frac{G M_{\mathrm{mercury}} M_\sun}{r^2} \cdot \left( 1 + \frac{3 \cdot |\vec{r} \times \vec{v}|^2}{r^2 c^2} \right)
+\end{equation}
+
+We then run the simulation and note where Mercury is when it is at perihelion (at speed \SI{12.44}{\astronomicalunit . \year^{-1}}).
+When we do this for normal Newtonian gravity and gravity with relativistic corrections, we see that Mercury is at perihelion at the
+angles shown in figure \ref{fig:3g}.
+
+We see that perihelion with the normal Netwonian gravity barely moves at all, keeping within $\approx \nicefrac{1}{1000}$ of a degree from where it started.
+Even this difference is most likely a result of errors in the numeric calculations we do, and so we can assume that perihelion occurs at the same position every time.
+
+On the other hand, with the relativistically corrected gravity, the angle changes at a rate equal to approximately 0.011 degrees per century; this is very close to
+the 43 arc seconds (0.01194 degrees) per century we already know that Mercury's precession due to general relativity is. This precession can be explain by the fact that general relativity predicts a
+slightly stronger gravitational pull than Newtonian gravity when two bodies are close to each other, which in this case will alter the shape of the orbit slightly, causing a precession of the perihelion.
+
+\begin{figure}[!ht]
+  \centering
+
+  \tikzpicturedependsonfile{data/3g.dat}
+  \begin{tikzpicture}
+    \begin{groupplot}[
+        group style={
+          group size=1 by 2,
+          xlabels at=edge bottom,
+          xticklabels at=edge bottom,
+          ylabels at=edge left,
+          yticklabels at=edge left,
+          vertical sep=1.5cm,
+          % horizontal sep=0pt,
+        },
+        width=\textwidth,
+        height=0.5\textwidth,
+        xmin=0, xmax=100,
+        xlabel={Time $t$ \; / \; \si{\year}},
+        ymin=-1e-2, ymax=3e-2,
+        ylabel={Angle $\theta_p$ at perihelion (degrees)},
+        scaled y ticks = false,
+        y tick label style={
+          /pgf/number format/fixed,
+          /pgf/number format/1000 sep = \thinspace
+        },
+        grid=both,
+      ]
+
+      \nextgroupplot[title={Newtonian gravity}]
+        \addplot[red] table[x=t, y=angle] {data/3g-normal.dat};
+        \addlegendentry{Angle at perihelion}
+
+        \addplot[black,dashed,samples=2,domain=0:100] {0};
+        \addlegendentry{Expected angle at perihelion}
+
+      \nextgroupplot[title={Gravity with general relativistic correction}]
+        \addplot[red] table[x=t, y=angle] {data/3g.dat};
+        \addlegendentry{Angle at perihelion}
+
+        \addplot[black,dashed,samples=2,domain=0:100] {0.0119444*(x/100)};
+        \addlegendentry{Expected angle at perihelion}
+    \end{groupplot}
+  \end{tikzpicture}
+
+  \caption{Angle of Mercury at perihelion as it changes over time, in the case of normal Newtonian gravity (top) and Newtonian gravity with relativistic corrections  (bottom).} \label{fig:3g}
+\end{figure}
+
+\clearpage
+\section{Conclusions}
+
+\clearpage
+\appendix
+\section{Appendix}
+
+All files used in this project can be found at \url{https://github.com/frxstrem/fys3150/tree/master/project3}.
+The following code files are used:
+\begin{enumerate}
+  \item[b)]
+    \begin{itemize}
+      \item \href{https://github.com/frxstrem/fys3150/tree/master/project3/code/3b.cc}{\tt code/3b.cc}
+    \end{itemize}
+
+  \item[d)]
+    \begin{itemize}
+      \item \href{https://github.com/frxstrem/fys3150/tree/master/project3/code/3b.cc}{\tt code/3d.cc}
+    \end{itemize}
+
+  \item[e)]
+    \begin{itemize}
+      \item \href{https://github.com/frxstrem/fys3150/tree/master/project3/code/3b.cc}{\tt code/3e.cc}
+    \end{itemize}
+
+  \item[f)]
+    \begin{itemize}
+      \item \href{https://github.com/frxstrem/fys3150/tree/master/project3/code/3b.cc}{\tt code/3f.cc}
+    \end{itemize}
+
+  \item[g)]
+    \begin{itemize}
+      \item \href{https://github.com/frxstrem/fys3150/tree/master/project3/code/3b.cc}{\tt code/3g.cc}
+    \end{itemize}
+\end{enumerate}
+
+In addition, the following files contains classes used in all of (or most of) the above programs:
+\begin{itemize}
+  \item \href{https://github.com/frxstrem/fys3150/tree/master/project3/code/CelestialBody.cc}{\tt code/CelestialBody.cc}
+    \begin{itemize}
+      \item \texttt{CelestialBody}
+    \end{itemize}
+  \item \href{https://github.com/frxstrem/fys3150/tree/master/project3/code/SolarSystem.cc}{\tt code/SolarSystem.cc}
+    \begin{itemize}
+      \item \texttt{SolarSystem}
+      \item \texttt{RelativisticSolarSystem}
+    \end{itemize}
+  \item \href{https://github.com/frxstrem/fys3150/tree/master/project3/code/Solver.cc}{\tt code/Solver.cc}
+    \begin{itemize}
+      \item \texttt{EulerSolver}
+      \item \texttt{VerletSolver}
+    \end{itemize}
+\end{itemize}
+
+% \clearpage
+% \printbibliography[heading=bibnumbered,title=Bibliography]
+
+\end{document}

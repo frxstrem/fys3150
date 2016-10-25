@@ -1,5 +1,9 @@
-#ifndef VEC3_H
-#define VEC3_H
+/**
+ * From Anders Hafreager's repository
+ * https://github.com/andeplane/solar-system
+**/
+#ifndef VEC3_HH
+#define VEC3_HH
 #include <string>
 #include <vector>
 

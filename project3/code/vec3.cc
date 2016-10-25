@@ -1,4 +1,8 @@
-#include "vec3.h"
+/**
+ * From Anders Hafreager's repository
+ * https://github.com/andeplane/solar-system
+**/
+#include "vec3.hh"
 #include <cmath>
 #include <iostream>
 using namespace std;
