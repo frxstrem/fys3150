@@ -1,0 +1,537 @@
+% standard LaTeX packages
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[margin=3cm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{parskip}
+\usepackage{xifthen,xparse}
+
+% math packages
+\usepackage{mathtools,amsfonts,amssymb,mathdots}
+\usepackage{mathrsfs}
+\usepackage{siunitx}
+\usepackage{physics}
+\usepackage{nicefrac}
+\mathtoolsset{showonlyrefs}
+\DeclareSIUnit{\year}{yr}
+\DeclareSIUnit{\astronomicalunit}{AU}
+\DeclareSIUnit{\solarmass}{M_\odot}
+
+% plotting and tables
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{caption}
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=tikz-,mode=list and make]
+\usepgfplotslibrary{units}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{
+  compat=1.13,
+  scaled x ticks = false,
+  x tick label style={
+    /pgf/number format/fixed,
+    /pgf/number format/1000 sep = \thinspace
+  },
+  scaled y ticks = false,
+  y tick label style={
+    /pgf/number format/fixed,
+    /pgf/number format/1000 sep = \thinspace
+  },
+  legend cell align=left,
+  % unit
+  unit markings=slash space,
+  unit code/.code 2 args=
+    \expandafter\expandafter\expandafter\expandafter
+    \expandafter\expandafter\expandafter\si
+    \expandafter\expandafter\expandafter\expandafter
+    \expandafter\expandafter\expandafter{#2},
+  % legend style={
+  %   at={(1.02,1)},
+  %   anchor=north west,
+  % },
+  filter discard warning=false,
+  unbounded coords=discard,
+  discard if not/.style 2 args={
+    x filter/.code={
+      \edef\tempa{\thisrow{#1}}
+      \edef\tempb{#2}
+      \ifx\tempa\tempb
+      \else
+        \def\pgfmathresult{inf}
+      \fi
+    }
+  },
+}
+
+% bibliography packages
+% \usepackage[backend=bibtex8,style=numeric,autocite=inline,sorting=ynt]{biblatex}
+
+% other packages
+% \usepackage{filecontents}
+\usepackage{marginnote}
+\usepackage{booktabs}
+
+% bibliography
+% \begin{filecontents}{bibliography.bib}
+% \end{filecontents}
+% \addbibresource{bibliography.bib}
+% \nocite{*}
+
+% custom math commands
+\newcommand\V[1]{\mathbf{#1}}                  % vector notation
+\newcommand\M[1]{\begin{bmatrix} #1 \end{bmatrix}} % matrix shorthand
+
+% commands for derivatives/integral dx expressions
+\newcommand\D[1]{{\,\mathrm{d}{#1}}}
+\renewcommand\dd[2][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\mathrm{d}{#2}}%
+    {\mathrm{d}^{#1}{#2}}%
+}}
+\newcommand\df[3][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\frac{\mathrm{d}{#2}}{\mathrm{d}{#3}}}%
+    {\frac{\mathrm{d}^{#1}{#2}}{{\mathrm{d}{#3}^{#1}}}}%
+}}
+\newcommand\pD[1]{{\,\mathrm{d}{#1}}}
+\newcommand\pdd[2][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\parital{#2}}%
+    {\partial^{#1}{#2}}%
+}}
+\newcommand\pdf[3][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\frac{\partial{#2}}{\partial{#3}}}%
+    {\frac{\partial^{#1}{#2}}{{\partial{#3}^{#1}}}}%
+}}
+\let\epsilon\varepsilon
+
+\def\M{\mathscr{M}}
+
+\DeclareDocumentCommand{\reversemarginnote}{ m O{} }{\reversemarginpar\marginnote{#1}[#2]\reversemarginpar}
+\newcommand\oppg[1]{\reversemarginnote{\textcolor{black!40}{#1)}}[2mm]}
+
+\begin{document}
+
+\title{Project 3 - FYS3150 Computational Physics}
+\author{Fredrik Østrem (\texttt{fredost})}
+\date{\today}
+
+\maketitle
+
+% \begin{abstract}
+% \end{abstract}
+
+\tableofcontents
+
+\clearpage
+\section{Introduction}
+In this project, we will look at the Ising model and use it to study phase transistions in magnetic systems. We will implement the Metropolis algorithm to simulate the Ising model of a two-dimensional $L \times L$ spin lattice with periodic boundary conditions and compare our simulated values to analytic expressions for the theoretical values. We will also consider the specific temperatures $t = 1.0$ and $t = 2.4$ (the latter of which is very close to the critical temperature), and look at how the simulations behave at these temperatures and others near the critical temperature.
+
+\section{Methods}
+
+\oppg{a}
+
+We want to find analytical solutions for the expected energy, expected absolute magnetization, specific heat capacity and susceptibility of the $2 \times 2$ lattice Ising model with periodic boundary conditions.
+
+For convenience, we define the ``dimensionless temperature'' $t = \dfrac{k T}{J} = \dfrac{1}{\beta J}$ and $\beta = \dfrac{1}{k T} = \frac{1}{J t}$.
+
+\begin{table}[b]
+  \centering
+
+  \begin{tabular}{llll}
+    \toprule
+    \textbf{Number of spins up} & \textbf{Degeneracy} & \textbf{Energy} & \textbf{Magnetiation} \\
+    \toprule
+    4 & 1 & $-8J$ &  4 \\
+    3 & 4 &    0  &  2 \\
+    2 & 4 &    0  &  0 \\
+    2 & 2 & $ 8J$ &  0 \\
+    1 & 4 &    0  & -2 \\
+    0 & 1 & $-8J$ & -4 \\
+    \hline
+  \end{tabular}
+
+  \caption{Energy and magnetization for the two-dimensional Ising model with $N = 2 \times 2$ spins with periodic boundary conditions. (Table 13.4 in lecture notes.)} \label{tbl:ising2x2p}
+\end{table}
+
+In table \ref{tbl:ising2x2p}, we see the possible states we can have. Looking at this, we can see that the partition function $Z$ is
+\begin{alignat}{4}
+  Z &= \sum_i g(i) e^{-\beta E_i} \\
+    &= 2 e^{8 \beta J} + 12 e^{- 0 \cdot \beta J} + 2 e^{- 8 \beta J} \\
+    &= 2 e^{8 \beta J} + 12 + 2 e^{- 8 \beta J} \\
+    &= 4 \cosh(8 \beta J) + 12 \\
+    &= 4 \cosh(8 / t) + 12
+\end{alignat}
+
+The expected energy is then
+\begin{align}
+  \expval{E} &= \frac{1}{Z} \sum_{i} g(i) E_i e^{- \beta E_i} \\
+    &= - \frac{1}{Z} \df{Z}{\beta} \\
+    &= - \frac{1}{Z} \cdot 32 J \sinh(8 \beta J) \\
+    &= - 8 J \cdot \frac{4 \sinh(8 \beta J)}{4 \cosh(8 \beta J) + 12} \\
+    &= - 8 J \cdot \frac{\sinh(8 \beta J)}{\cosh(8 \beta J) + 3} \\
+    &= - 8 J \cdot \frac{\sinh(8 / t)}{\cosh(8 / t) + 3}
+\end{align}
+
+The expected absolute magnetization is
+\begin{align}
+  \expval{|\M|} &= \frac{1}{Z} \sum_{i} g(i) |\M_i| e^{- \beta E_i} \\
+    &= \frac{1}{Z} \qty( 2 \cdot 4 e^{8 \beta J} + 8 \cdot 2 e^{- 0 \cdot \beta J } + 4 \cdot 0 e^{-0 \cdot \beta J} + 2 \cdot 0 e^{-8 \beta J} ) \\
+    &= \frac{8 e^{8 \beta J} + 16}{4 \cosh( 8 \beta J) + 12} \\
+    % &= \frac{2 \cosh(8 \beta J) + 2 \sinh(8 \beta J) + 4}{\cosh(8 \beta J) + 3} \\
+    &= 2 \qty( 1 + \frac{\sinh(8 \beta J) - 1}{\cosh(8 \beta J) + 3} ) \\
+    &= 2 \qty( 1 + \frac{\sinh(8/t) - 1}{\cosh(8/t) + 3} ) \\
+\end{align}
+
+The specific heat capacity is
+\begin{align}
+  C_V &= \pdf{\expval{E}}{T} \\
+    &= - 8 J \cdot \pdf{}{T} \qty( \frac{\sinh(8 \beta J)}{\cosh(8 \beta J) + 3} ) \\
+    &= - 8 J \cdot \df{\beta}{T} \pdf{}{\beta} \qty( \frac{\sinh(8 \beta J)}{\cosh(8 \beta J) + 3} ) \\
+    &= \frac{64 J^2}{kT^2} \qty( \frac{3 \cosh(8 \beta J) + 1}{(\cosh(8 \beta J) + 3)^2} ) \\
+    &= \frac{64 k}{t^2} \qty( \frac{3 \cosh(8/t) + 1}{(\cosh(8/t) + 3)^2} )
+\end{align}
+(This can also be expressed as $\qty( \expval{E^2} - \expval{E}^2 ) / k T^2$.)
+
+We can calculate the susceptibility with $\chi = \qty( \expval{\M^2} - \expval{\M}^2 ) / k T$.
+\begin{align}
+  \expval{\M} &= 0 \\
+  \expval{\M^2} &= \sum_i g(i) \M_i^2 e^{- \beta E_i} \\
+    &= \frac{1}{Z} \qty( 2 \cdot 4^2 e^{8 \beta J} + 8 \cdot 2^2 e^{- 0 \cdot \beta J } + 4 \cdot 0^2 e^{-0 \cdot \beta J} + 2 \cdot 0^2 e^{-8 \beta J} ) \\
+    &= \frac{32 e^{8 \beta J} + 32}{4 \cosh(8 \beta J) + 12} \\
+    &= \frac{8 e^{8 \beta J} + 8}{\cosh(8 \beta J) + 3} \\
+    % &= 8 \cdot \qty( \frac{\cosh(8 \beta J) +\sinh(8 \beta J) + 1}{\cosh(8 \beta J) + 3} ) \\
+    &= 8 \cdot \qty( 1 + \frac{\sinh(8 \beta J) - 2}{\cosh(8 \beta J) + 3} ) \\
+    &= 8 \cdot \qty( 1 + \frac{\sinh(8/t) - 2}{\cosh(8/t) + 3} ) \\
+\intertext{With this, we see that the susceptibility is}
+  \chi &= \frac{1}{k T} \qty( \expval{\M^2} - \underbrace{\expval{\M}^2}_{= \, 0} ) = \frac{1}{Jt} \expval{\M^2} \\
+    &= \frac{8}{J t} \qty( 1 + \frac{\sinh(8/t) - 2}{\cosh(8/t) + 3} )
+\end{align}
+
+\clearpage
+\section{Results}
+
+\oppg{b}
+We want to compare our analytical results to results we get from a Monte Carlo simulation of the model.
+For this, we implement the following algorithm:
+
+\begin{enumerate}
+  \item Start with a random state.
+  \item For each Monte Carlo cylce:
+    \begin{enumerate}
+      \item Flip a single spin at random.
+      \item Calculate the difference in energy $\Delta{E}$ from the flip.
+      \item If $\Delta{E} \le 0$, accept state.
+      \item If $\Delta{E} \ge 0$, accept state with probability $w = e^{-\beta \Delta{E}}$.
+    \end{enumerate}
+\end{enumerate}
+
+We calculate the average energy, absolute magnetization, specific heat capacity and susceptibility at the end of each Monte Carlo cycle. We see these plotted as a function of temperature $t$, along with the analytic results we got earlier, in figure \ref{fig:b}. When we adjust the total number of Monte Carlo cycles, we see that we need approximately \num{100000} cycles to get results that are close to the analytic results.
+
+% Note: \texttt{default\_random\_engine} is much faster than \texttt{random\_engine}.
+
+\begin{figure}[!ht]
+  \centering
+
+  \begin{tikzpicture}
+    \begin{groupplot}[
+        group style={
+          group size=1 by 4,
+          xlabels at=edge bottom,
+          xticklabels at=edge bottom,
+          ylabels at=edge left,
+          yticklabels at=edge left,
+          vertical sep=5pt,
+        },
+        width=\textwidth,
+        height=0.45\textwidth,
+        xlabel={Temperature $t$},
+        xlabel style={at={(axis description cs:0.5,-0.1)},anchor=north},
+        ylabel style={at={(axis description cs:-0.05,0.5)},anchor=south,align=center},
+        xmin=0, xmax=10,
+        grid=both,
+      ]
+
+      \nextgroupplot[
+        ylabel={Expected \\ energy \\ $\expval{E} \; / \; J$},
+        ymin=-10, ymax=10,
+      ]
+        \addplot[red,domain=0:10,samples=100] ({x},{- 8 * sinh(8 / x) / (cosh(8 / x) + 3)});
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=t,y=E] {code/4b.dat};
+        % \addplot[yellow,only marks,mark=*,mark size=1] table[x=t,y=E] {code/4e-out};
+
+        \legend{Theoretical,Simulated}
+
+      \nextgroupplot[
+        ylabel={Expected \\ magnetization \\ $\expval{|\M|}$},
+        ymin=0, ymax=5,
+      ]
+        \addplot[red,domain=0:10,samples=100] ({x},{2 * (1 + (sinh(8 / x) - 1) / (cosh(8 / x) + 3))});
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=t,y=absM] {code/4b.dat};
+        % \addplot[yellow,only marks,mark=*,mark size=1] table[x=t,y=absM] {code/4e-out};
+
+      \nextgroupplot[
+        ylabel={Heat capacity \\ $C_V \; / \; k$},
+        ymin=0, ymax=2.5,
+      ]
+        \addplot[red,domain=0:10,samples=100] ({x},{64/x^2 * ((3 * cosh(8/x) + 1) / (cosh(8/x)+3)^2)});
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=t,y=Cv] {code/4b.dat};
+        % \addplot[yellow,only marks,mark=*,mark size=1] table[x=t,y=Cv] {code/4e-out};
+
+      \nextgroupplot[
+        ylabel={Susceptibility \\ $\chi \; / \; (1/J)$},
+        ymin=0, ymax=23,
+      ]
+        \addplot[red,domain=0:10,samples=100] ({x},{8/x * (1 + (sinh(8/x)-2) / (cosh(8/x)+3)});
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=t,y=chi] {code/4b.dat};
+        % \addplot[yellow,only marks,mark=*,mark size=1] table[x=t,y=chi] {code/4e-out};
+    \end{groupplot}
+  \end{tikzpicture}
+
+  \caption{Plots that show theoretical and simulated values of $\expval{E}$, $\expval{|\M|}$, $C_V$ and $\chi$ for the Ising model of a $2 \times 2$ square spin lattice, from \textbf{a)} and \textbf{b)}.} \label{fig:b}
+\end{figure}
+
+\oppg{c}
+After this, we study how $\expval{E}$, $\expval{|\M|}$ and the number of accepted states behave as a function of the number of Monte Carlo cycles $n$ in a $20 \times 20$ Ising model, for ordered and random initial states, as we see in figures \ref{fig:c1} and \ref{fig:c2}.
+
+It's worth noting that at temperature $t = 1.0$, the equalibrium point lies almost at the ordered states already, so the model will use many orders of magnitude fewer cycles to achieve equalibrium than by starting at a random initial state. We can also note that the number of accepted state increases linearly with $n$, while the random states only approach the equalibrium and approximately linear number of accepted states after $n \approx \num{e6}$.
+
+At temperature $t = 2.4$, the picture is a bit different, however: the equalibrium energy is about midway between the random inital state (at energy $\approx 0$) and the ordered initial state (at energy $-800J$). This means that both the initial state use an approximately equal number of cycles to reach eqalibrium, after $n \approx \num{e7}$.
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{groupplot}[
+        group style={
+          group size=1 by 3,
+          xlabels at=edge bottom,
+          xticklabels at=edge bottom,
+          ylabels at=edge left,
+          yticklabels at=edge left,
+          vertical sep=5pt,
+        },
+        width=\textwidth,
+        height=0.45\textwidth,
+        xlabel={Monte Carlo cycles $n$},
+        xlabel style={at={(axis description cs:0.5,-0.15)},anchor=north},
+        ylabel style={at={(axis description cs:-0.1,0.5)},anchor=south,align=center},
+        xmin=1, xmax=1e9,
+        xmode=log,
+        grid=both,
+      ]
+
+      \nextgroupplot[
+        ylabel={Mean energy \\ $E \; / \; J$},
+        % ymin=-8.02, ymax=-7.9,
+      ]
+        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=E] {code/4c-1.0-ordered.dat};
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=E] {code/4c-1.0-random.dat};
+
+        \legend{Ordered initial state,Randomized initial state}
+
+      \nextgroupplot[
+        ylabel={Mean abs. magnetization \\ $|\M|$},
+        % ymin=3.95, ymax=4.01,
+      ]
+        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=absM] {code/4c-1.0-ordered.dat};
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=absM] {code/4c-1.0-random.dat};
+
+      \nextgroupplot[
+        ylabel={Accepted states},
+        ymin=1, ymax=1e9, ymode=log,
+        ytick={1e0,1e2,1e4,1e6,1e8},
+      ]
+        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=accepted] {code/4c-1.0-ordered.dat};
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=accepted] {code/4c-1.0-random.dat};
+    \end{groupplot}
+  \end{tikzpicture}
+
+  \caption{Mean energy, mean absolute magnetization and number of accepted states as a function of the number of Monte Carlo cycles for $t = 1.0$.} \label{fig:c1}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{groupplot}[
+        group style={
+          group size=1 by 3,
+          xlabels at=edge bottom,
+          xticklabels at=edge bottom,
+          ylabels at=edge left,
+          yticklabels at=edge left,
+          vertical sep=5pt,
+        },
+        width=\textwidth,
+        height=0.45\textwidth,
+        xlabel={Monte Carlo cycles $n$},
+        xlabel style={at={(axis description cs:0.5,-0.15)},anchor=north},
+        ylabel style={at={(axis description cs:-0.1,0.5)},anchor=south,align=center},
+        xmin=1, xmax=1e9,
+        xmode=log,
+        grid=both,
+      ]
+
+      \nextgroupplot[
+        ylabel={Mean energy \\ $E \; / \; J$},
+        % ymin=-8.02, ymax=-7.9,
+      ]
+        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=E] {code/4c-2.4-ordered.dat};
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=E] {code/4c-2.4-random.dat};
+
+        \legend{Ordered initial state,Randomized initial state}
+
+      \nextgroupplot[
+        ylabel={Mean abs. magnetization \\ $|\M|$},
+        % ymin=3.95, ymax=4.01,
+      ]
+        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=absM] {code/4c-2.4-ordered.dat};
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=absM] {code/4c-2.4-random.dat};
+
+      \nextgroupplot[
+        ylabel={Accepted states},
+        ymin=1, ymax=1e9, ymode=log,
+        ytick={1e0,1e2,1e4,1e6,1e8},
+      ]
+        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=accepted] {code/4c-2.4-ordered.dat};
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=accepted] {code/4c-2.4-random.dat};
+    \end{groupplot}
+  \end{tikzpicture}
+
+  \caption{Mean energy, mean absolute magnetization and number of accepted states as a function of the number of Monte Carlo cycles for $t = 2.4$.} \label{fig:c2}
+\end{figure}
+
+\clearpage
+\oppg{d}
+We can then look at how the probability distribution of the energy states for the same two temperatures ($t = 1.0$ and $t = 2.4$) for the same $20 \times 20$ Ising model. For this, we simply skip ahead until we get a steady state, and then count the number of times each energy level occur during the simulation.
+
+First of all, we note that for $t = 1.0$, the most likely energy level is $-800J$, which is the same as the equalibrium energy level we got for this temperature earlier (see figure \ref{fig:c1}). For $t = 2.4$, the most likely energy level is about $-480J$, which is about the same as the equalibrium level we got for this temperature as well (see figure \ref{fig:c2}).
+
+We can also tell that the probability distribution for $t = 2.4$ is much wider, with a standard deviation that we calculate to be $\sigma_E = 57.04$, while the probability distribution for $t = 1.0$ only has a standard deviation of $\sigma_E = 3.063$. A quick comparision with the plots in figure \ref{fig:c1} and \ref{fig:c2} confirm that these are reasonable numbers.
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{groupplot}[
+        group style={
+          group size=1 by 2,
+          % vertical sep=5pt,
+        },
+        width=\textwidth,
+        height=0.7\textwidth,
+        xlabel={Energy $E \; / \; J$},
+        xlabel style={at={(axis description cs:0.5,-0.15)},anchor=north},
+        ylabel={Probability $P(E)$},
+        ylabel style={at={(axis description cs:-0.1,0.5)},anchor=south,align=center},
+        grid=both,
+      ]
+
+      \nextgroupplot[
+        ymin=0, ymax=1,
+      ]
+        \addplot[blue,mark=*,ycomb] table[x=E,y=P] {code/4d-1.0.dat};
+        \legend{$t = 1.0$}
+
+      \nextgroupplot[
+        ymin=0, ymax=0.05,
+      ]
+        \addplot[red,mark=*,ycomb] table[x=E,y=P] {code/4d-2.4.dat};
+        \legend{$t = 2.4$}
+    \end{groupplot}
+  \end{tikzpicture}
+
+  \centering{Relative frequencies of the different energy levels after a steady state is reached, for temperatures $t = 1.0$ and $t = 2.4$ on a $20 \times 20$ Ising model.} \label{fig:d}
+\end{figure}
+
+\oppg{e}
+We run the Metropolis algorithm for the Ising model at temperatures in the range $t \in [2.0,2.3]$ in temperature steps of $\Delta{t} = 0.005$, for lattices of sizes $L = 40, 60, 100, 140$. For each lattice, we run $\num{100000} \cdot L^2$ Monte Carlo cycles. For the latter half of these cycles (after we assume we have reach a somewhat stable state) we calculate the mean energy $\expval{E}$ and mean absolute magnetization $\expval{|\M|}$, along with the specific heat capacity $C_V$ and susceptibility $\chi$, for each time step. (This took about 2-3 hours to run on 4 processor cores.)
+
+From these results which are shown in figure \ref{fig:e}, we can tell that as the temperature approaches the critical temperature, the number of cycles we used is no longer sufficient to get a stable state, and instead we get big fluctuations from one time step to another. For some reason I can't explain, the heat capacity $C_V$ \emph{decreases} in this interval, although we expect that it increase in this interval; this is unexpected since we know that
+\begin{equation}
+  C_V = \pdf{\expval{E}}{T}
+\end{equation}
+and $\expval{E}$ is definitely increasing more with higher temperature on this interval.
+
+\begin{figure}[!ht]
+  \centering
+
+  \begin{tikzpicture}
+    \begin{groupplot}[
+        group style={
+          group size=1 by 4,
+          xlabels at=edge bottom,
+          xticklabels at=edge bottom,
+          ylabels at=edge left,
+          yticklabels at=edge left,
+          vertical sep=5pt,
+        },
+        width=\textwidth,
+        height=0.45\textwidth,
+        xmin=2.0, xmax=2.3,
+        xlabel={Temperature $t$},
+        xlabel style={at={(axis description cs:0.5,-0.1)},anchor=north},
+        ylabel style={at={(axis description cs:-0.1,0.5)},anchor=south,align=center},
+        legend pos=north west,
+        % grid=both,
+      ]
+
+      \nextgroupplot[
+        ylabel={Expected \\ energy per spin \\ $\expval{E} \; / \; J L^2$},
+        % ymin=-10, ymax=10,
+      ]
+        \addplot[blue,mark=*,mark size=1] table[x=t,y expr={\thisrow{E} / 40^2}] {code/4e-40x40.dat};
+        \addplot[red,mark=*,mark size=1] table[x=t,y expr={\thisrow{E} / 60^2}] {code/4e-60x60.dat};
+        \addplot[purple,mark=*,mark size=1] table[x=t,y expr={\thisrow{E} / 100^2}] {code/4e-100x100.dat};
+        \addplot[green!50!black,mark=*,mark size=1] table[x=t,y expr={\thisrow{E} / 140^2}] {code/4e-140x140.dat};
+
+        \legend{$L=40$,$L=60$,$L=100$,$L=140$}
+
+      \nextgroupplot[
+        ylabel={Expected \\ magnetization per spin \\ $\expval{|\M|} \; / \; L^2$},
+        % ymin=0, ymax=5,
+      ]
+        \addplot[blue,mark=*,mark size=1] table[x=t,y expr={\thisrow{absM} / 40^2}] {code/4e-40x40.dat};
+        \addplot[red,mark=*,mark size=1] table[x=t,y expr={\thisrow{absM} / 60^2}] {code/4e-60x60.dat};
+        \addplot[purple,mark=*,mark size=1] table[x=t,y expr={\thisrow{absM} / 100^2}] {code/4e-100x100.dat};
+        \addplot[green!50!black,mark=*,mark size=1] table[x=t,y expr={\thisrow{absM} / 140^2}] {code/4e-140x140.dat};
+
+      \nextgroupplot[
+        ylabel={Heat capacity \\ per spin squared \\ $C_V \; / \; k L^4$},
+        % ymin=0, ymax=2.5,
+      ]
+        \addplot[blue,mark=*,mark size=1] table[x=t,y expr={\thisrow{Cv} / 40^4}] {code/4e-40x40.dat};
+        \addplot[red,mark=*,mark size=1] table[x=t,y expr={\thisrow{Cv} / 60^4}] {code/4e-60x60.dat};
+        \addplot[purple,mark=*,mark size=1] table[x=t,y expr={\thisrow{Cv} / 100^4}] {code/4e-100x100.dat};
+        \addplot[green!50!black,mark=*,mark size=1] table[x=t,y expr={\thisrow{Cv} / 140^4}] {code/4e-140x140.dat};
+
+      \nextgroupplot[
+        ylabel={Susceptibility \\ per spin squared \\ $\chi \; / \; (L^4/J)$},
+        % ymin=0, ymax=23,
+      ]
+        \addplot[blue,mark=*,mark size=1] table[x=t,y expr={\thisrow{chi} / 40^4}] {code/4e-40x40.dat};
+        \addplot[red,mark=*,mark size=1] table[x=t,y expr={\thisrow{chi} / 60^4}] {code/4e-60x60.dat};
+        \addplot[purple,mark=*,mark size=1] table[x=t,y expr={\thisrow{chi} / 100^4}] {code/4e-100x100.dat};
+        \addplot[green!50!black,mark=*,mark size=1] table[x=t,y expr={\thisrow{chi} / 140^4}] {code/4e-140x140.dat};
+    \end{groupplot}
+  \end{tikzpicture}
+
+  \caption{Plots that show the simulated values of $\expval{E}$, $\expval{|\M|}$, $C_V$ and $\chi$ for the Ising model of a $L \times L$ square spin lattice, where $L = 40,60,100,140$.} \label{fig:e}
+\end{figure}
+
+\oppg{f}
+At this point, if we got the expected curves for $C_V$ in figure \ref{fig:e}, we should have seen spikes in the heat capacity around the critical temperature. We should then have been example to use the equation
+\begin{equation}
+  T_C(L) = a L^{-1/\nu} + T_C(L = \infty) = a L^{-1/\nu} + b
+\end{equation}
+and find a best-fit for the three parameters $a,b,\nu$ (or just $a,b$ if we are assuming $\nu = 1$). The parameter $b$ would then be the critical temperature in the thermodynamical limit $L \to \infty$.
+
+\section{Conclusion}
+
+\appendix
+\clearpage
+\section{Appendix}
+
+\end{document}
