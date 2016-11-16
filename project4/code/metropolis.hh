@@ -7,11 +7,14 @@
 
 template <class Generator>
 bool metropolisStep(IsingState &state, number t, Generator &g) {
+  size_t M = state.M;
+  size_t N = state.N;
+
   // uniform distribution on [0,1]
   std::uniform_real_distribution<> dist(0, 1);
 
   // uniform integer distributions on [0,M) and [0,N)
-  std::uniform_int_distribution<> iDist(0, state.M - 1), jDist(0, state.N - 1);
+  std::uniform_int_distribution<> iDist(0, M - 1), jDist(0, N - 1);
 
   // get random indices to flip
   size_t i = iDist(g);

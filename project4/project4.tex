@@ -215,6 +215,8 @@ We can calculate the susceptibility with $\chi = \qty( \expval{\M^2} - \expval{\
 \clearpage
 \section{Results}
 
+\subsection{Simulation of $2 \times 2$ lattice Ising model}
+
 \oppg{b}
 We want to compare our analytical results to results we get from a Monte Carlo simulation of the model.
 For this, we implement the following algorithm:
@@ -261,8 +263,8 @@ We calculate the average energy, absolute magnetization, specific heat capacity 
         ymin=-10, ymax=10,
       ]
         \addplot[red,domain=0:10,samples=100] ({x},{- 8 * sinh(8 / x) / (cosh(8 / x) + 3)});
-        \addplot[blue,only marks,mark=*,mark size=1] table[x=t,y=E] {code/4b.dat};
-        % \addplot[yellow,only marks,mark=*,mark size=1] table[x=t,y=E] {code/4e-out};
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=t,y=E] {data/4b.dat};
+        % \addplot[yellow,only marks,mark=*,mark size=1] table[x=t,y=E] {data/4e-out};
 
         \legend{Theoretical,Simulated}
 
@@ -271,30 +273,31 @@ We calculate the average energy, absolute magnetization, specific heat capacity 
         ymin=0, ymax=5,
       ]
         \addplot[red,domain=0:10,samples=100] ({x},{2 * (1 + (sinh(8 / x) - 1) / (cosh(8 / x) + 3))});
-        \addplot[blue,only marks,mark=*,mark size=1] table[x=t,y=absM] {code/4b.dat};
-        % \addplot[yellow,only marks,mark=*,mark size=1] table[x=t,y=absM] {code/4e-out};
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=t,y=absM] {data/4b.dat};
+        % \addplot[yellow,only marks,mark=*,mark size=1] table[x=t,y=absM] {data/4e-out};
 
       \nextgroupplot[
         ylabel={Heat capacity \\ $C_V \; / \; k$},
         ymin=0, ymax=2.5,
       ]
         \addplot[red,domain=0:10,samples=100] ({x},{64/x^2 * ((3 * cosh(8/x) + 1) / (cosh(8/x)+3)^2)});
-        \addplot[blue,only marks,mark=*,mark size=1] table[x=t,y=Cv] {code/4b.dat};
-        % \addplot[yellow,only marks,mark=*,mark size=1] table[x=t,y=Cv] {code/4e-out};
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=t,y=Cv] {data/4b.dat};
+        % \addplot[yellow,only marks,mark=*,mark size=1] table[x=t,y=Cv] {data/4e-out};
 
       \nextgroupplot[
         ylabel={Susceptibility \\ $\chi \; / \; (1/J)$},
         ymin=0, ymax=23,
       ]
         \addplot[red,domain=0:10,samples=100] ({x},{8/x * (1 + (sinh(8/x)-2) / (cosh(8/x)+3)});
-        \addplot[blue,only marks,mark=*,mark size=1] table[x=t,y=chi] {code/4b.dat};
-        % \addplot[yellow,only marks,mark=*,mark size=1] table[x=t,y=chi] {code/4e-out};
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=t,y=chi] {data/4b.dat};
+        % \addplot[yellow,only marks,mark=*,mark size=1] table[x=t,y=chi] {data/4e-out};
     \end{groupplot}
   \end{tikzpicture}
 
   \caption{Plots that show theoretical and simulated values of $\expval{E}$, $\expval{|\M|}$, $C_V$ and $\chi$ for the Ising model of a $2 \times 2$ square spin lattice, from \textbf{a)} and \textbf{b)}.} \label{fig:b}
 \end{figure}
 
+\subsection{Evolution by number of Monte Carlo cycles}
 \oppg{c}
 After this, we study how $\expval{E}$, $\expval{|\M|}$ and the number of accepted states behave as a function of the number of Monte Carlo cycles $n$ in a $20 \times 20$ Ising model, for ordered and random initial states, as we see in figures \ref{fig:c1} and \ref{fig:c2}.
 
@@ -328,8 +331,8 @@ At temperature $t = 2.4$, the picture is a bit different, however: the equalibri
         ylabel={Mean energy \\ $E \; / \; J$},
         % ymin=-8.02, ymax=-7.9,
       ]
-        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=E] {code/4c-1.0-ordered.dat};
-        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=E] {code/4c-1.0-random.dat};
+        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=E] {data/4c-1.0-ordered.dat};
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=E] {data/4c-1.0-random.dat};
 
         \legend{Ordered initial state,Randomized initial state}
 
@@ -337,16 +340,16 @@ At temperature $t = 2.4$, the picture is a bit different, however: the equalibri
         ylabel={Mean abs. magnetization \\ $|\M|$},
         % ymin=3.95, ymax=4.01,
       ]
-        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=absM] {code/4c-1.0-ordered.dat};
-        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=absM] {code/4c-1.0-random.dat};
+        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=absM] {data/4c-1.0-ordered.dat};
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=absM] {data/4c-1.0-random.dat};
 
       \nextgroupplot[
         ylabel={Accepted states},
         ymin=1, ymax=1e9, ymode=log,
         ytick={1e0,1e2,1e4,1e6,1e8},
       ]
-        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=accepted] {code/4c-1.0-ordered.dat};
-        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=accepted] {code/4c-1.0-random.dat};
+        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=accepted] {data/4c-1.0-ordered.dat};
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=accepted] {data/4c-1.0-random.dat};
     \end{groupplot}
   \end{tikzpicture}
 
@@ -379,8 +382,8 @@ At temperature $t = 2.4$, the picture is a bit different, however: the equalibri
         ylabel={Mean energy \\ $E \; / \; J$},
         % ymin=-8.02, ymax=-7.9,
       ]
-        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=E] {code/4c-2.4-ordered.dat};
-        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=E] {code/4c-2.4-random.dat};
+        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=E] {data/4c-2.4-ordered.dat};
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=E] {data/4c-2.4-random.dat};
 
         \legend{Ordered initial state,Randomized initial state}
 
@@ -388,16 +391,16 @@ At temperature $t = 2.4$, the picture is a bit different, however: the equalibri
         ylabel={Mean abs. magnetization \\ $|\M|$},
         % ymin=3.95, ymax=4.01,
       ]
-        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=absM] {code/4c-2.4-ordered.dat};
-        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=absM] {code/4c-2.4-random.dat};
+        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=absM] {data/4c-2.4-ordered.dat};
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=absM] {data/4c-2.4-random.dat};
 
       \nextgroupplot[
         ylabel={Accepted states},
         ymin=1, ymax=1e9, ymode=log,
         ytick={1e0,1e2,1e4,1e6,1e8},
       ]
-        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=accepted] {code/4c-2.4-ordered.dat};
-        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=accepted] {code/4c-2.4-random.dat};
+        \addplot[red,only marks,mark=*,mark size=1] table[x=n,y=accepted] {data/4c-2.4-ordered.dat};
+        \addplot[blue,only marks,mark=*,mark size=1] table[x=n,y=accepted] {data/4c-2.4-random.dat};
     \end{groupplot}
   \end{tikzpicture}
 
@@ -405,6 +408,7 @@ At temperature $t = 2.4$, the picture is a bit different, however: the equalibri
 \end{figure}
 
 \clearpage
+\section{Probability distributions}
 \oppg{d}
 We can then look at how the probability distribution of the energy states for the same two temperatures ($t = 1.0$ and $t = 2.4$) for the same $20 \times 20$ Ising model. For this, we simply skip ahead until we get a steady state, and then count the number of times each energy level occur during the simulation.
 
@@ -432,13 +436,13 @@ We can also tell that the probability distribution for $t = 2.4$ is much wider, 
       \nextgroupplot[
         ymin=0, ymax=1,
       ]
-        \addplot[blue,mark=*,ycomb] table[x=E,y=P] {code/4d-1.0.dat};
+        \addplot[blue,mark=*,ycomb] table[x=E,y=P] {data/4d-1.0.dat};
         \legend{$t = 1.0$}
 
       \nextgroupplot[
         ymin=0, ymax=0.05,
       ]
-        \addplot[red,mark=*,ycomb] table[x=E,y=P] {code/4d-2.4.dat};
+        \addplot[red,mark=*,ycomb] table[x=E,y=P] {data/4d-2.4.dat};
         \legend{$t = 2.4$}
     \end{groupplot}
   \end{tikzpicture}
@@ -446,6 +450,7 @@ We can also tell that the probability distribution for $t = 2.4$ is much wider, 
   \centering{Relative frequencies of the different energy levels after a steady state is reached, for temperatures $t = 1.0$ and $t = 2.4$ on a $20 \times 20$ Ising model.} \label{fig:d}
 \end{figure}
 
+\subsection{Numerical studies of phase transitions}
 \oppg{e}
 We run the Metropolis algorithm for the Ising model at temperatures in the range $t \in [2.0,2.3]$ in temperature steps of $\Delta{t} = 0.005$, for lattices of sizes $L = 40, 60, 100, 140$. For each lattice, we run $\num{100000} \cdot L^2$ Monte Carlo cycles. For the latter half of these cycles (after we assume we have reach a somewhat stable state) we calculate the mean energy $\expval{E}$ and mean absolute magnetization $\expval{|\M|}$, along with the specific heat capacity $C_V$ and susceptibility $\chi$, for each time step. (This took about 2-3 hours to run on 4 processor cores.)
 
@@ -453,7 +458,7 @@ From these results which are shown in figure \ref{fig:e}, we can tell that as th
 \begin{equation}
   C_V = \pdf{\expval{E}}{T}
 \end{equation}
-and $\expval{E}$ is definitely increasing more with higher temperature on this interval.
+and $\expval{E}$ is definitely increasing more with higher temperature on this interval, and we also expect it to have a maximum close to the critical temperature (at $t = 2.269$ if we assume $\nu = 1$), which we don't see.
 
 \begin{figure}[!ht]
   \centering
@@ -482,10 +487,10 @@ and $\expval{E}$ is definitely increasing more with higher temperature on this i
         ylabel={Expected \\ energy per spin \\ $\expval{E} \; / \; J L^2$},
         % ymin=-10, ymax=10,
       ]
-        \addplot[blue,mark=*,mark size=1] table[x=t,y expr={\thisrow{E} / 40^2}] {code/4e-40x40.dat};
-        \addplot[red,mark=*,mark size=1] table[x=t,y expr={\thisrow{E} / 60^2}] {code/4e-60x60.dat};
-        \addplot[purple,mark=*,mark size=1] table[x=t,y expr={\thisrow{E} / 100^2}] {code/4e-100x100.dat};
-        \addplot[green!50!black,mark=*,mark size=1] table[x=t,y expr={\thisrow{E} / 140^2}] {code/4e-140x140.dat};
+        \addplot[blue,mark=*,mark size=1] table[x=t,y expr={\thisrow{E} / 40^2}] {data/4e-40x40.dat};
+        \addplot[red,mark=*,mark size=1] table[x=t,y expr={\thisrow{E} / 60^2}] {data/4e-60x60.dat};
+        \addplot[purple,mark=*,mark size=1] table[x=t,y expr={\thisrow{E} / 100^2}] {data/4e-100x100.dat};
+        \addplot[green!50!black,mark=*,mark size=1] table[x=t,y expr={\thisrow{E} / 140^2}] {data/4e-140x140.dat};
 
         \legend{$L=40$,$L=60$,$L=100$,$L=140$}
 
@@ -493,28 +498,28 @@ and $\expval{E}$ is definitely increasing more with higher temperature on this i
         ylabel={Expected \\ magnetization per spin \\ $\expval{|\M|} \; / \; L^2$},
         % ymin=0, ymax=5,
       ]
-        \addplot[blue,mark=*,mark size=1] table[x=t,y expr={\thisrow{absM} / 40^2}] {code/4e-40x40.dat};
-        \addplot[red,mark=*,mark size=1] table[x=t,y expr={\thisrow{absM} / 60^2}] {code/4e-60x60.dat};
-        \addplot[purple,mark=*,mark size=1] table[x=t,y expr={\thisrow{absM} / 100^2}] {code/4e-100x100.dat};
-        \addplot[green!50!black,mark=*,mark size=1] table[x=t,y expr={\thisrow{absM} / 140^2}] {code/4e-140x140.dat};
+        \addplot[blue,mark=*,mark size=1] table[x=t,y expr={\thisrow{absM} / 40^2}] {data/4e-40x40.dat};
+        \addplot[red,mark=*,mark size=1] table[x=t,y expr={\thisrow{absM} / 60^2}] {data/4e-60x60.dat};
+        \addplot[purple,mark=*,mark size=1] table[x=t,y expr={\thisrow{absM} / 100^2}] {data/4e-100x100.dat};
+        \addplot[green!50!black,mark=*,mark size=1] table[x=t,y expr={\thisrow{absM} / 140^2}] {data/4e-140x140.dat};
 
       \nextgroupplot[
         ylabel={Heat capacity \\ per spin squared \\ $C_V \; / \; k L^4$},
         % ymin=0, ymax=2.5,
       ]
-        \addplot[blue,mark=*,mark size=1] table[x=t,y expr={\thisrow{Cv} / 40^4}] {code/4e-40x40.dat};
-        \addplot[red,mark=*,mark size=1] table[x=t,y expr={\thisrow{Cv} / 60^4}] {code/4e-60x60.dat};
-        \addplot[purple,mark=*,mark size=1] table[x=t,y expr={\thisrow{Cv} / 100^4}] {code/4e-100x100.dat};
-        \addplot[green!50!black,mark=*,mark size=1] table[x=t,y expr={\thisrow{Cv} / 140^4}] {code/4e-140x140.dat};
+        \addplot[blue,mark=*,mark size=1] table[x=t,y expr={\thisrow{Cv} / 40^4}] {data/4e-40x40.dat};
+        \addplot[red,mark=*,mark size=1] table[x=t,y expr={\thisrow{Cv} / 60^4}] {data/4e-60x60.dat};
+        \addplot[purple,mark=*,mark size=1] table[x=t,y expr={\thisrow{Cv} / 100^4}] {data/4e-100x100.dat};
+        \addplot[green!50!black,mark=*,mark size=1] table[x=t,y expr={\thisrow{Cv} / 140^4}] {data/4e-140x140.dat};
 
       \nextgroupplot[
         ylabel={Susceptibility \\ per spin squared \\ $\chi \; / \; (L^4/J)$},
         % ymin=0, ymax=23,
       ]
-        \addplot[blue,mark=*,mark size=1] table[x=t,y expr={\thisrow{chi} / 40^4}] {code/4e-40x40.dat};
-        \addplot[red,mark=*,mark size=1] table[x=t,y expr={\thisrow{chi} / 60^4}] {code/4e-60x60.dat};
-        \addplot[purple,mark=*,mark size=1] table[x=t,y expr={\thisrow{chi} / 100^4}] {code/4e-100x100.dat};
-        \addplot[green!50!black,mark=*,mark size=1] table[x=t,y expr={\thisrow{chi} / 140^4}] {code/4e-140x140.dat};
+        \addplot[blue,mark=*,mark size=1] table[x=t,y expr={\thisrow{chi} / 40^4}] {data/4e-40x40.dat};
+        \addplot[red,mark=*,mark size=1] table[x=t,y expr={\thisrow{chi} / 60^4}] {data/4e-60x60.dat};
+        \addplot[purple,mark=*,mark size=1] table[x=t,y expr={\thisrow{chi} / 100^4}] {data/4e-100x100.dat};
+        \addplot[green!50!black,mark=*,mark size=1] table[x=t,y expr={\thisrow{chi} / 140^4}] {data/4e-140x140.dat};
     \end{groupplot}
   \end{tikzpicture}
 
@@ -528,10 +533,13 @@ At this point, if we got the expected curves for $C_V$ in figure \ref{fig:e}, we
 \end{equation}
 and find a best-fit for the three parameters $a,b,\nu$ (or just $a,b$ if we are assuming $\nu = 1$). The parameter $b$ would then be the critical temperature in the thermodynamical limit $L \to \infty$.
 
+\clearpage
 \section{Conclusion}
+In this project, we have tried to model phase transitions in a magnetic material by using the Ising model. The initial results for the $2 \times 2$ lattice were promising and matched the analytic, but when we later tried to use the same code for lattices, we didn't get the expected results, especially with respect to the heat capacity and susceptibility, so that we're unable to use this to calculate the critical temperature. I suspect this is because of some error in the implementation of the algorithm, but I cannot find what it is that causes this. Regardless of this, we can still see that the algorithm becomes much less accurate around the critical temperature.
 
 \appendix
-\clearpage
 \section{Appendix}
+
+All the code and data files used for this project can be found at \url{https://github.com/frxstrem/fys3150/tree/master/project4/code} and \url{https://github.com/frxstrem/fys3150/tree/master/project4/data}, respectively.
 
 \end{document}
