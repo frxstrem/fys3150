@@ -1,0 +1,237 @@
+% standard LaTeX packages
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[margin=3cm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{parskip}
+\usepackage{xifthen,xparse}
+
+% math packages
+\usepackage{mathtools,amsfonts,amssymb,mathdots}
+\usepackage{mathrsfs}
+\usepackage{siunitx}
+\usepackage{physics}
+\usepackage{nicefrac}
+\mathtoolsset{showonlyrefs}
+\DeclareSIUnit{\year}{yr}
+\DeclareSIUnit{\astronomicalunit}{AU}
+\DeclareSIUnit{\solarmass}{M_\odot}
+
+% plotting and tables
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepackage{caption}
+% \usepgfplotslibrary{external}
+% \tikzexternalize[prefix=tikz-,mode=list and make]
+\usepgfplotslibrary{units}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{
+  compat=1.13,
+  scaled x ticks = false,
+  x tick label style={
+    /pgf/number format/fixed,
+    /pgf/number format/1000 sep = \thinspace
+  },
+  scaled y ticks = false,
+  y tick label style={
+    /pgf/number format/fixed,
+    /pgf/number format/1000 sep = \thinspace
+  },
+  legend cell align=left,
+  % unit
+  unit markings=slash space,
+  unit code/.code 2 args=
+    \expandafter\expandafter\expandafter\expandafter
+    \expandafter\expandafter\expandafter\si
+    \expandafter\expandafter\expandafter\expandafter
+    \expandafter\expandafter\expandafter{#2},
+  % legend style={
+  %   at={(1.02,1)},
+  %   anchor=north west,
+  % },
+  filter discard warning=false,
+  unbounded coords=discard,
+}
+
+% bibliography packages
+% \usepackage[backend=bibtex8,style=numeric,autocite=inline,sorting=ynt]{biblatex}
+
+% other packages
+% \usepackage{filecontents}
+\usepackage{marginnote}
+\usepackage{booktabs}
+
+% bibliography
+% \begin{filecontents}{bibliography.bib}
+% \end{filecontents}
+% \addbibresource{bibliography.bib}
+% \nocite{*}
+
+% custom math commands
+\newcommand\V[1]{\mathbf{#1}}                  % vector notation
+\newcommand\M[1]{\begin{bmatrix} #1 \end{bmatrix}} % matrix shorthand
+
+% commands for derivatives/integral dx expressions
+\newcommand\D[1]{{\,\mathrm{d}{#1}}}
+\renewcommand\dd[2][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\mathrm{d}{#2}}%
+    {\mathrm{d}^{#1}{#2}}%
+}}
+\newcommand\df[3][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\frac{\mathrm{d}{#2}}{\mathrm{d}{#3}}}%
+    {\frac{\mathrm{d}^{#1}{#2}}{{\mathrm{d}{#3}^{#1}}}}%
+}}
+\newcommand\pD[1]{{\,\mathrm{d}{#1}}}
+\newcommand\pdd[2][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\parital{#2}}%
+    {\partial^{#1}{#2}}%
+}}
+\newcommand\pdf[3][]{{%
+  \ifthenelse{\isempty{#1}}%
+    {\frac{\partial{#2}}{\partial{#3}}}%
+    {\frac{\partial^{#1}{#2}}{{\partial{#3}^{#1}}}}%
+}}
+\let\epsilon\varepsilon
+
+\def\M{\mathscr{M}}
+
+\DeclareDocumentCommand{\reversemarginnote}{ m O{} }{\reversemarginpar\marginnote{#1}[#2]\reversemarginpar}
+\newcommand\oppg[1]{\reversemarginnote{\textcolor{black!40}{#1)}}[2mm]}
+
+\begin{document}
+
+\title{Project 5 - FYS3150 Computational Physics}
+\author{Fredrik Østrem (\texttt{fredost})}
+\date{\today}
+
+\maketitle
+
+\begin{abstract}
+  \textit{Abstract}
+\end{abstract}
+
+\tableofcontents
+
+\clearpage
+
+\section{Introduction}
+
+At equalibrium, we know that the distribution of the money is given by the Gibbs distribution,
+\begin{equation}
+  w_m = \beta \exp(-\beta m)
+\end{equation}
+where $\beta = \expval{m}^{-1} = m_0^{-1}$. The variance of the Gibbs distribution is $\sigma_m^2 = \beta^{-2} = m_0^2$, so we can compare the variance of the distribution with this ``equalibrium variance'' and use that as a criterion for being at equalibrium.
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\textwidth,
+        height=\textwidth,
+        xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
+        xmin=0, xmax=6,
+        xtick={0,1,...,6},
+        ylabel={Relative frequencies $w_m \Delta{m}$},
+        ymin=0, ymax=0.01,
+        ytick={0,1e-3,2e-3,3e-3,4e-3,5e-3,6e-3,7e-3,8e-3,9e-3,10e-3},
+        y tick label style={
+          /pgf/number format/fixed,
+          /pgf/number format/fixed zerofill,
+          /pgf/number format/precision=3,
+          /pgf/number format/1000 sep = \thinspace
+        },
+      ]
+      \addplot+[ybar interval,forget plot,draw=none,fill=blue!30,no marks] table[x=m_start,y=relcount] {code/5a.dat};
+        \addlegendimage{blue!30}
+        \addlegendentry{Simulation}
+
+      \addplot[red,thick,domain=0:10,samples=100] {0.01 * exp(-x)};
+        \addlegendentry{$0.01 e^{-x}$}
+    \end{axis}
+  \end{tikzpicture}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\textwidth,
+        height=\textwidth,
+        xlabel={Number of transactions},
+        xmin=1e0, xmax=1e7,
+        xmode=log,
+        ylabel={Variance},
+        ymin=0, ymax=2,
+      ]
+      \addplot[blue] table[x=k,y=V] {code/5a-equalibrium.dat};
+        \addlegendentry{Simulation variance}
+
+      \addplot[black,dashed,domain=1:1e7,samples=2] {1};
+        \addlegendentry{Ideal variance $V = m_0^2$}
+    \end{axis}
+  \end{tikzpicture}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\textwidth,
+        height=\textwidth,
+        xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
+        xmin=0, xmax=10,
+        xtick={0,1,...,10},
+        ylabel={Relative frequencies $w_m \Delta{m}$},
+        ymin=1e-7, ymax=1e-2,
+        ymode=log,
+      ]
+      \addplot[blue!30,forget plot] table[x=m_start,y=relcount] {code/5a.dat};
+        \addlegendimage{blue!30}
+        \addlegendentry{Simulation}
+
+      \addplot[red,thick,domain=0:10,samples=100] {0.01 * exp(-x)};
+        \addlegendentry{$0.01 e^{-x}$}
+
+      \addplot[black,dotted,forget plot,domain=0:10,samples=2] {1 / 500000};
+    \end{axis}
+  \end{tikzpicture}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\textwidth,
+        height=\textwidth,
+        xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
+        xmin=0, xmax=6,
+        xtick={0,1,...,6},
+        ylabel={Relative frequencies $w_m \Delta{m}$},
+        ymin=0, ymax=0.03,
+        ytick={0,0.005,...,0.030,0.030},
+        y tick label style={
+          /pgf/number format/fixed,
+          /pgf/number format/fixed zerofill,
+          /pgf/number format/precision=3,
+          /pgf/number format/1000 sep = \thinspace
+        },
+      ]
+      \addplot[blue] table[x=m_start,y=relcount] {code/5c-0.25.dat};
+        \addlegendentry{Simulation $\lambda = 0.25$}
+
+      \addplot[red] table[x=m_start,y=relcount] {code/5c-0.5.dat};
+        \addlegendentry{Simulation $\lambda = 0.50$}
+
+      \addplot[purple] table[x=m_start,y=relcount] {code/5c-0.9.dat};
+        \addlegendentry{Simulation $\lambda = 0.90$}
+    \end{axis}
+  \end{tikzpicture}
+\end{figure}
+
+\end{document}
