@@ -24,8 +24,8 @@
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
 \usepackage{caption}
-% \usepgfplotslibrary{external}
-% \tikzexternalize[prefix=tikz-,mode=list and make]
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=tikz-,mode=list and make]
 \usepgfplotslibrary{units}
 \usepgfplotslibrary{groupplots}
 \pgfplotsset{
@@ -122,11 +122,18 @@
 
 \section{Introduction}
 
-At equalibrium, we know that the distribution of the money is given by the Gibbs distribution,
+% At equalibrium, we know that the distribution of the money is given by the Gibbs distribution,
+% \begin{equation}
+%   w_m = \beta \exp(-\beta m)
+% \end{equation}
+% where $\beta = \expval{m}^{-1} = m_0^{-1}$. The variance of the Gibbs distribution is $\sigma_m^2 = \beta^{-2} = m_0^2$, so we can compare the variance of the distribution with this ``equalibrium variance'' and use that as a criterion for being at equalibrium.
+
+\oppg{a,b}
+We start the simulation with the simplest model: Initial amount $m_0 = 1$ with no saving ($\lambda = 1$) and no preference for transaction partners ($\alpha = 0, \gamma = 0$). In this case, we expect the Gibbs distribution
 \begin{equation}
   w_m = \beta \exp(-\beta m)
 \end{equation}
-where $\beta = \expval{m}^{-1} = m_0^{-1}$. The variance of the Gibbs distribution is $\sigma_m^2 = \beta^{-2} = m_0^2$, so we can compare the variance of the distribution with this ``equalibrium variance'' and use that as a criterion for being at equalibrium.
+where $\beta = \expval{m}^{-1} = m_0^{-1}$.
 
 \begin{figure}[!ht]
   \centering
@@ -155,6 +162,8 @@ where $\beta = \expval{m}^{-1} = m_0^{-1}$. The variance of the Gibbs distributi
         \addlegendentry{$0.01 e^{-x}$}
     \end{axis}
   \end{tikzpicture}
+
+  \caption{} \label{fig:a}
 \end{figure}
 
 \begin{figure}[!ht]
@@ -169,8 +178,14 @@ where $\beta = \expval{m}^{-1} = m_0^{-1}$. The variance of the Gibbs distributi
         ylabel={Variance},
         ymin=0, ymax=2,
       ]
-      \addplot[blue] table[x=k,y=V] {code/5a-equalibrium.dat};
-        \addlegendentry{Simulation variance}
+      \addplot[blue] table[x=k,y=V] {code/5a-equalibrium-100.dat};
+        \addlegendentry{Simulation variance ($ N = 100 $)}
+      \addplot[purple] table[x=k,y=V] {code/5a-equalibrium-250.dat};
+        \addlegendentry{Simulation variance ($ N = 250 $)}
+      \addplot[red] table[x=k,y=V] {code/5a-equalibrium-500.dat};
+        \addlegendentry{Simulation variance ($ N = 500 $)}
+      \addplot[orange] table[x=k,y=V] {code/5a-equalibrium-1000.dat};
+        \addlegendentry{Simulation variance ($ N = 1000 $)}
 
       \addplot[black,dashed,domain=1:1e7,samples=2] {1};
         \addlegendentry{Ideal variance $V = m_0^2$}
@@ -233,5 +248,199 @@ where $\beta = \expval{m}^{-1} = m_0^{-1}$. The variance of the Gibbs distributi
     \end{axis}
   \end{tikzpicture}
 \end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{groupplot}[
+        group style={
+          group size=1 by 2,
+          xlabels at=edge bottom,
+          xticklabels at=edge bottom,
+          ylabels at=edge left,
+          yticklabels at=edge left,
+          vertical sep=10pt,
+        },
+        width=\textwidth,
+        height=0.45\textwidth,
+        xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
+        xmin=0, xmax=2,
+        ylabel={Relative frequencies $w_m \Delta{m}$},
+        ymin=0, ymax=0.04,
+        ytick={0,0.005,...,0.040,0.040},
+        y tick label style={
+          /pgf/number format/fixed,
+          /pgf/number format/fixed zerofill,
+          /pgf/number format/precision=3,
+          /pgf/number format/1000 sep = \thinspace
+        },
+      ]
+
+      \nextgroupplot[]
+        \addplot[black,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5a.dat};
+          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 0.0$}
+        \addplot[blue,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N500-l0.00-a0.5.dat};
+          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 0.5$}
+        \addplot[purple,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N500-l0.00-a1.0.dat};
+          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 1.0$}
+        \addplot[red,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N500-l0.00-a1.5.dat};
+          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 1.5$}
+        \addplot[orange,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N500-l0.00-a2.0.dat};
+          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 2.0$}
+
+      \nextgroupplot[]
+        \addplot[black,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5c-0.25.dat};
+          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 0.0$}
+        \addplot[blue,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N500-l0.25-a0.5.dat};
+          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 0.5$}
+        \addplot[purple,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N500-l0.25-a1.0.dat};
+          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 1.0$}
+        \addplot[red,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N500-l0.25-a1.5.dat};
+          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 1.5$}
+        \addplot[orange,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N500-l0.25-a2.0.dat};
+          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 2.0$}
+    \end{groupplot}
+  \end{tikzpicture}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{groupplot}[
+        group style={
+          group size=1 by 2,
+          xlabels at=edge bottom,
+          xticklabels at=edge bottom,
+          ylabels at=edge left,
+          yticklabels at=edge left,
+          vertical sep=10pt,
+        },
+        width=\textwidth,
+        height=0.45\textwidth,
+        xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
+        xmin=0, xmax=2,
+        ylabel={Relative frequencies $w_m \Delta{m}$},
+        ymin=0, ymax=0.04,
+        ytick={0,0.005,...,0.040,0.040},
+        y tick label style={
+          /pgf/number format/fixed,
+          /pgf/number format/fixed zerofill,
+          /pgf/number format/precision=3,
+          /pgf/number format/1000 sep = \thinspace
+        },
+      ]
+
+      \nextgroupplot[]
+        % \addplot[black,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5a.dat};
+        %   \addlegendentry{Simulation $\lambda = 0.00, \alpha = 0.0$}
+        \addplot[blue,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N1000-l0.00-a0.5.dat};
+          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 0.5$}
+        \addplot[purple,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N1000-l0.00-a1.0.dat};
+          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 1.0$}
+        \addplot[red,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N1000-l0.00-a1.5.dat};
+          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 1.5$}
+        \addplot[orange,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N1000-l0.00-a2.0.dat};
+          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 2.0$}
+
+      \nextgroupplot[]
+        % \addplot[black,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5c-0.25.dat};
+        %   \addlegendentry{Simulation $\lambda = 0.25, \alpha = 0.0$}
+        \addplot[blue,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N1000-l0.25-a0.5.dat};
+          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 0.5$}
+        \addplot[purple,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N1000-l0.25-a1.0.dat};
+          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 1.0$}
+        \addplot[red,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N1000-l0.25-a1.5.dat};
+          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 1.5$}
+        \addplot[orange,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N1000-l0.25-a2.0.dat};
+          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 2.0$}
+    \end{groupplot}
+  \end{tikzpicture}
+\end{figure}
+
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{groupplot}[
+        group style={
+          group size=1 by 2,
+          xlabels at=edge bottom,
+          xticklabels at=edge bottom,
+          ylabels at=edge left,
+          yticklabels at=edge left,
+          vertical sep=10pt,
+        },
+        legend style={
+          at={(0.01,0.02)},
+          anchor=south west,
+        },
+        width=\textwidth,
+        height=0.8\textwidth,
+        xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
+        xmode=log,
+        xmin=0.01, xmax=100,
+        ylabel={Relative frequencies $w_m \Delta{m}$},
+        ymode=log,
+        ymin=2e-7, ymax=1e-1,
+      ]
+
+      \nextgroupplot[]
+        \addplot[black] table[x=m_start,y=relcount] {code/5a.dat};
+          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 0.0$}
+        \addplot[blue] table[x=m_start,y=relcount] {code/5d-N500-l0.00-a0.5.dat};
+          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 0.5$}
+        \addplot[purple] table[x=m_start,y=relcount] {code/5d-N500-l0.00-a1.0.dat};
+          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 1.0$}
+        \addplot[red] table[x=m_start,y=relcount] {code/5d-N500-l0.00-a1.5.dat};
+          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 1.5$}
+        \addplot[orange] table[x=m_start,y=relcount] {code/5d-N500-l0.00-a2.0.dat};
+          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 2.0$}
+
+      \nextgroupplot[]
+        \addplot[black] table[x=m_start,y=relcount] {code/5c-0.25.dat};
+          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 0.0$}
+        \addplot[blue] table[x=m_start,y=relcount] {code/5d-N500-l0.25-a0.5.dat};
+        \addplot[blue!70!black,dashed,forget plot,domain=0.01:100,samples=100] {7.5e-3*(x/0.35)^(-0.5)};
+          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 0.5$}
+        \addplot[purple] table[x=m_start,y=relcount] {code/5d-N500-l0.25-a1.0.dat};
+          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 1.0$}
+        \addplot[red] table[x=m_start,y=relcount] {code/5d-N500-l0.25-a1.5.dat};
+          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 1.5$}
+        \addplot[orange] table[x=m_start,y=relcount] {code/5d-N500-l0.25-a2.0.dat};
+          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 2.0$}
+
+    \end{groupplot}
+  \end{tikzpicture}
+\end{figure}
+
+\textbf{5d)} $R = 10^3$, $K = 10^6$.
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\textwidth,
+        height=\textwidth,
+        xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
+        xmin=0, xmax=6,
+        xtick={0,1,...,6},
+        ylabel={Relative frequencies $w_m \Delta{m}$},
+        ymin=0, ymax=0.03,
+        ytick={0,0.005,...,0.030,0.030},
+        y tick label style={
+          /pgf/number format/fixed,
+          /pgf/number format/fixed zerofill,
+          /pgf/number format/precision=3,
+          /pgf/number format/1000 sep = \thinspace
+        },
+      ]
+      \addplot[black,thick] table[x=m_start,y=relcount] {code/5d-N1000-l0.00-a1.0.dat};
+      \addplot[blue] table[x=m_start,y=relcount] {code/5e.dat};
+        % \addlegendentry{Simulation $\lambda = 0.25$}
+    \end{axis}
+  \end{tikzpicture}
+\end{figure}
+
+\textbf{5e)} $R = 10^3$, $K = 10^6$, $S = 1000$
 
 \end{document}

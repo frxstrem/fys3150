@@ -13,6 +13,7 @@ unsigned int seed_simulation();
  *  size_t K    - Number of transactions
  *  double m0   - Initial amount of money for each agent
  *  double l    - Saving fraction λ (default: 0.0)
+ *  double S    - Higher number gives more accurate simulations but slower (required if α or γ is given)
  *  double a    - Neighbor preference parameter α (default: 0.0)
  *  double g    - Previous interaction preference parameter γ (default: 0.0)
  *
@@ -21,7 +22,7 @@ unsigned int seed_simulation();
 **/
 std::vector<double> simulate_transactions(size_t N, size_t K, double m0);
 std::vector<double> simulate_transactions(size_t N, size_t K, double m0, double l);
-std::vector<double> simulate_transactions(size_t N, size_t K, double m0, double l, double a);
-std::vector<double> simulate_transactions(size_t N, size_t K, double m0, double l, double a, double g);
+std::vector<double> simulate_transactions(size_t N, size_t K, double m0, double l, double S, double a);
+std::vector<double> simulate_transactions(size_t N, size_t K, double m0, double l, double S, double a, double g);
 
 #endif

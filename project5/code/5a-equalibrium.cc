@@ -8,7 +8,13 @@ using namespace std;
 using namespace arma;
 
 int main(int argc, char **argv) {
-  size_t N = 500;
+  if(argc <= 2) {
+    fprintf(stderr, "Usage: %s OUT-FILE NUM-AGENTS\n", argv[0]);
+    return 0;
+  }
+
+  const char *filename = argv[1];
+  int N = atoi(argv[2]);
   size_t K = 10000000;
   double m0 = 1.0;
 
@@ -62,7 +68,7 @@ int main(int argc, char **argv) {
   }
 
   // save to file
-  FILE *fp = fopen("5a-equalibrium.dat", "w");
+  FILE *fp = fopen(filename, "w");
   fprintf(fp, "k\tV\n");
   for(size_t i = 0; i < step.size() && i < variance.size(); i++) {
     fprintf(fp, "%d\t%.3E\n", step[i], variance[i]);

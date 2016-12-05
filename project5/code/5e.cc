@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 
   if(argc <= 6) {
     if(mpiRank == 0) {
-      fprintf(stderr, "Usage: %s OUTPUT-FILE NUM-AGENTS NUM-TRANSACTIONS NUM-RUNS INITIAL-MONEY [LAMBDA] [ALPHA] [GAMMA]\n", argv[0]);
+      fprintf(stderr, "Usage: %s OUTPUT-FILE NUM-AGENTS NUM-TRANSACTIONS NUM-RUNS INITIAL-MONEY [LAMBDA] [ALPHA] [GAMMA] [S-FACTOR]\n", argv[0]);
     }
     MPI_Finalize();
     exit(0);
@@ -36,6 +36,7 @@ int main(int argc, char **argv) {
   double l;   // lambda parameter
   double a;   // alpha parameter
   double g;   // gamma parameter
+  double S;   // "S-factor", affects accuracy and slowness of simulations with α≠0 or γ≠0 (default: 1.0)
   if(mpiRank == 0) {
     // mandatory arguments
     filename = argv[1];
@@ -48,6 +49,7 @@ int main(int argc, char **argv) {
     l  = (argc > 6 ? atof(argv[6]) : 0.0);
     a  = (argc > 7 ? atof(argv[7]) : 0.0);
     g  = (argc > 8 ? atof(argv[8]) : 0.0);
+    S  = (argc > 9 ? atof(argv[9]) : 1.0);
   }
 
   if(mpiRank == 0) {
@@ -59,6 +61,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "  λ = %.3f\n", l);
     fprintf(stderr, "  α = %.3f\n", a);
     fprintf(stderr, "  γ = %.3f\n", g);
+    fprintf(stderr, "  S = %.1f\n", S);
   }
 
   // broadcast parameters to all nodes
@@ -69,6 +72,11 @@ int main(int argc, char **argv) {
   MPI_Bcast(&l, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(&a, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(&g, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&S, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+  // reseed simulation with true random seed
+  // (so that the different processes don't make the exact same simulations)
+  seed_simulation();
 
   // list of all agents after each run
   vector<double> m(N * R, 1);
@@ -85,7 +93,7 @@ int main(int argc, char **argv) {
   for(size_t r = startRun; r < endRun; r++) {
     // simulate transactions
     // (store resulting money distribution in a subvector)
-    vector<double> m_dist = simulate_transactions(N, K, m0, l, a, g);
+    vector<double> m_dist = simulate_transactions(N, K, m0, l, S, a, g);
 
     copy(begin(m_dist), end(m_dist), begin(m) + (r * N));
   }
