@@ -5,7 +5,7 @@
 #SBATCH --job-name=finceng
 
 # 5a)
-mpirun ./5a 5a.dat 500 10000000 1000 1.0
+mpirun ./5a 5a-N500.dat 500 10000000 1000 1.0
 
 # 5c)
 for lambda in 0.25 0.50 0.90; do

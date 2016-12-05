@@ -15,9 +15,10 @@
 \usepackage{physics}
 \usepackage{nicefrac}
 \mathtoolsset{showonlyrefs}
-\DeclareSIUnit{\year}{yr}
-\DeclareSIUnit{\astronomicalunit}{AU}
-\DeclareSIUnit{\solarmass}{M_\odot}
+
+\sisetup{
+  range-phrase=--,
+}
 
 % plotting and tables
 \usepackage{tikz}
@@ -120,20 +121,26 @@
 
 \clearpage
 
-\section{Introduction}
-
-% At equalibrium, we know that the distribution of the money is given by the Gibbs distribution,
-% \begin{equation}
-%   w_m = \beta \exp(-\beta m)
-% \end{equation}
-% where $\beta = \expval{m}^{-1} = m_0^{-1}$. The variance of the Gibbs distribution is $\sigma_m^2 = \beta^{-2} = m_0^2$, so we can compare the variance of the distribution with this ``equalibrium variance'' and use that as a criterion for being at equalibrium.
+\section{Result}
 
 \oppg{a,b}
-We start the simulation with the simplest model: Initial amount $m_0 = 1$ with no saving ($\lambda = 1$) and no preference for transaction partners ($\alpha = 0, \gamma = 0$). In this case, we expect the Gibbs distribution
+We start the simulation with the simplest model: Initial amount $m_0 = 1$ with no saving ($\lambda = 0$) and no preference for transaction partners ($\alpha = 0, \gamma = 0$). In this case, we expect the Gibbs distribution
 \begin{equation}
   w_m = \beta \exp(-\beta m)
 \end{equation}
 where $\beta = \expval{m}^{-1} = m_0^{-1}$.
+
+In fact, when we run the simulations, we get the distribution shown in figure~\ref{fig:a}, we see that the distribution matches almost exactly up with the distribution be would expect, where $\beta = m_0^{-1} = 1$. This is further comfirmed by plotting the $y$ axis logarithmically, in which case we get figure~\ref{fig:b}, which clearly shows this relation.
+
+We know that the variance of the Gibbs distribution is $\sigma_m^2 0 \beta^{-2} = m_0^2$, and we can use this to find out how many transactions we need to get equalibrium. Before any transactions, the variance is zero (as every agent has the same amount of money); after equalibrium is reached, we expect the variance to vary around the theoretical variance.
+In figure~\ref{fig:a-equalibrium} we see the calculated variance of the simulated distribution plotted against the number of transactions, for different number of agents. We can see that it takes only about \numrange{e2}{e3} transactions to reach equalibrium, and that this number is roughly proportional to $N$.
+
+\oppg{c}
+Next, we introduce saving into the equation: every time a transaction happens, each of the agents save a fraction $\lambda$ before each transaction. We run three simulations with saving fractions $\lambda = 0.25, 0.50, 0.90$, and look at how these alter the distribution of money. In figure~\ref{fig:c} we see the distributions of these simulations. We see that having a high saving fractions lowers lowers wealth inequality, and at very high saving fractions ($\lambda = 0.90$), the money is distributed according to an approximate narrow Gaussian distribution centered at $m_0 = 1$.
+
+\oppg{d}
+
+We then introduce a new parameter $\alpha$, that affects the agents preference for transaction partners with wealth close to their own. We run eight new simulations with parameters $\alpha = 0.5,1.0,1.5,2.0$, with and without saving. In figure~\ref{fig:d-N500}~and~\ref{fig:d-N1000}
 
 \begin{figure}[!ht]
   \centering
@@ -159,38 +166,11 @@ where $\beta = \expval{m}^{-1} = m_0^{-1}$.
         \addlegendentry{Simulation}
 
       \addplot[red,thick,domain=0:10,samples=100] {0.01 * exp(-x)};
-        \addlegendentry{$0.01 e^{-x}$}
+        \addlegendentry{$\Delta{m} \, e^{-x}$}
     \end{axis}
   \end{tikzpicture}
 
-  \caption{} \label{fig:a}
-\end{figure}
-
-\begin{figure}[!ht]
-  \centering
-  \begin{tikzpicture}
-    \begin{axis}[
-        width=\textwidth,
-        height=\textwidth,
-        xlabel={Number of transactions},
-        xmin=1e0, xmax=1e7,
-        xmode=log,
-        ylabel={Variance},
-        ymin=0, ymax=2,
-      ]
-      \addplot[blue] table[x=k,y=V] {code/5a-equalibrium-100.dat};
-        \addlegendentry{Simulation variance ($ N = 100 $)}
-      \addplot[purple] table[x=k,y=V] {code/5a-equalibrium-250.dat};
-        \addlegendentry{Simulation variance ($ N = 250 $)}
-      \addplot[red] table[x=k,y=V] {code/5a-equalibrium-500.dat};
-        \addlegendentry{Simulation variance ($ N = 500 $)}
-      \addplot[orange] table[x=k,y=V] {code/5a-equalibrium-1000.dat};
-        \addlegendentry{Simulation variance ($ N = 1000 $)}
-
-      \addplot[black,dashed,domain=1:1e7,samples=2] {1};
-        \addlegendentry{Ideal variance $V = m_0^2$}
-    \end{axis}
-  \end{tikzpicture}
+  \caption{Histogram of the distribution of wealth after running the simple model ($\lambda = 0, \alpha = 0, \gamma = 0$) with \num{e7} transactions \num{e3} times, compared with the theoretical Gibbs distribution. Bin width is $\Delta{m} = 0.01$.} \label{fig:a}
 \end{figure}
 
 \begin{figure}[!ht]
@@ -211,11 +191,43 @@ where $\beta = \expval{m}^{-1} = m_0^{-1}$.
         \addlegendentry{Simulation}
 
       \addplot[red,thick,domain=0:10,samples=100] {0.01 * exp(-x)};
-        \addlegendentry{$0.01 e^{-x}$}
+        \addlegendentry{$\Delta{m} \, e^{-x}$}
 
       \addplot[black,dotted,forget plot,domain=0:10,samples=2] {1 / 500000};
     \end{axis}
   \end{tikzpicture}
+
+  \caption{The distribution from figure~\ref{fig:a}, plotted on a logarithmic $y$ axis.} \label{fig:b}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+        width=\textwidth,
+        height=\textwidth,
+        xlabel={Number of transactions},
+        xmin=1e0, xmax=1e7,
+        xmode=log,
+        ylabel={Variance},
+        ymin=0, ymax=2,
+      ]
+      \addplot[blue] table[x=k,y=V] {code/5a-equalibrium-100.dat};
+        \addlegendentry{Simulation variance ($ N = 100 $)}
+
+      \addplot[purple] table[x=k,y=V] {code/5a-equalibrium-250.dat};
+        \addlegendentry{Simulation variance ($ N = 250 $)}
+      \addplot[red] table[x=k,y=V] {code/5a-equalibrium-500.dat};
+        \addlegendentry{Simulation variance ($ N = 500 $)}
+      \addplot[orange] table[x=k,y=V] {code/5a-equalibrium-1000.dat};
+        \addlegendentry{Simulation variance ($ N = 1000 $)}
+
+      \addplot[black,dashed,domain=1:1e7,samples=2] {1};
+        \addlegendentry{Ideal variance $V = m_0^2$}
+    \end{axis}
+  \end{tikzpicture}
+
+  \caption{Simulated distribution variance as a function of number of transactions, for different numbers of agents. Dashed black line marks the ``ideal'' variance (theoretical variance at equalibrium).} \label{fig:a-equalibrium}
 \end{figure}
 
 \begin{figure}[!ht]
@@ -237,6 +249,9 @@ where $\beta = \expval{m}^{-1} = m_0^{-1}$.
           /pgf/number format/1000 sep = \thinspace
         },
       ]
+      \addplot[black] table[x=m_start,y=relcount] {code/5a.dat};
+        \addlegendentry{Simulation $\lambda = 0.00$}
+
       \addplot[blue] table[x=m_start,y=relcount] {code/5c-0.25.dat};
         \addlegendentry{Simulation $\lambda = 0.25$}
 
@@ -247,6 +262,8 @@ where $\beta = \expval{m}^{-1} = m_0^{-1}$.
         \addlegendentry{Simulation $\lambda = 0.90$}
     \end{axis}
   \end{tikzpicture}
+
+  \caption{Simulated distributions after we introduce a saving fraction $\lambda$ in the model.} \label{fig:c}
 \end{figure}
 
 \begin{figure}[!ht]
@@ -301,6 +318,8 @@ where $\beta = \expval{m}^{-1} = m_0^{-1}$.
           \addlegendentry{Simulation $\lambda = 0.25, \alpha = 2.0$}
     \end{groupplot}
   \end{tikzpicture}
+
+  \caption{Simulated distributions after a ``wealth preference'' parameter $\alpha$ is introduced into the model. Number of agents is $N = 500$.} \label{fig:d-N500}
 \end{figure}
 
 \begin{figure}[!ht]
@@ -355,6 +374,8 @@ where $\beta = \expval{m}^{-1} = m_0^{-1}$.
           \addlegendentry{Simulation $\lambda = 0.25, \alpha = 2.0$}
     \end{groupplot}
   \end{tikzpicture}
+
+  \caption{Same as figure~\ref{fig:d-N500}, but with $N = 1000$ agents.} \label{fig:d-N1000}
 \end{figure}
 
 
@@ -411,6 +432,8 @@ where $\beta = \expval{m}^{-1} = m_0^{-1}$.
 
     \end{groupplot}
   \end{tikzpicture}
+
+  \caption{} \label{fig:d-log}
 \end{figure}
 
 \textbf{5d)} $R = 10^3$, $K = 10^6$.
@@ -435,10 +458,12 @@ where $\beta = \expval{m}^{-1} = m_0^{-1}$.
         },
       ]
       \addplot[black,thick] table[x=m_start,y=relcount] {code/5d-N1000-l0.00-a1.0.dat};
-      \addplot[blue] table[x=m_start,y=relcount] {code/5e.dat};
+      % \addplot[blue] table[x=m_start,y=relcount] {code/5e.dat};
         % \addlegendentry{Simulation $\lambda = 0.25$}
     \end{axis}
   \end{tikzpicture}
+
+  \caption{} \label{fig:e}
 \end{figure}
 
 \textbf{5e)} $R = 10^3$, $K = 10^6$, $S = 1000$
