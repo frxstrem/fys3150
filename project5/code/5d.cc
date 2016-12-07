@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
     // optional arguments
     l  = (argc > 6 ? atof(argv[6]) : 0.0);
     a  = (argc > 7 ? atof(argv[7]) : 0.0);
-    S  = (argc > 9 ? atof(argv[9]) : 1.0);
+    S  = (argc > 8 ? atof(argv[8]) : 1.0);
   }
 
   if(mpiRank == 0) {
