@@ -147,7 +147,7 @@ vector<double> simulate_transactions(size_t N, size_t K, double m0, double l, do
   for(size_t k = 0; k < K; k++) {
     // pick two random, different agents
     int i, j;
-    double r, dm, M;
+    double r, dm, C, M;
 
     do {
       i = idist(G);
@@ -155,7 +155,9 @@ vector<double> simulate_transactions(size_t N, size_t K, double m0, double l, do
       r = S * rdist(G);
 
       dm = m[i] - m[j];
-      M = pow(dm * dm, - a) * pow(c[i][j] + 1, g);
+      C = c[i][j] + 1;
+
+      M = pow(dm * dm, - a) * pow(C * C, g);
 
       // DEBUGGING
       total_tests++;

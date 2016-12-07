@@ -4,7 +4,13 @@
 \usepackage[T1]{fontenc}
 \usepackage[english]{babel}
 \usepackage[margin=3cm]{geometry}
-\usepackage[hidelinks]{hyperref}
+\usepackage[
+  colorlinks = true,
+  linkcolor = .,
+  urlcolor  = blue,
+  citecolor = blue!70!black,
+  anchorcolor = .,
+]{hyperref}
 \usepackage{parskip}
 \usepackage{xifthen,xparse}
 
@@ -57,19 +63,17 @@
   unbounded coords=discard,
 }
 
-% bibliography packages
-% \usepackage[backend=bibtex8,style=numeric,autocite=inline,sorting=ynt]{biblatex}
-
 % other packages
 % \usepackage{filecontents}
 \usepackage{marginnote}
 \usepackage{booktabs}
 
+% bibliography packages
+\usepackage[backend=bibtex8,style=authoryear,autocite=inline,sorting=ynt,hyperref=true,]{biblatex}
+
 % bibliography
-% \begin{filecontents}{bibliography.bib}
-% \end{filecontents}
-% \addbibresource{bibliography.bib}
-% \nocite{*}
+\addbibresource{bibliography.bib}
+\nocite{*}
 
 % custom math commands
 \newcommand\V[1]{\mathbf{#1}}                  % vector notation
@@ -105,6 +109,8 @@
 \DeclareDocumentCommand{\reversemarginnote}{ m O{} }{\reversemarginpar\marginnote{#1}[#2]\reversemarginpar}
 \newcommand\oppg[1]{\reversemarginnote{\textcolor{black!40}{#1)}}[2mm]}
 
+\newcommand\comment[1]{\textcolor{red}{[#1]}}
+
 \begin{document}
 
 \title{Project 5 - FYS3150 Computational Physics}
@@ -113,7 +119,7 @@
     \href{https://github.com/frxstrem/fys3150/tree/master/project5}{\tt github.com/frxstrem/fys3150}
   \and
   Joseph Knutson (\texttt{josephkn}) \\
-    \href{https://github.com/mathhat/Computational_Physics/tree/master/prosjekt5}{\tt github.com/mathhat/Computational\_Physics}}
+    \href{https://github.com/mathhat/Computational_Physics/tree/master/prosjekt5}{\tt github.com/mathhat/Computational\_Physics}
 }
 \date{\today}
 
@@ -129,6 +135,8 @@
 
 \section{Result}
 
+In all our simulations, we run 1000 runs with $10^7$ transactions each.
+
 \oppg{a,b}
 We start the simulation with the simplest model: Initial amount $m_0 = 1$ with no saving ($\lambda = 0$) and no preference for transaction partners ($\alpha = 0, \gamma = 0$). In this case, we expect the Gibbs distribution
 \begin{equation}
@@ -138,22 +146,15 @@ where $\beta = \expval{m}^{-1} = m_0^{-1}$.
 
 In fact, when we run the simulations, we get the distribution shown in figure~\ref{fig:a}, we see that the distribution matches almost exactly up with the distribution be would expect, where $\beta = m_0^{-1} = 1$. This is further comfirmed by plotting the $y$ axis logarithmically, in which case we get figure~\ref{fig:b}, which clearly shows this relation.
 
-We know that the variance of the Gibbs distribution is $\sigma_m^2 0 \beta^{-2} = m_0^2$, and we can use this to find out how many transactions we need to get equalibrium. Before any transactions, the variance is zero (as every agent has the same amount of money); after equalibrium is reached, we expect the variance to vary around the theoretical variance.
+We know that the variance of the Gibbs distribution is $\sigma_m^2 = \beta^{-2} = m_0^2$, and we can use this to find out how many transactions we need to get equalibrium. Before any transactions, the variance is zero (as every agent has the same amount of money); after equalibrium is reached, we expect the variance to vary around the theoretical variance.
 In figure~\ref{fig:a-equalibrium} we see the calculated variance of the simulated distribution plotted against the number of transactions, for different number of agents. We can see that it takes only about \numrange{e2}{e3} transactions to reach equalibrium, and that this number is roughly proportional to $N$.
-
-\oppg{c}
-Next, we introduce saving into the equation: every time a transaction happens, each of the agents save a fraction $\lambda$ before each transaction. We run three simulations with saving fractions $\lambda = 0.25, 0.50, 0.90$, and look at how these alter the distribution of money. In figure~\ref{fig:c} we see the distributions of these simulations. We see that having a high saving fractions lowers lowers wealth inequality, and at very high saving fractions ($\lambda = 0.90$), the money is distributed according to an approximate narrow Gaussian distribution centered at $m_0 = 1$.
-
-\oppg{d}
-
-We then introduce a new parameter $\alpha$, that affects the agents preference for transaction partners with wealth close to their own. We run eight new simulations with parameters $\alpha = 0.5,1.0,1.5,2.0$, with and without saving. In figure~\ref{fig:d-N500}~and~\ref{fig:d-N1000}
 
 \begin{figure}[!ht]
   \centering
   \begin{tikzpicture}
     \begin{axis}[
-        width=\textwidth,
-        height=\textwidth,
+        width=1.0\textwidth,
+        height=0.5\textwidth,
         xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
         xmin=0, xmax=6,
         xtick={0,1,...,6},
@@ -167,7 +168,7 @@ We then introduce a new parameter $\alpha$, that affects the agents preference f
           /pgf/number format/1000 sep = \thinspace
         },
       ]
-      \addplot+[ybar interval,forget plot,draw=none,fill=blue!30,no marks] table[x=m_start,y=relcount] {code/5a.dat};
+      \addplot+[ybar interval,forget plot,draw=none,fill=blue!30,no marks] table[x=m_start,y=relcount] {data/5a-N500.dat};
         \addlegendimage{blue!30}
         \addlegendentry{Simulation}
 
@@ -183,8 +184,8 @@ We then introduce a new parameter $\alpha$, that affects the agents preference f
   \centering
   \begin{tikzpicture}
     \begin{axis}[
-        width=\textwidth,
-        height=\textwidth,
+        width=1.0\textwidth,
+        height=0.5\textwidth,
         xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
         xmin=0, xmax=10,
         xtick={0,1,...,10},
@@ -192,7 +193,7 @@ We then introduce a new parameter $\alpha$, that affects the agents preference f
         ymin=1e-7, ymax=1e-2,
         ymode=log,
       ]
-      \addplot[blue!30,forget plot] table[x=m_start,y=relcount] {code/5a.dat};
+      \addplot[blue!30,forget plot] table[x=m_start,y=relcount] {data/5a-N500.dat};
         \addlegendimage{blue!30}
         \addlegendentry{Simulation}
 
@@ -210,23 +211,27 @@ We then introduce a new parameter $\alpha$, that affects the agents preference f
   \centering
   \begin{tikzpicture}
     \begin{axis}[
-        width=\textwidth,
-        height=\textwidth,
+        legend style={
+          at={(0.01,0.98)},
+          anchor=north west,
+        },
+        width=1.0\textwidth,
+        height=0.5\textwidth,
         xlabel={Number of transactions},
         xmin=1e0, xmax=1e7,
         xmode=log,
         ylabel={Variance},
-        ymin=0, ymax=2,
+        ymin=0, ymax=3,
       ]
-      \addplot[blue] table[x=k,y=V] {code/5a-equalibrium-100.dat};
-        \addlegendentry{Simulation variance ($ N = 100 $)}
+      \addplot[blue] table[x=k,y=V] {data/5a-equalibrium-100.dat};
+        \addlegendentry{variance ($ N = 100 $)}
 
-      \addplot[purple] table[x=k,y=V] {code/5a-equalibrium-250.dat};
-        \addlegendentry{Simulation variance ($ N = 250 $)}
-      \addplot[red] table[x=k,y=V] {code/5a-equalibrium-500.dat};
-        \addlegendentry{Simulation variance ($ N = 500 $)}
-      \addplot[orange] table[x=k,y=V] {code/5a-equalibrium-1000.dat};
-        \addlegendentry{Simulation variance ($ N = 1000 $)}
+      \addplot[purple] table[x=k,y=V] {data/5a-equalibrium-250.dat};
+        \addlegendentry{variance ($ N = 250 $)}
+      \addplot[red] table[x=k,y=V] {data/5a-equalibrium-500.dat};
+        \addlegendentry{variance ($ N = 500 $)}
+      \addplot[orange] table[x=k,y=V] {data/5a-equalibrium-1000.dat};
+        \addlegendentry{variance ($ N = 1000 $)}
 
       \addplot[black,dashed,domain=1:1e7,samples=2] {1};
         \addlegendentry{Ideal variance $V = m_0^2$}
@@ -236,12 +241,16 @@ We then introduce a new parameter $\alpha$, that affects the agents preference f
   \caption{Simulated distribution variance as a function of number of transactions, for different numbers of agents. Dashed black line marks the ``ideal'' variance (theoretical variance at equalibrium).} \label{fig:a-equalibrium}
 \end{figure}
 
+\clearpage
+\oppg{c}
+Next, we introduce saving into the equation: every time a transaction happens, each of the agents save a fraction $\lambda$ before each transaction. We run three simulations with saving fractions $\lambda = 0.25, 0.50, 0.90$, and look at how these alter the distribution of money. In figure~\ref{fig:c} we see the distributions of these simulations. We see that having a high saving fractions lowers lowers wealth inequality, and at very high saving fractions ($\lambda = 0.90$), the money is distributed according to an approximate narrow Gaussian distribution centered at $m_0 = 1$.
+
 \begin{figure}[!ht]
   \centering
   \begin{tikzpicture}
     \begin{axis}[
         width=\textwidth,
-        height=\textwidth,
+        height=0.5\textwidth,
         xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
         xmin=0, xmax=6,
         xtick={0,1,...,6},
@@ -255,22 +264,33 @@ We then introduce a new parameter $\alpha$, that affects the agents preference f
           /pgf/number format/1000 sep = \thinspace
         },
       ]
-      \addplot[black] table[x=m_start,y=relcount] {code/5a.dat};
-        \addlegendentry{Simulation $\lambda = 0.00$}
+      \addplot[black] table[x=m_start,y=relcount] {data/5a-N500.dat};
+        \addlegendentry{$\lambda = 0.00$}
 
-      \addplot[blue] table[x=m_start,y=relcount] {code/5c-0.25.dat};
-        \addlegendentry{Simulation $\lambda = 0.25$}
+      \addplot[blue] table[x=m_start,y=relcount] {data/5c-N500-l0.25.dat};
+        \addlegendentry{$\lambda = 0.25$}
 
-      \addplot[red] table[x=m_start,y=relcount] {code/5c-0.5.dat};
-        \addlegendentry{Simulation $\lambda = 0.50$}
+      \addplot[red] table[x=m_start,y=relcount] {data/5c-N500-l0.50.dat};
+        \addlegendentry{$\lambda = 0.50$}
 
-      \addplot[purple] table[x=m_start,y=relcount] {code/5c-0.9.dat};
-        \addlegendentry{Simulation $\lambda = 0.90$}
+      \addplot[purple] table[x=m_start,y=relcount] {data/5c-N500-l0.90.dat};
+        \addlegendentry{$\lambda = 0.90$}
     \end{axis}
   \end{tikzpicture}
 
   \caption{Simulated distributions after we introduce a saving fraction $\lambda$ in the model.} \label{fig:c}
 \end{figure}
+
+\oppg{d}
+
+We then introduce a new parameter $\alpha$, that affects the agents preference for transaction partners with wealth close to their own (as described in section \comment{what}). We run eight new simulations with parameters $\lambda = 0.00,0.25$ and $\alpha = 0.5,1.0,1.5,2.0$ for $N = 500$ and $N = 1000$.
+
+In figure~\ref{fig:d-N500}~and~\ref{fig:d-N1000} we see the wealth distributions of these models. From these distributions we can tell that a higher value of $\alpha$ will cause more people to have less money, giving a more narrow distribution and less wealth inequality among agents.
+
+In figure~\ref{fig:d-log}, we have plotted the same data for $N = 100$ with logarithmic axes.
+We expect this plot to be similar to figure~1 of \textcite{goswami-sen}. Indeed, our plot is very similar, except that our plot does not reproduce the kink at $m \approx \num{2e-2}$ for the larger $\alpha$ values.
+
+\comment{Power law of tail???}
 
 \begin{figure}[!ht]
   \centering
@@ -289,8 +309,8 @@ We then introduce a new parameter $\alpha$, that affects the agents preference f
         xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
         xmin=0, xmax=2,
         ylabel={Relative frequencies $w_m \Delta{m}$},
-        ymin=0, ymax=0.04,
-        ytick={0,0.005,...,0.040,0.040},
+        ymin=0, ymax=0.035,
+        ytick={0,0.005,...,0.030,0.030},
         y tick label style={
           /pgf/number format/fixed,
           /pgf/number format/fixed zerofill,
@@ -300,28 +320,28 @@ We then introduce a new parameter $\alpha$, that affects the agents preference f
       ]
 
       \nextgroupplot[]
-        \addplot[black,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5a.dat};
-          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 0.0$}
-        \addplot[blue,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N500-l0.00-a0.5.dat};
-          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 0.5$}
-        \addplot[purple,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N500-l0.00-a1.0.dat};
-          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 1.0$}
-        \addplot[red,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N500-l0.00-a1.5.dat};
-          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 1.5$}
-        \addplot[orange,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N500-l0.00-a2.0.dat};
-          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 2.0$}
+        \addplot[black,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5a-N500.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 0.0$}
+        \addplot[blue,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5d-N500-l0.00-a0.5.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 0.5$}
+        \addplot[purple,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5d-N500-l0.00-a1.0.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 1.0$}
+        \addplot[red,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5d-N500-l0.00-a1.5.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 1.5$}
+        \addplot[orange,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5d-N500-l0.00-a2.0.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 2.0$}
 
       \nextgroupplot[]
-        \addplot[black,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5c-0.25.dat};
-          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 0.0$}
-        \addplot[blue,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N500-l0.25-a0.5.dat};
-          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 0.5$}
-        \addplot[purple,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N500-l0.25-a1.0.dat};
-          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 1.0$}
-        \addplot[red,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N500-l0.25-a1.5.dat};
-          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 1.5$}
-        \addplot[orange,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N500-l0.25-a2.0.dat};
-          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 2.0$}
+        \addplot[black,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5c-N500-l0.25.dat};
+          \addlegendentry{$\lambda = 0.25, \alpha = 0.0$}
+        \addplot[blue,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5d-N500-l0.25-a0.5.dat};
+          \addlegendentry{$\lambda = 0.25, \alpha = 0.5$}
+        \addplot[purple,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5d-N500-l0.25-a1.0.dat};
+          \addlegendentry{$\lambda = 0.25, \alpha = 1.0$}
+        \addplot[red,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5d-N500-l0.25-a1.5.dat};
+          \addlegendentry{$\lambda = 0.25, \alpha = 1.5$}
+        \addplot[orange,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5d-N500-l0.25-a2.0.dat};
+          \addlegendentry{$\lambda = 0.25, \alpha = 2.0$}
     \end{groupplot}
   \end{tikzpicture}
 
@@ -345,8 +365,8 @@ We then introduce a new parameter $\alpha$, that affects the agents preference f
         xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
         xmin=0, xmax=2,
         ylabel={Relative frequencies $w_m \Delta{m}$},
-        ymin=0, ymax=0.04,
-        ytick={0,0.005,...,0.040,0.040},
+        ymin=0, ymax=0.035,
+        ytick={0,0.005,...,0.030,0.030},
         y tick label style={
           /pgf/number format/fixed,
           /pgf/number format/fixed zerofill,
@@ -356,34 +376,33 @@ We then introduce a new parameter $\alpha$, that affects the agents preference f
       ]
 
       \nextgroupplot[]
-        % \addplot[black,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5a.dat};
-        %   \addlegendentry{Simulation $\lambda = 0.00, \alpha = 0.0$}
-        \addplot[blue,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N1000-l0.00-a0.5.dat};
-          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 0.5$}
-        \addplot[purple,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N1000-l0.00-a1.0.dat};
-          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 1.0$}
-        \addplot[red,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N1000-l0.00-a1.5.dat};
-          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 1.5$}
-        \addplot[orange,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N1000-l0.00-a2.0.dat};
-          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 2.0$}
+        % \addplot[black,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5a-N500.dat};
+        %   \addlegendentry{$\lambda = 0.00, \alpha = 0.0$}
+        \addplot[blue,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5d-N1000-l0.00-a0.5.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 0.5$}
+        \addplot[purple,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5d-N1000-l0.00-a1.0.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 1.0$}
+        \addplot[red,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5d-N1000-l0.00-a1.5.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 1.5$}
+        \addplot[orange,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5d-N1000-l0.00-a2.0.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 2.0$}
 
       \nextgroupplot[]
-        % \addplot[black,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5c-0.25.dat};
-        %   \addlegendentry{Simulation $\lambda = 0.25, \alpha = 0.0$}
-        \addplot[blue,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N1000-l0.25-a0.5.dat};
-          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 0.5$}
-        \addplot[purple,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N1000-l0.25-a1.0.dat};
-          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 1.0$}
-        \addplot[red,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N1000-l0.25-a1.5.dat};
-          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 1.5$}
-        \addplot[orange,restrict x to domain=0:2] table[x=m_start,y=relcount] {code/5d-N1000-l0.25-a2.0.dat};
-          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 2.0$}
+        % \addplot[black,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5c-N500-l0.25.dat};
+        %   \addlegendentry{$\lambda = 0.25, \alpha = 0.0$}
+        \addplot[blue,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5d-N1000-l0.25-a0.5.dat};
+          \addlegendentry{$\lambda = 0.25, \alpha = 0.5$}
+        \addplot[purple,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5d-N1000-l0.25-a1.0.dat};
+          \addlegendentry{$\lambda = 0.25, \alpha = 1.0$}
+        \addplot[red,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5d-N1000-l0.25-a1.5.dat};
+          \addlegendentry{$\lambda = 0.25, \alpha = 1.5$}
+        \addplot[orange,restrict x to domain=0:2] table[x=m_start,y=relcount] {data/5d-N1000-l0.25-a2.0.dat};
+          \addlegendentry{$\lambda = 0.25, \alpha = 2.0$}
     \end{groupplot}
   \end{tikzpicture}
 
   \caption{Same as figure~\ref{fig:d-N500}, but with $N = 1000$ agents.} \label{fig:d-N1000}
 \end{figure}
-
 
 \begin{figure}[!ht]
   \centering
@@ -408,51 +427,62 @@ We then introduce a new parameter $\alpha$, that affects the agents preference f
         xmin=0.01, xmax=100,
         ylabel={Relative frequencies $w_m \Delta{m}$},
         ymode=log,
-        ymin=2e-7, ymax=1e-1,
+        ymin=2e-6, ymax=1,
       ]
 
       \nextgroupplot[]
-        \addplot[black] table[x=m_start,y=relcount] {code/5a.dat};
-          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 0.0$}
-        \addplot[blue] table[x=m_start,y=relcount] {code/5d-N500-l0.00-a0.5.dat};
-          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 0.5$}
-        \addplot[purple] table[x=m_start,y=relcount] {code/5d-N500-l0.00-a1.0.dat};
-          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 1.0$}
-        \addplot[red] table[x=m_start,y=relcount] {code/5d-N500-l0.00-a1.5.dat};
-          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 1.5$}
-        \addplot[orange] table[x=m_start,y=relcount] {code/5d-N500-l0.00-a2.0.dat};
-          \addlegendentry{Simulation $\lambda = 0.00, \alpha = 2.0$}
+        \addplot[black] table[x=m_start,y=relcount] {data/5a-N500.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 0.0$}
+        \addplot[blue] table[x=m_start,y=relcount] {data/5d-N500-l0.00-a0.5.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 0.5$}
+        \addplot[purple] table[x=m_start,y=relcount] {data/5d-N500-l0.00-a1.0.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 1.0$}
+        \addplot[red] table[x=m_start,y=relcount] {data/5d-N500-l0.00-a1.5.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 1.5$}
+        \addplot[orange] table[x=m_start,y=relcount] {data/5d-N500-l0.00-a2.0.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 2.0$}
 
       \nextgroupplot[]
-        \addplot[black] table[x=m_start,y=relcount] {code/5c-0.25.dat};
-          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 0.0$}
-        \addplot[blue] table[x=m_start,y=relcount] {code/5d-N500-l0.25-a0.5.dat};
-        \addplot[blue!70!black,dashed,forget plot,domain=0.01:100,samples=100] {7.5e-3*(x/0.35)^(-0.5)};
-          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 0.5$}
-        \addplot[purple] table[x=m_start,y=relcount] {code/5d-N500-l0.25-a1.0.dat};
-          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 1.0$}
-        \addplot[red] table[x=m_start,y=relcount] {code/5d-N500-l0.25-a1.5.dat};
-          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 1.5$}
-        \addplot[orange] table[x=m_start,y=relcount] {code/5d-N500-l0.25-a2.0.dat};
-          \addlegendentry{Simulation $\lambda = 0.25, \alpha = 2.0$}
+        \addplot[black] table[x=m_start,y=relcount] {data/5c-N500-l0.25.dat};
+          \addlegendentry{$\lambda = 0.25, \alpha = 0.0$}
+        \addplot[blue] table[x=m_start,y=relcount] {data/5d-N500-l0.25-a0.5.dat};
+          \addlegendentry{$\lambda = 0.25, \alpha = 0.5$}
+        \addplot[purple] table[x=m_start,y=relcount] {data/5d-N500-l0.25-a1.0.dat};
+          \addlegendentry{$\lambda = 0.25, \alpha = 1.0$}
+        \addplot[red] table[x=m_start,y=relcount] {data/5d-N500-l0.25-a1.5.dat};
+          \addlegendentry{$\lambda = 0.25, \alpha = 1.5$}
+        \addplot[orange] table[x=m_start,y=relcount] {data/5d-N500-l0.25-a2.0.dat};
+          \addlegendentry{$\lambda = 0.25, \alpha = 2.0$}
 
     \end{groupplot}
   \end{tikzpicture}
 
-  \caption{} \label{fig:d-log}
+  \caption{Same data as in figure~\ref{fig:d-N500}, plotted with logarithmic axes.} \label{fig:d-log}
 \end{figure}
 
-\textbf{5d)} $R = 10^3$, $K = 10^6$.
+\oppg{e}
+
+Finally, we introduce the parameter $\gamma$ that affects the agents preference for previous transaction partners (as described in section \comment{what}). We run 20 simulations with parameters $\lambda = 0.00, 0.25$, $\alpha = 1.0, 2.0$ and $\gamma = 0.0, 1.0, 2.0, 3.0, 4.0$, with $N = 1000$ agents.
+
+In figure~\ref{fig:e}~and~\ref{fig:e-log}, we have again plotted the distribution of these simulations with linear and logarithmic axes. \comment{How does $\gamma$ affect the distributions?}
 
 \begin{figure}[!ht]
   \centering
   \begin{tikzpicture}
-    \begin{axis}[
+    \begin{groupplot}[
+        group style={
+          group size=1 by 4,
+          xlabels at=edge bottom,
+          xticklabels at=edge bottom,
+          ylabels at=edge left,
+          yticklabels at=edge left,
+          vertical sep=10pt,
+        },
         width=\textwidth,
-        height=\textwidth,
+        height=0.4\textwidth,
         xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
-        xmin=0, xmax=6,
-        xtick={0,1,...,6},
+        xmin=0, xmax=2,
+        xtick={0,0.5,1,1.5,2},
         ylabel={Relative frequencies $w_m \Delta{m}$},
         ymin=0, ymax=0.03,
         ytick={0,0.005,...,0.030,0.030},
@@ -463,15 +493,156 @@ We then introduce a new parameter $\alpha$, that affects the agents preference f
           /pgf/number format/1000 sep = \thinspace
         },
       ]
-      \addplot[black,thick] table[x=m_start,y=relcount] {code/5d-N1000-l0.00-a1.0.dat};
-      % \addplot[blue] table[x=m_start,y=relcount] {code/5e.dat};
-        % \addlegendentry{Simulation $\lambda = 0.25$}
-    \end{axis}
+
+      \nextgroupplot[]
+        \addplot[blue,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a1.0-g0.0.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 1.0, \gamma = 0.0$}
+        \addplot[purple,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a1.0-g1.0.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 1.0, \gamma = 1.0$}
+        \addplot[red,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a1.0-g2.0.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 1.0, \gamma = 2.0$}
+        \addplot[orange,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a1.0-g3.0.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 1.0, \gamma = 3.0$}
+        \addplot[yellow,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a1.0-g4.0.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 1.0, \gamma = 4.0$}
+        \addplot[black,thick,forget plot,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5d-N1000-l0.00-a1.0.dat};
+
+        \nextgroupplot[]
+          \addplot[blue,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a2.0-g0.0.dat};
+            \addlegendentry{$\lambda = 0.00, \alpha = 2.0, \gamma = 0.0$}
+          \addplot[purple,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a2.0-g1.0.dat};
+            \addlegendentry{$\lambda = 0.00, \alpha = 2.0, \gamma = 1.0$}
+          \addplot[red,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a2.0-g2.0.dat};
+            \addlegendentry{$\lambda = 0.00, \alpha = 2.0, \gamma = 2.0$}
+          \addplot[orange,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a2.0-g3.0.dat};
+            \addlegendentry{$\lambda = 0.00, \alpha = 2.0, \gamma = 3.0$}
+          \addplot[yellow,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a2.0-g4.0.dat};
+            \addlegendentry{$\lambda = 0.00, \alpha = 2.0, \gamma = 4.0$}
+          \addplot[black,thick,forget plot,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5d-N1000-l0.00-a2.0.dat};
+
+      \nextgroupplot[]
+        \addplot[blue,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a1.0-g0.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 1.0, \gamma = 0.0$}
+        \addplot[purple,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a1.0-g1.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 1.0, \gamma = 1.0$}
+        \addplot[red,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a1.0-g2.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 1.0, \gamma = 2.0$}
+        \addplot[orange,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a1.0-g3.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 1.0, \gamma = 3.0$}
+        \addplot[yellow,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a1.0-g4.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 1.0, \gamma = 4.0$}
+        \addplot[black,thick,forget plot,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5d-N1000-l0.25-a1.0.dat};
+
+        \nextgroupplot[]
+          \addplot[blue,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a2.0-g0.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 2.0, \gamma = 0.0$}
+          \addplot[purple,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a2.0-g1.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 2.0, \gamma = 1.0$}
+          \addplot[red,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a2.0-g2.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 2.0, \gamma = 2.0$}
+          \addplot[orange,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a2.0-g3.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 2.0, \gamma = 3.0$}
+          \addplot[yellow,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a2.0-g4.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 2.0, \gamma = 4.0$}
+          \addplot[black,thick,forget plot,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5d-N1000-l0.25-a2.0.dat};
+
+    \end{groupplot}
   \end{tikzpicture}
 
-  \caption{} \label{fig:e}
+  \caption{Simulated distributions after a ``agent preference'' parameter $\gamma$ is introduced into the model. Number of agents is $N = 1000$.} \label{fig:e}
 \end{figure}
 
-\textbf{5e)} $R = 10^3$, $K = 10^6$, $S = 1000$
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{groupplot}[
+        group style={
+          group size=1 by 4,
+          xlabels at=edge bottom,
+          xticklabels at=edge bottom,
+          ylabels at=edge left,
+          yticklabels at=edge left,
+          vertical sep=10pt,
+        },
+        legend style={
+          at={(0.01,0.02)},
+          anchor=south west,
+        },
+        width=\textwidth,
+        height=0.4\textwidth,
+        xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
+        xmode=log,
+        xmin=0.01, xmax=100,
+        ylabel={Relative frequencies $w_m \Delta{m}$},
+        ymode=log,
+        ymin=2e-7, ymax=1e-1,
+      ]
+
+      \nextgroupplot[]
+        \addplot[blue] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a1.0-g0.0.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 1.0, \gamma = 0.0$}
+        \addplot[purple] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a1.0-g1.0.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 1.0, \gamma = 1.0$}
+        \addplot[red] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a1.0-g2.0.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 1.0, \gamma = 2.0$}
+        \addplot[orange] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a1.0-g3.0.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 1.0, \gamma = 3.0$}
+        \addplot[yellow] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a1.0-g4.0.dat};
+          \addlegendentry{$\lambda = 0.00, \alpha = 1.0, \gamma = 4.0$}
+        \addplot[black,thick,forget plot] table[x=m_start,y=relcount] {data/5d-N1000-l0.00-a1.0.dat};
+
+        \nextgroupplot[]
+          \addplot[blue] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a2.0-g0.0.dat};
+            \addlegendentry{$\lambda = 0.00, \alpha = 2.0, \gamma = 0.0$}
+          \addplot[purple] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a2.0-g1.0.dat};
+            \addlegendentry{$\lambda = 0.00, \alpha = 2.0, \gamma = 1.0$}
+          \addplot[red] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a2.0-g2.0.dat};
+            \addlegendentry{$\lambda = 0.00, \alpha = 2.0, \gamma = 2.0$}
+          \addplot[orange] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a2.0-g3.0.dat};
+            \addlegendentry{$\lambda = 0.00, \alpha = 2.0, \gamma = 3.0$}
+          \addplot[yellow] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a2.0-g4.0.dat};
+            \addlegendentry{$\lambda = 0.00, \alpha = 2.0, \gamma = 4.0$}
+          \addplot[black,thick,forget plot] table[x=m_start,y=relcount] {data/5d-N1000-l0.00-a2.0.dat};
+
+      \nextgroupplot[]
+        \addplot[blue] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a1.0-g0.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 1.0, \gamma = 0.0$}
+        \addplot[purple] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a1.0-g1.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 1.0, \gamma = 1.0$}
+        \addplot[red] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a1.0-g2.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 1.0, \gamma = 2.0$}
+        \addplot[orange] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a1.0-g3.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 1.0, \gamma = 3.0$}
+        \addplot[yellow] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a1.0-g4.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 1.0, \gamma = 4.0$}
+        \addplot[black,thick,forget plot] table[x=m_start,y=relcount] {data/5d-N1000-l0.25-a1.0.dat};
+
+        \nextgroupplot[]
+          \addplot[blue] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a2.0-g0.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 2.0, \gamma = 0.0$}
+          \addplot[purple] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a2.0-g1.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 2.0, \gamma = 1.0$}
+          \addplot[red] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a2.0-g2.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 2.0, \gamma = 2.0$}
+          \addplot[orange] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a2.0-g3.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 2.0, \gamma = 3.0$}
+          \addplot[yellow] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a2.0-g4.0.dat};
+            \addlegendentry{$\lambda = 0.25, \alpha = 2.0, \gamma = 4.0$}
+          \addplot[black,thick,forget plot] table[x=m_start,y=relcount] {data/5d-N1000-l0.25-a2.0.dat};
+
+    \end{groupplot}
+  \end{tikzpicture}
+
+  \caption{Same data as in figure~\ref{fig:e}, plotted with logarithmic axes.} \label{fig:e-log}
+\end{figure}
+
+\clearpage
+
+\appendix
+\section{Appendix}
+
+\comment{where can code etc. be found?}
+
+\printbibliography[heading=bibnumbered,title=Bibliography]
 
 \end{document}
