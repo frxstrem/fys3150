@@ -69,7 +69,14 @@
 \usepackage{booktabs}
 
 % bibliography packages
-\usepackage[backend=bibtex8,style=authoryear,autocite=inline,sorting=ynt,hyperref=true,]{biblatex}
+\usepackage[
+  backend=bibtex8,
+  style=authoryear,
+  autocite=inline,
+  sorting=ynt,
+  hyperref=true,
+  maxcitenames=2,
+]{biblatex}
 
 % bibliography
 \addbibresource{bibliography.bib}
@@ -102,7 +109,6 @@
     {\frac{\partial{#2}}{\partial{#3}}}%
     {\frac{\partial^{#1}{#2}}{{\partial{#3}^{#1}}}}%
 }}
-\let\epsilon\varepsilon
 
 \def\M{\mathscr{M}}
 
@@ -130,6 +136,128 @@
 \end{abstract}
 
 \tableofcontents
+
+\clearpage
+
+\section{Introduction}
+The aim of this project is to simulate transactions of money between financial
+agents, people, using Monte Carlo methods. The final goal is to extract a distribution of
+income as function of the income $m$. From Pareto’s work
+\autocite{pareto},
+and from empirical studies, it is known that the higher end of the distribution of money, rich end, follows a power distribution.
+$$\omega_{m} = m^{-1-\alpha} $$
+with $\alpha\in [1,2]$. We will follow the analysis made by
+\textcite{patriarca}.
+
+We assume we have $N$ agents that exchange money in pairs $(i,j)$. We assume also that all agents
+start with the same amount of money $m_0 > 0$. At a given ``time step'', we choose a pair
+of agents $(i,j)$ and let a transaction take place. This means that agent $i$'s money $m_i$ changes
+to $m_i'$ and similarly we have $m_j\rightarrow m_j'$.
+Money is conserved during a transaction:
+
+\begin{equation}
+  m_i+m_j=m_i'+m_j'.
+  \label{eq:conserve}
+\end{equation}
+In order to decide which agent gets what, we draw a random number $\epsilon$.
+The change is done via a random reassignement (a random number) $\epsilon$, meaning that
+
+\begin{equation}
+  m_i' = \epsilon(m_i+m_j), \label{eq:eps1}
+\end{equation}
+leading to
+
+\begin{equation}
+  m_j'= (1-\epsilon)(m_i+m_j). \label{eq:eps2}
+\end{equation}
+The number $\epsilon$ is extracted from a uniform distribution.
+In this simple model, no agents are left with a debt, that is $m\ge 0$.
+Due to the conservation law above, one can show that the system relaxes toward an equilibrium
+state given by a Gibbs distribution
+
+\begin{equation*}
+w_m=\beta \exp{(-\beta m)},
+\end{equation*}
+with
+
+\begin{equation*}
+\beta = \frac{1}{\langle m\rangle},
+\end{equation*}
+and $\langle m\rangle=\sum_i m_i/N=m_0$, the average money.
+It means that after equilibrium has been reached that the majority of agents is left with a small
+number of money, while the number of richest agents, those with $m$ larger than a specific value $m'$,
+exponentially decreases with $m'$.
+
+In each simulation, we need a sufficiently large number of transactions, say $10^7$. Our aim is find the final equilibrium distribution $w_m$. In order to do that we would need
+several runs of the above simulations, at least $10^3$--$10^4$ experiments.
+
+\section{Theory of Models}
+
+Now there are multiple models to explore. Our first model picks two entirely random agents, $i$ and $j$, and makes them trade a random amount decided by the factor $\epsilon$ (see equation \eqref{eq:eps1} and \eqref{eq:eps2}).
+The following three models each add another parameter to the previous resulting in more realistic distributions of money.
+\subsection{2nd Model) The Saving Factor $\lambda$}
+In our simplest model, nothing is stopping our agents from throwing away all their money. In order to make our agents a bit more rational, we will limit the amount of money they trade away.
+
+
+The conservation law of \eqref{eq:conserve} holds, but the money to be shared in a transaction between
+agent $i$ and agent $j$ is now $(1-\lambda)(m_i+m_j)$. This means that the amount of money our previous model would transfer is reduced by $\lambda$\%, which can be written as
+
+\begin{equation}
+  m_i'=m_i+\delta m
+\end{equation}
+and
+
+\begin{equation}
+  m_j'=m_j-\delta m,
+\end{equation}
+with
+
+\begin{equation}\label{eq:save}
+  \delta m=(1-\lambda)(\epsilon m_j-(1-\epsilon)m_i),
+\end{equation}
+From \eqref{eq:save}, if $\lambda = 0.8$, our agents will never trade more than 20\% of their total money.
+As $\lambda$ goes to 1, our agents only engage in microtransactions. This reduces risk and you will soon see how helpful $\lambda$ can be for the reduction of poverty.
+
+\subsection{3rd model) The Preferential Factor $\alpha$}
+Our next model is the same as the last, except our agents will not only have risk reduction through $\lambda$, but also a preferred trading partner through $\alpha$.
+How our agents will come to prefer each other will be based on how equal they are economically.
+\begin{equation}\label{eq:alpha}
+ P(i,j;\alpha) \propto \left|m(i)-m(j) \right|^{-\alpha}
+\end{equation}
+We use the expression in \eqref{eq:alpha} to produce a probability for agent $i$ and $j$'s transaction. We can't know what the proportionality constant is without
+calculating the probability of every pair of agents (which is costly). Instead we generate a random number $r$ between $0$ and $S$, such that $S$ is larger than the probability expression
+some large fraction of the time. We discard a transaction between pair of agents if $r$ is less than the probability expression in \eqref{eq:alpha}.
+If $S$ is too small, any pair where the probability expression in \eqref{eq:alpha} is larger than $S$ will always be accepted, causing a less accurate distribution, while if $S$ is too large, too
+many pairs of agents will be discarded, so computation time will take longer.
+
+\subsection{4th model) Memory Factor $\gamma$}
+This time, we're adding another parameter to the way the agent's prefer trading with each other.
+In real life, people build trust with those they've traded with before. We're going to make the agent's remember each other. The goal is to make them prefer those they've traded with before.
+The more trades that a pair has comitted in past, the more likely it is for that pair to trade again in the future.
+
+The new probability expression will contain a new factor:
+\begin{equation}
+ P(i,j;\alpha,\gamma) \propto \left|m(i)-m(j) \right|^{-\alpha}(C_{ij} + 1)^{\gamma}
+\end{equation}
+$C$ is a matrix which stores the amount of times that agent $i$ and $j$ have traded.
+This means that each time agent $i$ and $j$ trades, $C_{ij}$ grows with 1.
+
+We see that for $\gamma = 0$, the probability of a transaction is the same as before, but for
+$\gamma > 0$ the probability of trade increases.
+
+\clearpage
+
+\section{Methods}
+
+To model the trades between our agents, we use random sampling, otherwise known as Monte Carlo methods.
+
+\subsection{Monte Carlo}
+We have both used different random number generators. Fredrik used the C++11 random number generators and Joseph used the C function \verb|rand()|.
+With these we were able to draw pairs of random agents, produce probabilities and compare our agents' money and history to determine if a pair should trade.
+
+\subsection{A Metropolis Algorithm}
+The last two models are the only models where the agents gain preferences of who to trade with. For this, we added two probability expressions with relatively low acceptance ratios.
+If a random number between $0$ and $S$ was lower than the probability expression produced by the random pair, then the transaction was allowed.
 
 \clearpage
 
@@ -484,8 +612,8 @@ In figure~\ref{fig:e}~and~\ref{fig:e-log}, we have again plotted the distributio
         xmin=0, xmax=2,
         xtick={0,0.5,1,1.5,2},
         ylabel={Relative frequencies $w_m \Delta{m}$},
-        ymin=0, ymax=0.03,
-        ytick={0,0.005,...,0.030,0.030},
+        ymin=0, ymax=0.05,
+        % ytick={0,0.005,...,0.030,0.030},
         y tick label style={
           /pgf/number format/fixed,
           /pgf/number format/fixed zerofill,
@@ -505,7 +633,6 @@ In figure~\ref{fig:e}~and~\ref{fig:e-log}, we have again plotted the distributio
           \addlegendentry{$\lambda = 0.00, \alpha = 1.0, \gamma = 3.0$}
         \addplot[yellow,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a1.0-g4.0.dat};
           \addlegendentry{$\lambda = 0.00, \alpha = 1.0, \gamma = 4.0$}
-        \addplot[black,thick,forget plot,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5d-N1000-l0.00-a1.0.dat};
 
         \nextgroupplot[]
           \addplot[blue,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a2.0-g0.0.dat};
@@ -518,7 +645,6 @@ In figure~\ref{fig:e}~and~\ref{fig:e-log}, we have again plotted the distributio
             \addlegendentry{$\lambda = 0.00, \alpha = 2.0, \gamma = 3.0$}
           \addplot[yellow,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a2.0-g4.0.dat};
             \addlegendentry{$\lambda = 0.00, \alpha = 2.0, \gamma = 4.0$}
-          \addplot[black,thick,forget plot,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5d-N1000-l0.00-a2.0.dat};
 
       \nextgroupplot[]
         \addplot[blue,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a1.0-g0.0.dat};
@@ -531,7 +657,6 @@ In figure~\ref{fig:e}~and~\ref{fig:e-log}, we have again plotted the distributio
             \addlegendentry{$\lambda = 0.25, \alpha = 1.0, \gamma = 3.0$}
         \addplot[yellow,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a1.0-g4.0.dat};
             \addlegendentry{$\lambda = 0.25, \alpha = 1.0, \gamma = 4.0$}
-        \addplot[black,thick,forget plot,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5d-N1000-l0.25-a1.0.dat};
 
         \nextgroupplot[]
           \addplot[blue,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a2.0-g0.0.dat};
@@ -544,7 +669,6 @@ In figure~\ref{fig:e}~and~\ref{fig:e-log}, we have again plotted the distributio
             \addlegendentry{$\lambda = 0.25, \alpha = 2.0, \gamma = 3.0$}
           \addplot[yellow,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a2.0-g4.0.dat};
             \addlegendentry{$\lambda = 0.25, \alpha = 2.0, \gamma = 4.0$}
-          \addplot[black,thick,forget plot,restrict x to domain=0:2,restrict y to domain=0:0.06] table[x=m_start,y=relcount] {data/5d-N1000-l0.25-a2.0.dat};
 
     \end{groupplot}
   \end{tikzpicture}
@@ -575,7 +699,7 @@ In figure~\ref{fig:e}~and~\ref{fig:e-log}, we have again plotted the distributio
         xmin=0.01, xmax=100,
         ylabel={Relative frequencies $w_m \Delta{m}$},
         ymode=log,
-        ymin=2e-7, ymax=1e-1,
+        ymin=2e-7, ymax=1,
       ]
 
       \nextgroupplot[]
@@ -589,7 +713,6 @@ In figure~\ref{fig:e}~and~\ref{fig:e-log}, we have again plotted the distributio
           \addlegendentry{$\lambda = 0.00, \alpha = 1.0, \gamma = 3.0$}
         \addplot[yellow] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a1.0-g4.0.dat};
           \addlegendentry{$\lambda = 0.00, \alpha = 1.0, \gamma = 4.0$}
-        \addplot[black,thick,forget plot] table[x=m_start,y=relcount] {data/5d-N1000-l0.00-a1.0.dat};
 
         \nextgroupplot[]
           \addplot[blue] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a2.0-g0.0.dat};
@@ -602,7 +725,6 @@ In figure~\ref{fig:e}~and~\ref{fig:e-log}, we have again plotted the distributio
             \addlegendentry{$\lambda = 0.00, \alpha = 2.0, \gamma = 3.0$}
           \addplot[yellow] table[x=m_start,y=relcount] {data/5e-N1000-l0.00-a2.0-g4.0.dat};
             \addlegendentry{$\lambda = 0.00, \alpha = 2.0, \gamma = 4.0$}
-          \addplot[black,thick,forget plot] table[x=m_start,y=relcount] {data/5d-N1000-l0.00-a2.0.dat};
 
       \nextgroupplot[]
         \addplot[blue] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a1.0-g0.0.dat};
@@ -615,7 +737,6 @@ In figure~\ref{fig:e}~and~\ref{fig:e-log}, we have again plotted the distributio
             \addlegendentry{$\lambda = 0.25, \alpha = 1.0, \gamma = 3.0$}
         \addplot[yellow] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a1.0-g4.0.dat};
             \addlegendentry{$\lambda = 0.25, \alpha = 1.0, \gamma = 4.0$}
-        \addplot[black,thick,forget plot] table[x=m_start,y=relcount] {data/5d-N1000-l0.25-a1.0.dat};
 
         \nextgroupplot[]
           \addplot[blue] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a2.0-g0.0.dat};
@@ -628,7 +749,6 @@ In figure~\ref{fig:e}~and~\ref{fig:e-log}, we have again plotted the distributio
             \addlegendentry{$\lambda = 0.25, \alpha = 2.0, \gamma = 3.0$}
           \addplot[yellow] table[x=m_start,y=relcount] {data/5e-N1000-l0.25-a2.0-g4.0.dat};
             \addlegendentry{$\lambda = 0.25, \alpha = 2.0, \gamma = 4.0$}
-          \addplot[black,thick,forget plot] table[x=m_start,y=relcount] {data/5d-N1000-l0.25-a2.0.dat};
 
     \end{groupplot}
   \end{tikzpicture}
