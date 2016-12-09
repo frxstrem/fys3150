@@ -283,8 +283,8 @@ where $\beta = \expval{m}^{-1} = m_0^{-1}$.
 
 In fact, when we run the simulations, we get the distribution shown in \cref{fig:a}, we see that the distribution matches almost exactly up with the distribution be would expect, where $\beta = m_0^{-1} = 1$. This is further comfirmed by plotting the $y$ axis logarithmically, in which case we get \cref{fig:b}, which clearly shows this relation.
 
-We know that the variance of the Gibbs distribution is $\sigma_m^2 = \beta^{-2} = m_0^2$, and we can use this to find out how many transactions we need to get equalibrium. Before any transactions, the variance is zero (as every agent has the same amount of money); after equalibrium is reached, we expect the variance to vary around the theoretical variance.
-In \cref{fig:a-equalibrium} we see the calculated variance of the simulated distribution plotted against the number of transactions, for different number of agents. We can see that it takes only about \numrange{e2}{e3} transactions to reach equalibrium, and that this number is roughly proportional to $N$.
+We know that the variance of the Gibbs distribution is $\sigma_m^2 = \beta^{-2} = m_0^2$, and we can use this to find out how many transactions we need to get equilibrium. Before any transactions, the variance is zero (as every agent has the same amount of money); after equilibrium is reached, we expect the variance to vary around the theoretical variance.
+In \cref{fig:a-equilibrium} we see the calculated variance of the simulated distribution plotted against the number of transactions, for different number of agents. We can see that it takes only about \numrange{e2}{e3} transactions to reach equilibrium, and that this number is roughly proportional to $N$.
 
 \begin{figure}[!ht]
   \centering
@@ -360,14 +360,14 @@ In \cref{fig:a-equalibrium} we see the calculated variance of the simulated dist
         ylabel={Variance},
         ymin=0, ymax=3,
       ]
-      \addplot[blue] table[x=k,y=V] {data/5a-equalibrium-100.dat};
+      \addplot[blue] table[x=k,y=V] {data/5a-equilibrium-100.dat};
         \addlegendentry{variance ($ N = 100 $)}
 
-      \addplot[purple] table[x=k,y=V] {data/5a-equalibrium-250.dat};
+      \addplot[purple] table[x=k,y=V] {data/5a-equilibrium-250.dat};
         \addlegendentry{variance ($ N = 250 $)}
-      \addplot[red] table[x=k,y=V] {data/5a-equalibrium-500.dat};
+      \addplot[red] table[x=k,y=V] {data/5a-equilibrium-500.dat};
         \addlegendentry{variance ($ N = 500 $)}
-      \addplot[orange] table[x=k,y=V] {data/5a-equalibrium-1000.dat};
+      \addplot[orange] table[x=k,y=V] {data/5a-equilibrium-1000.dat};
         \addlegendentry{variance ($ N = 1000 $)}
 
       \addplot[black,dashed,domain=1:1e7,samples=2] {1};

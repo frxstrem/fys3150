@@ -7,12 +7,12 @@ MPI_CXX=mpic++
 
 .PHONY: all
 
-all: 5a 5c 5d 5e
+all: 5a 5a-equilibrium 5c 5d 5e
 
 5a: 5a.o transactions.o histograms.o
 	${MPI_CXX} ${LDFLAGS} -o $@ $^ ${LIBS}
 
-5a-equalibrium: 5a-equalibrium.o
+5a-equilibrium: 5a-equilibrium.o
 	${CXX} ${LDFLAGS} -o $@ $^ ${LIBS}
 
 5c: 5c.o transactions.o histograms.o
@@ -27,7 +27,7 @@ all: 5a 5c 5d 5e
 5a.o: 5a.cc transactions.hh histograms.hh
 	${MPI_CXX} ${CXXFLAGS} -c -o $@ $<
 
-5a-equalibrium.o: 5a-equalibrium.cc
+5a-equilibrium.o: 5a-equilibrium.cc
 	${CXX} ${CXXFLAGS} -c -o $@ $<
 
 5c.o: 5c.cc transactions.hh histograms.hh
