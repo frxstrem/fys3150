@@ -8,6 +8,8 @@
 *.blg
 *.run.xml
 *.toc
+*.lof
+*.lot
 *.out
 *.swp
 *.figlist

@@ -6,7 +6,7 @@
 \usepackage[margin=3cm]{geometry}
 \usepackage[
   colorlinks = true,
-  linkcolor = .,
+  linkcolor = blue!70!black,
   urlcolor  = blue,
   citecolor = blue!70!black,
   anchorcolor = .,
@@ -134,9 +134,10 @@
 
 \begin{abstract}
   We are going to use four different models, each adding to the former, to simulate financial transactions between
-  agents in a financial society. To simulate these transactions, we use Monte Carlo methods. Specifically, we will look at how to reduce wealth inequality, and we will see that having small transactions, and having no preference for the wealth of transaction partners, but high preference for previous partners, will do most to decrease inequality.
+  agents in a financial society. To simulate these transactions, we use Monte Carlo methods. Specifically, we will look at how to reduce wealth inequality with these models, and we will see that having small transactions, having no preference for the wealth of transaction partners, but high preference for previous partners, will do most to decrease wealth inequality.
 \end{abstract}
 
+\clearpage
 \tableofcontents
 
 \clearpage
@@ -246,7 +247,6 @@ We see that for $\gamma = 0$, the probability of a transaction is the same as be
 $\gamma > 0$ the probability of trade increases.
 
 \clearpage
-
 \section{Methods}
 
 To model the trading between our agents, we use random sampling, the essence of Monte Carlo methods.
@@ -258,14 +258,15 @@ All our simulations ran 10 million transactions for each of  the 1 thousand cycl
 We have both used different random number generators to do this. Fredrik used the C++ random number generator, while Joseph used the C function \verb|rand()|.
 
 $P(i,j;\alpha)$ and $P(i,j;\alpha,\gamma)$ were later calculated and compared to random samples between $0$ and $S$. This was in order to decide if agents $i$ and $j$ knew each other were economically equal from before.
+
 \subsection{Variance and Equilibrium}
-Variance shows the average squared difference between the people's actual wealth and their initial money, $m_0$. It doesn't tell if there is extreme poverty, but the larger it is the more inequality we will find.
-To calculate it, we simply iterate over all our agents' money:s
+The variance is the average squared difference between the agents' actual wealth and their average/initial money, $m_0$. It doesn't tell if there is extreme poverty, it tells us how much wealth inequality there is.
+To calculate it, we simply iterate over all our agents' money:
 \begin{equation}
-\sigma_m^2 = \frac{1}{N}\sum_i^{N} (m_i - m_0)^2 = \expval{m^2} - \expval{m}^2 \label{eq:sigma}
+  \sigma_m^2 = \frac{1}{N}\sum_i^{N} (m_i - m_0)^2 = \expval{m^2} - \expval{m}^2 \label{eq:sigma}
 \end{equation}
-where $N$ equals the number of agent and $m_i$ is agent $i$'s money.
-The variance between our agents' money is calculated between every transaction (see Results).
+where $N$ equals the number of agent, and $m_i$ is agent $i$'s money.
+We only calculate the variance for our first model, but we keep track of the variance at every step by tracking how $\expval{m^2}$ changes between each transaction. (See \cref{sec:result-model1}).
 
 \clearpage
 
@@ -273,7 +274,7 @@ The variance between our agents' money is calculated between every transaction (
 
 In all our simulations, we run 1000 runs with $10^7$ transactions each.
 
-\subsection{First model: No preference}
+\subsection{First model: No preference} \label{sec:result-model1}
 
 We start the simulation with the simplest model: Initial amount $m_0 = 1$ with no saving ($\lambda = 0$) and no preference for transaction partners ($\alpha = 0, \gamma = 0$). In this case, we expect the Gibbs distribution
 \begin{equation}
@@ -281,17 +282,17 @@ We start the simulation with the simplest model: Initial amount $m_0 = 1$ with n
 \end{equation}
 where $\beta = \expval{m}^{-1} = m_0^{-1}$.
 
-In fact, when we run the simulations, we get the distribution shown in \cref{fig:a}, we see that the distribution matches almost exactly up with the distribution be would expect, where $\beta = m_0^{-1} = 1$. This is further comfirmed by plotting the $y$ axis logarithmically, in which case we get \cref{fig:b}, which clearly shows this relation.
+In fact, when we run the simulations, we get the distribution shown in \cref{fig:a}, and we see that the distribution matches almost exactly up with the expected distribution, where $\beta = m_0^{-1} = 1$. This is further confirmed by plotting the $y$ axis logarithmically, in which case we get \cref{fig:b}, which clearly shows this relation as a straight line.
 
-We know that the variance of the Gibbs distribution is $\sigma_m^2 = \beta^{-2} = m_0^2$, and we can use this to find out how many transactions we need to get equilibrium. Before any transactions, the variance is zero (as every agent has the same amount of money); after equilibrium is reached, we expect the variance to vary around the theoretical variance.
-In \cref{fig:a-equilibrium} we see the calculated variance of the simulated distribution plotted against the number of transactions, for different number of agents. We can see that it takes only about \numrange{e2}{e3} transactions to reach equilibrium, and that this number is roughly proportional to $N$.
+We know that the variance of the Gibbs distribution is $\sigma_m^2 = \beta^{-2} = m_0^2$, and we can use this to find out how many transactions we need to get to equilibrium. Before any transactions, the variance is zero (as every agent has the same amount of money); after equilibrium is reached, we expect the variance to vary around the theoretical variance.
+In \cref{fig:a-equilibrium} we see the calculated variance of the simulated distribution plotted against the number of transactions, for different numbers of agents. We can see that it takes only about \numrange{e2}{e3} transactions to reach equilibrium, and that this number is roughly proportional to $N$.
 
 \begin{figure}[!ht]
   \centering
   \begin{tikzpicture}
     \begin{axis}[
         width=1.0\textwidth,
-        height=0.5\textwidth,
+        height=\textwidth,
         xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
         xmin=0, xmax=6,
         xtick={0,1,...,6},
@@ -322,7 +323,7 @@ In \cref{fig:a-equilibrium} we see the calculated variance of the simulated dist
   \begin{tikzpicture}
     \begin{axis}[
         width=1.0\textwidth,
-        height=0.5\textwidth,
+        height=0.6\textwidth,
         xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
         xmin=0, xmax=10,
         xtick={0,1,...,10},
@@ -353,7 +354,7 @@ In \cref{fig:a-equilibrium} we see the calculated variance of the simulated dist
           anchor=north west,
         },
         width=1.0\textwidth,
-        height=0.5\textwidth,
+        height=0.6\textwidth,
         xlabel={Number of transactions},
         xmin=1e0, xmax=1e7,
         xmode=log,
@@ -380,7 +381,7 @@ In \cref{fig:a-equilibrium} we see the calculated variance of the simulated dist
 
 \clearpage
 \subsection{Second model: The Saving Factor $\lambda$}
-Next, we introduce saving into the equation: every time a transaction happens, each of the agents save a fraction $\lambda$ before each transaction (as described in \cref{sec:model2}). We run three simulations with saving fractions $\lambda = 0.25, 0.50, 0.90$, and look at how these alter the distribution of money. In \cref{fig:c} we see the distributions of these simulations. We see that having a high saving fractions lowers lowers wealth inequality, and at very high saving fractions ($\lambda = 0.90$), the money is distributed according to an approximate narrow Gaussian distribution centered at $m_0 = 1$.
+Next, we introduce saving into the equation: every time a transaction happens, each of the agents save a fraction $\lambda$ before each transaction (as described in \cref{sec:model2}). We run three simulations with saving fractions $\lambda = 0.25, 0.50, 0.90$, and look at how these alter the distribution of money. In \cref{fig:c} we see the distributions of these simulations. We see that having a high saving fraction lowers wealth inequality, and at very high saving fractions ($\lambda = 0.90$), the money is distributed according to an approximate narrow Gaussian distribution centered at $m_0 = 1$.
 
 \begin{figure}[!ht]
   \centering
@@ -428,7 +429,7 @@ From these figures we can tell that a higher preferential factor $\alpha$ causes
 In \cref{fig:d-log}, we have plotted the same data for $N = 100$ with logarithmic axes.
 We expect this plot to be similar to figure~1 of \textcite{goswami-sen}. Indeed, our plot is very similar, except that our plot does not reproduce the kink at $m \approx \num{2e-2}$ for the larger $\alpha$ values.
 
-If the distribution followed a tail power law, we would expect the plots in \cref{fig:d-log} to make a straight line in the tail. Instead
+% If the distribution followed a tail power law, we would expect the plots in \cref{fig:d-log} to make a straight line in the tail. Instead\footnote{Awkward silence.}
 
 \begin{figure}[!ht]
   \centering
@@ -603,12 +604,12 @@ If the distribution followed a tail power law, we would expect the plots in \cre
 
 Finally, we introduce the parameter $\gamma$ that affects the agents preference for previous transaction partners (as described in \cref{sec:model4}). We run 20 simulations with parameters $\lambda = 0.00, 0.25$, $\alpha = 1.0, 2.0$ and $\gamma = 0.0, 1.0, 2.0, 3.0, 4.0$, with $N = 1000$ agents.
 
-In \cref{fig:e-nosave,fig:e-save,fig:e-nosave-log,fig:e-save-log}, wave have again plotted the distributions of these simulations with linear and logarithmic axes.
-By looking at these figures, we see that increasing the $\gamma$ parameter ``evens out'' the distribution again. If we compare this to the distributions of differing $\alpha$ values in \cref{fig:d-N1000}, we see that $\gamma$ parameters in effect ``negate'' the effects of the $\alpha$ parameter.
+In \cref{fig:e-nosave,fig:e-save,fig:e-nosave-log,fig:e-save-log}, we have again plotted the distributions of these simulations with linear and logarithmic axes.
+By looking at these figures, we see that increasing the $\gamma$ parameter ``evens out'' the distribution again. If we compare this to the distributions of differing $\alpha$ values in \cref{fig:d-N1000}, we see that $\gamma$ parameters in effect ``negate'' the effects of the $\alpha$ parameter. By this, we mean that increasing $\gamma$ values causes wealth equality while increasing $\alpha$ values causes wealth inequality.
 
-If we compare the figures without saving (\cref{fig:e-nosave-log}) with figures~5~and~6 of \textcite{goswami-sen}, we see that for $\alpha = 1.0$ the plots have a similar shape, while for $\alpha = 2.0$ the plots are drastically different. However, in both cases we still don't reproduce the kink that Gowsami and Sen have in their figures.
+If we compare the figures without saving (\cref{fig:e-nosave-log}) with figures~5~and~6 of \textcite{goswami-sen}, we see that for $\alpha = 1.0$ the plots have a similar shape, while for $\alpha = 2.0$ the plots are drastically different. However, in both cases we still don't reproduce the kink that Goswami and Sen have in their figures.
 
-For $m$ between approximately 2 and 20, we see that the distribution stays approximately uniform.
+For $m$ between approximately 2 and 20, we see that the distribution of $\alpha = 2.0$ stays approximately uniform.
 
 \begin{figure}[!ht]
   \centering
@@ -830,16 +831,15 @@ For $m$ between approximately 2 and 20, we see that the distribution stays appro
   \caption{Same as \cref{fig:e-save} (with saving), plotted with logarithmic axes.} \label{fig:e-save-log}
 \end{figure}
 
-\clearpage
 \section{Conclusion}
-How realistic our models are can be discussed, but from these models we get a sense of how the different effects affect the distribution of wealth in society. High saving factors $\lambda$ cause less risk-taking and smaller transactions, which gives us a narrower distribution and less wealth inequality. A high preferential factor $\alpha$, on the other hand, causes more people to be poor and rich people to be wealthier, which means that there is a higher wealth inequality. Finally, a high memory factor $\gamma$ means that the agents end up almost only trading with each other in small groups: this causes a limited flow of money and reduces the wealth inequality for most people.
+Our models may be questionable for a realistic point of view, but from these models we get a sense of how the different effects affect the distribution of wealth in society. High saving factors $\lambda$ cause less risk-taking and smaller transactions, which gives us a narrower distribution and less wealth inequality. A high preferential factor $\alpha$, on the other hand, causes more people to be poor and rich people to be wealthier, which means that there is a higher wealth inequality. Finally, a high memory factor $\gamma$ means that the agents end up almost only trading with each other in small groups: this causes a limited flow of money and reduces the wealth inequality for most people.
 
-Based on these models, we can tell that in an ideal financial society, agents should trade small amounts of money at a time, with no regards to their transactional partners' wealth, but with a high preference for previous transactional partners. This reduces the income equality the most.
+Based on these models, we can tell what the ideal financial society should be if agents start with an equal amount of money: agents should trade only small amounts of money at a time; they should trade with no regards to the wealth oftheir transactional partners; and they should have a high preference for previous transactional partners. This combination will reduce income equality the most.
 
 \clearpage
 
 \appendix
-\section{Appendix}
+\section{Code and data files}
 
 For this project we both wrote our own code for the simulations, but for all of the results we used the program written by Fredrik.
 
@@ -851,5 +851,8 @@ The code for Joseph's programs can be found here: \\
 \href{https://github.com/mathhat/Computational_Physics/tree/master/prosjekt5}{\tt github.com/mathhat/Computational\_Physics/tree/master/prosjekt5}
 
 \printbibliography[heading=bibnumbered,title=Bibliography]
+
+\clearpage
+\listoffigures
 
 \end{document}
