@@ -248,18 +248,13 @@ $\gamma > 0$ the probability of trade increases.
 
 \section{Methods}
 
-To model the trades between our agents, we use random sampling, the essence of Monte Carlo methods.
-
+To model the trading between our agents, we use random sampling, the essence of Monte Carlo methods.
+To complicate things further, we added probabilistic if-expressions to create preferential bonds between agents based on money and past transactions, requiring even more sampling.
 \subsection{Monte Carlo}
-All our simulations run 10 million transactions over 1 thousand cycles. Each of the $10^3 \times 10^7$ transactions consist of drawing two random numbers, $i$ and $j$, representing two agents.
+All our simulations ran 10 million transactions for each of  the 1 thousand cycles. Each of the $10^3 \times 10^7$ transactions consist of drawing two random numbers, $i$ and $j$, representing two agents.
 We have both used different random number generators to do this. Fredrik used the C++ random number generator, while Joseph used the C function \verb|rand()|.
-Following agents, produce probabilities and compare our agents' money and history to determine if a
-pair should trade.
 
-\subsection{A Metropolis Algorithm}
-The last two models are the only models where the agents gain preferences of who to trade with. For this, we added two probability expressions with relatively low acceptance ratios.
-If a random number between $0$ and $S$ was lower than the probability expression produced by the random pair, then the transaction was allowed.
-
+$P(i,j;\alpha)$ and $P(i,j;\alpha,\gamma)$ were later calculated and compared to random samples between $0$ and $S$. This was in order to decide if agents $i$ and $j$ knew each other were economically equal from before.
 \clearpage
 
 \section{Result}
