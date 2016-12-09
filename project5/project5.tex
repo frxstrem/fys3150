@@ -421,7 +421,8 @@ Next, we introduce saving into the equation: every time a transaction happens, e
 
 We then introduce a new parameter $\alpha$, that affects the agents preference for transaction partners with wealth close to their own (as described in \cref{sec:model3}). We run eight new simulations with parameters $\lambda = 0.00,0.25$ and $\alpha = 0.5,1.0,1.5,2.0$ for $N = 500$ and $N = 1000$.
 
-In \cref{fig:d-N500,fig:d-N1000} we see the wealth distributions of these models. From these distributions we can tell that a higher value of $\alpha$ will cause more people to have less money, giving a more narrow distribution and less wealth inequality among agents.
+In \cref{fig:d-N500,fig:d-N1000,fig:d-log} we see the wealth distributions of these models.
+From these figures we can tell that a higher preferential factor $\alpha$ causes higher wealth inequality, since there are more poor people, and the richest people get richer, when we increase the $\alpha$ factor.
 
 In \cref{fig:d-log}, we have plotted the same data for $N = 100$ with logarithmic axes.
 We expect this plot to be similar to figure~1 of \textcite{goswami-sen}. Indeed, our plot is very similar, except that our plot does not reproduce the kink at $m \approx \num{2e-2}$ for the larger $\alpha$ values.
@@ -792,7 +793,7 @@ For $m$ between approximately 2 and 20, we see that the distribution stays appro
         height=0.8\textwidth,
         xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
         xmode=log,
-        xmin=0.01, xmax=10,
+        xmin=0.01, xmax=100,
         ylabel={Relative frequencies $w_m \Delta{m}$},
         ymode=log,
         ymin=2e-7, ymax=1,
@@ -830,7 +831,9 @@ For $m$ between approximately 2 and 20, we see that the distribution stays appro
 
 \clearpage
 \section{Conclusion}
-How realistic our different models are can be discussed, but from these models we get a sense of how different effects affect the distribution of wealth in society.
+How realistic our models are can be discussed, but from these models we get a sense of how the different effects affect the distribution of wealth in society. High saving factors $\lambda$ cause less risk-taking and smaller transactions, which gives us a narrower distribution and less wealth inequality. A high preferential factor $\alpha$, on the other hand, causes more people to be poor and rich people to be wealthier, which means that there is a higher wealth inequality. Finally, a high memory factor $\gamma$ means that the agents end up almost only trading with each other in small groups: this causes a limited flow of money and reduces the wealth inequality for most people.
+
+Based on these models, we can tell that in an ideal financial society, agents should trade small amounts of money at a time, with no regards to their transactional partners' wealth, but with a high preference for previous transactional partners. This reduces the income equality the most.
 
 \clearpage
 
