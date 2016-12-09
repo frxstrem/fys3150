@@ -13,6 +13,7 @@
 ]{hyperref}
 \usepackage{parskip}
 \usepackage{xifthen,xparse}
+\usepackage{cleveref}
 
 % math packages
 \usepackage{mathtools,amsfonts,amssymb,mathdots}
@@ -31,7 +32,6 @@
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
 \usepackage{caption}
-\usepackage{cleveref}
 \usepgfplotslibrary{external}
 \tikzexternalize[prefix=tikz-,mode=list and make]
 \usepgfplotslibrary{units}
@@ -274,7 +274,6 @@ In all our simulations, we run 1000 runs with $10^7$ transactions each.
 
 \subsection{First model: No preference}
 
-\oppg{a,b}
 We start the simulation with the simplest model: Initial amount $m_0 = 1$ with no saving ($\lambda = 0$) and no preference for transaction partners ($\alpha = 0, \gamma = 0$). In this case, we expect the Gibbs distribution
 \begin{equation}
   w_m = \beta \exp(-\beta m)
@@ -375,13 +374,11 @@ In \cref{fig:a-equilibrium} we see the calculated variance of the simulated dist
     \end{axis}
   \end{tikzpicture}
 
-  \caption{Simulated distribution variance as a function of number of transactions, for different numbers of agents. Dashed black line marks the ``ideal'' variance (theoretical variance at equalibrium).} \label{fig:a-equalibrium}
+  \caption{Simulated distribution variance as a function of number of transactions, for different numbers of agents. Dashed black line marks the ``ideal'' variance (theoretical variance at equilibrium).} \label{fig:a-equilibrium}
 \end{figure}
 
-\subsection{Second model: The Saving Factor $\lambda$}
-
 \clearpage
-\oppg{c}
+\subsection{Second model: The Saving Factor $\lambda$}
 Next, we introduce saving into the equation: every time a transaction happens, each of the agents save a fraction $\lambda$ before each transaction (as described in \cref{sec:model2}). We run three simulations with saving fractions $\lambda = 0.25, 0.50, 0.90$, and look at how these alter the distribution of money. In \cref{fig:c} we see the distributions of these simulations. We see that having a high saving fractions lowers lowers wealth inequality, and at very high saving fractions ($\lambda = 0.90$), the money is distributed according to an approximate narrow Gaussian distribution centered at $m_0 = 1$.
 
 \begin{figure}[!ht]
@@ -421,7 +418,6 @@ Next, we introduce saving into the equation: every time a transaction happens, e
 \end{figure}
 
 \subsection{Third model: The Preferential Factor $\alpha$}
-\oppg{d}
 
 We then introduce a new parameter $\alpha$, that affects the agents preference for transaction partners with wealth close to their own (as described in \cref{sec:model3}). We run eight new simulations with parameters $\lambda = 0.00,0.25$ and $\alpha = 0.5,1.0,1.5,2.0$ for $N = 500$ and $N = 1000$.
 
@@ -601,15 +597,15 @@ If the distribution followed a tail power law, we would expect the plots in \cre
 \end{figure}
 
 \clearpage
-\subsection{Fourth model: Memory Factor $\gamma$} \label{sec:model4}
-\oppg{e}
+\subsection{Fourth model: Memory Factor $\gamma$}
 
 Finally, we introduce the parameter $\gamma$ that affects the agents preference for previous transaction partners (as described in \cref{sec:model4}). We run 20 simulations with parameters $\lambda = 0.00, 0.25$, $\alpha = 1.0, 2.0$ and $\gamma = 0.0, 1.0, 2.0, 3.0, 4.0$, with $N = 1000$ agents.
 
 In \cref{fig:e-nosave,fig:e-save,fig:e-nosave-log,fig:e-save-log}, wave have again plotted the distributions of these simulations with linear and logarithmic axes.
 By looking at these figures, we see that increasing the $\gamma$ parameter ``evens out'' the distribution again. If we compare this to the distributions of differing $\alpha$ values in \cref{fig:d-N1000}, we see that $\gamma$ parameters in effect ``negate'' the effects of the $\alpha$ parameter.
 
-If we compare the figures without saving (\cref{fig:e-nosave-log}) with figures~5~and~6 of \textcite{goswami-sen}, we see that for $\alpha = 1.0$ the plots have a similar shape, while for $\alpha = 2.0$ the plots are drastically different.
+If we compare the figures without saving (\cref{fig:e-nosave-log}) with figures~5~and~6 of \textcite{goswami-sen}, we see that for $\alpha = 1.0$ the plots have a similar shape, while for $\alpha = 2.0$ the plots are drastically different. However, in both cases we still don't reproduce the kink that Gowsami and Sen have in their figures.
+
 For $m$ between approximately 2 and 20, we see that the distribution stays approximately uniform.
 
 \begin{figure}[!ht]
@@ -796,7 +792,7 @@ For $m$ between approximately 2 and 20, we see that the distribution stays appro
         height=0.8\textwidth,
         xlabel={Money $m$ (in intervals of $\Delta{m} = 0.01$)},
         xmode=log,
-        xmin=0.01, xmax=100,
+        xmin=0.01, xmax=10,
         ylabel={Relative frequencies $w_m \Delta{m}$},
         ymode=log,
         ymin=2e-7, ymax=1,
@@ -833,11 +829,22 @@ For $m$ between approximately 2 and 20, we see that the distribution stays appro
 \end{figure}
 
 \clearpage
+\section{Conclusion}
+How realistic our different models are can be discussed, but from these models we get a sense of how different effects affect the distribution of wealth in society.
+
+\clearpage
 
 \appendix
 \section{Appendix}
 
-\comment{where can code etc. be found?}
+For this project we both wrote our own code for the simulations, but for all of the results we used the program written by Fredrik.
+
+The code for Fredrik's programs and data files can be found here: \\
+\href{https://github.com/frxstrem/fys3150/tree/master/project5/code}{\tt github.com/frxstrem/fys3150/tree/master/project5/code} \\
+\href{https://github.com/frxstrem/fys3150/tree/master/project5/data}{\tt github.com/frxstrem/fys3150/tree/master/project5/data}
+
+The code for Joseph's programs can be found here: \\
+\href{https://github.com/mathhat/Computational_Physics/tree/master/prosjekt5}{\tt github.com/mathhat/Computational\_Physics/tree/master/prosjekt5}
 
 \printbibliography[heading=bibnumbered,title=Bibliography]
 
