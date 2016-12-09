@@ -250,11 +250,22 @@ $\gamma > 0$ the probability of trade increases.
 
 To model the trading between our agents, we use random sampling, the essence of Monte Carlo methods.
 To complicate things further, we added probabilistic if-expressions to create preferential bonds between agents based on money and past transactions, requiring even more sampling.
+
+To see if our simulations ever reach a form of equilibrium, we observe the variance of the agents' money. Doing so over time could prove useful for pinpointing when the distribution of money has stabilized.
 \subsection{Monte Carlo}
 All our simulations ran 10 million transactions for each of  the 1 thousand cycles. Each of the $10^3 \times 10^7$ transactions consist of drawing two random numbers, $i$ and $j$, representing two agents.
 We have both used different random number generators to do this. Fredrik used the C++ random number generator, while Joseph used the C function \verb|rand()|.
 
 $P(i,j;\alpha)$ and $P(i,j;\alpha,\gamma)$ were later calculated and compared to random samples between $0$ and $S$. This was in order to decide if agents $i$ and $j$ knew each other were economically equal from before.
+\subsection{Variance and Equilibrium}
+Variance shows the average squared difference between the people's actual wealth and their initial money, $m_0$. It doesn't tell if there is extreme poverty, but the larger it is the more inequality we will find.
+To calculate it, we simply iterate over all our agents' money:s
+\begin{equation}
+\sigma_m^2 = \frac{1}{N}\sum_i^{N} (m_i - m_0)^2 = \expval{m^2} - \expval{m}^2 \label{eq:sigma}
+\end{equation}
+where $N$ equals the number of agent and $m_i$ is agent $i$'s money.
+The variance between our agents' money is calculated between every transaction (see Results).
+
 \clearpage
 
 \section{Result}
